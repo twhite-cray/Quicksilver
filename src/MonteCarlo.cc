@@ -25,32 +25,14 @@ MonteCarlo::MonteCarlo(const Parameters& params)
    _nuclearData            = 0;
    _materialDatabase       = 0;
 
-    #if defined (HAVE_UVM)
-        void *ptr1, *ptr2, *ptr3, *ptr4;
-
-        cudaMallocManaged( &ptr1, sizeof(Tallies), cudaMemAttachHost );
-        cudaMallocManaged( &ptr2, sizeof(MC_Processor_Info), cudaMemAttachHost );
-        cudaMallocManaged( &ptr3, sizeof(MC_Time_Info), cudaMemAttachHost );
-        cudaMallocManaged( &ptr4, sizeof(MC_Fast_Timer_Container) );
-
-        _tallies                = new(ptr1) Tallies( params.simulationParams.balanceTallyReplications, 
-                                                     params.simulationParams.fluxTallyReplications,
-                                                     params.simulationParams.cellTallyReplications, 
-                                                     params.simulationParams.energySpectrum,
-                                                     params.simulationParams.nGroups);
-        processor_info          = new(ptr2) MC_Processor_Info();
-        time_info               = new(ptr3) MC_Time_Info();
-        fast_timer              = new(ptr4) MC_Fast_Timer_Container();
-    #else
-        _tallies                = new Tallies( params.simulationParams.balanceTallyReplications, 
-                                               params.simulationParams.fluxTallyReplications,
-                                               params.simulationParams.cellTallyReplications,
-                                               params.simulationParams.energySpectrum,
-                                               params.simulationParams.nGroups);
-        processor_info          = new MC_Processor_Info();
-        time_info               = new MC_Time_Info();
-        fast_timer              = new MC_Fast_Timer_Container();
-    #endif
+   _tallies                = new Tallies( params.simulationParams.balanceTallyReplications, 
+       params.simulationParams.fluxTallyReplications,
+       params.simulationParams.cellTallyReplications,
+       params.simulationParams.energySpectrum,
+       params.simulationParams.nGroups);
+   processor_info          = new MC_Processor_Info();
+   time_info               = new MC_Time_Info();
+   fast_timer              = new MC_Fast_Timer_Container();
 
    source_particle_weight = 0.0;
 
@@ -96,16 +78,8 @@ MonteCarlo::MonteCarlo(const Parameters& params)
     int num_extra_vaults = ( vector_size / batch_size ) + 1;
     //Previous definition was not enough extra space for some reason? need to determine why still
 
-    #if defined(HAVE_UVM)
-        void *ptr5, *ptr6;
-        cudaMallocManaged( &ptr5, sizeof(MC_Particle_Buffer) );
-        cudaMallocManaged( &ptr6, sizeof(ParticleVaultContainer), cudaMemAttachHost );
-        particle_buffer         = new(ptr5) MC_Particle_Buffer(this, batch_size);
-        _particleVaultContainer = new(ptr6) ParticleVaultContainer(batch_size, num_batches, num_extra_vaults);
-    #else
-        particle_buffer         = new MC_Particle_Buffer(this, batch_size);
-        _particleVaultContainer = new ParticleVaultContainer(batch_size, num_batches, num_extra_vaults);
-    #endif
+    particle_buffer         = new MC_Particle_Buffer(this, batch_size);
+    _particleVaultContainer = new ParticleVaultContainer(batch_size, num_batches, num_extra_vaults);
 
 }
 
@@ -114,36 +88,14 @@ MonteCarlo::MonteCarlo(const Parameters& params)
 //----------------------------------------------------------------------------------------------------------------------
 MonteCarlo::~MonteCarlo()
 {
-    #if defined (HAVE_UVM)
-    
-        _nuclearData->~NuclearData();
-        _particleVaultContainer->~ParticleVaultContainer();
-        _materialDatabase->~MaterialDatabase();
-        _tallies->~Tallies();
-        processor_info->~MC_Processor_Info();
-        time_info->~MC_Time_Info();
-        fast_timer->~MC_Fast_Timer_Container();
-        particle_buffer->~MC_Particle_Buffer();
-
-        cudaFree( _nuclearData );
-        cudaFree( _particleVaultContainer);
-        cudaFree( _materialDatabase);
-        cudaFree( _tallies);
-        cudaFree( processor_info);
-        cudaFree( time_info);
-        cudaFree( fast_timer);
-        cudaFree( particle_buffer);
-
-    #else
-        delete _nuclearData;
-        delete _particleVaultContainer;
-        delete _materialDatabase;
-        delete _tallies;
-        delete processor_info;
-        delete time_info;
-        delete fast_timer;
-        delete particle_buffer;
-    #endif
+  delete _nuclearData;
+  delete _particleVaultContainer;
+  delete _materialDatabase;
+  delete _tallies;
+  delete processor_info;
+  delete time_info;
+  delete fast_timer;
+  delete particle_buffer;
 }
 
 void MonteCarlo::clearCrossSectionCache()

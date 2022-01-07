@@ -72,12 +72,7 @@ int main(int argc, char** argv)
 
    coralBenchmarkCorrectness(mcco, params);
 
-#ifdef HAVE_UVM
-    mcco->~MonteCarlo();
-    cudaFree( mcco );
-#else
    delete mcco;
-#endif
 
    mpiFinalize();
    

@@ -52,13 +52,7 @@ namespace
 MonteCarlo* initMC(const Parameters& params)
 {
    MonteCarlo* monteCarlo;
-   #ifdef HAVE_UVM
-      void* ptr;
-      cudaMallocManaged( &ptr, sizeof(MonteCarlo), cudaMemAttachGlobal );
-      monteCarlo = new(ptr) MonteCarlo(params);
-   #else
-     monteCarlo = new MonteCarlo(params);
-   #endif
+   monteCarlo = new MonteCarlo(params);
    initGPUInfo(monteCarlo);
    initTimeInfo(monteCarlo, params);
    initNuclearData(monteCarlo, params);
@@ -137,21 +131,10 @@ namespace
 {
    void initNuclearData(MonteCarlo* monteCarlo, const Parameters& params)
    {
-      #if defined HAVE_UVM
-         void *ptr1, *ptr2;
-         cudaMallocManaged( &ptr1, sizeof(NuclearData), cudaMemAttachGlobal );
-         cudaMallocManaged( &ptr2, sizeof(MaterialDatabase), cudaMemAttachGlobal );
-
-         monteCarlo->_nuclearData = new(ptr1) NuclearData(params.simulationParams.nGroups,
-                                                          params.simulationParams.eMin,
-                                                          params.simulationParams.eMax);
-         monteCarlo->_materialDatabase = new(ptr2) MaterialDatabase();
-     #else
-         monteCarlo->_nuclearData = new NuclearData(params.simulationParams.nGroups,
-                                                    params.simulationParams.eMin,
-                                                    params.simulationParams.eMax);
-         monteCarlo->_materialDatabase = new MaterialDatabase();
-     #endif
+     monteCarlo->_nuclearData = new NuclearData(params.simulationParams.nGroups,
+         params.simulationParams.eMin,
+         params.simulationParams.eMax);
+     monteCarlo->_materialDatabase = new MaterialDatabase();
 
      map<string, Polynomial> crossSection;
      for (auto crossSectionIter = params.crossSectionParams.begin();

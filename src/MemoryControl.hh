@@ -20,13 +20,6 @@ namespace MemoryControl
         case AllocationPolicy::HOST_MEM:
          tmp = new T [size];
          break;
-#ifdef HAVE_UVM
-        case AllocationPolicy::UVM_MEM:
-         void *ptr;
-         cudaMallocManaged(&ptr, size*sizeof(T), cudaMemAttachGlobal);
-         tmp = new(ptr) T[size]; 
-         break;
-#endif
         default:
          qs_assert(false);
          break;
@@ -42,13 +35,6 @@ namespace MemoryControl
         case MemoryControl::AllocationPolicy::HOST_MEM:
          delete[] data; 
          break;
-#ifdef HAVE_UVM
-        case UVM_MEM:
-         for (int i=0; i < size; ++i)
-            data[i].~T();
-         cudaFree(data);
-         break;
-#endif         
         default:
          qs_assert(false);
          break;

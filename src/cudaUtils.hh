@@ -27,13 +27,8 @@ static void checkHip(const hipError_t err, const char *const file, const int lin
 #ifdef HAVE_OPENMP_TARGET
     #ifdef USE_OPENMP_NO_GPU
         #define VAR_MEM MemoryControl::AllocationPolicy::HOST_MEM
-    #else
-        #define VAR_MEM MemoryControl::AllocationPolicy::UVM_MEM
-        #define HAVE_UVM
     #endif
 #elif HAVE_CUDA
-    #define VAR_MEM MemoryControl::AllocationPolicy::UVM_MEM
-    #define HAVE_UVM
 #else
     #define VAR_MEM MemoryControl::AllocationPolicy::HOST_MEM
 #endif
