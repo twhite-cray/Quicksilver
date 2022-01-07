@@ -116,20 +116,6 @@ void cycleInit( bool loadBalance )
 }
 
 
-#if defined (HAVE_CUDA)
-
-__global__ void CycleTrackingKernel( MonteCarlo* monteCarlo, int num_particles, ParticleVault* processingVault, ParticleVault* processedVault )
-{
-   int global_index = getGlobalThreadID(); 
-
-    if( global_index < num_particles )
-    {
-        CycleTrackingGuts( monteCarlo, global_index, processingVault, processedVault );
-    }
-}
-
-#endif
-
 void cycleTracking(MonteCarlo *monteCarlo)
 {
     MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking);
@@ -183,24 +169,6 @@ void cycleTracking(MonteCarlo *monteCarlo)
                             CycleTrackingGuts( monteCarlo, particle_index, processingVault, processedVault );
                           }
                         }
-                       break;
-
-                      case gpuWithCUDA:
-                       {
-                          #if defined (HAVE_CUDA)
-                          dim3 grid(1,1,1);
-                          dim3 block(1,1,1);
-                          int runKernel = ThreadBlockLayout( grid, block, numParticles);
-                          
-                          //Call Cycle Tracking Kernel
-                          if( runKernel )
-                             CycleTrackingKernel<<<grid, block >>>( monteCarlo, numParticles, processingVault, processedVault );
-                          
-                          //Synchronize the stream so that memory is copied back before we begin MPI section
-                          cudaPeekAtLastError();
-                          cudaDeviceSynchronize();
-                          #endif
-                       }
                        break;
                        
                       case gpuWithOpenMP:
