@@ -82,13 +82,16 @@ namespace
       #elif defined(HAVE_CUDA)
          int Ngpus;
          cudaGetDeviceCount(&Ngpus);
+      #elif defined(HAVE_HIP)
+         int Ngpus = 0;
+         CHECK(hipGetDeviceCount(&Ngpus));
       #else
          int Ngpus = 0;
       #endif
 
          if( Ngpus != 0 )
          {
-            #if defined(HAVE_OPENMP_TARGET) || defined(HAVE_CUDA)
+            #if defined(HAVE_OPENMP_TARGET) || defined(HAVE_CUDA) || defined(HAVE_HIP)
             monteCarlo->processor_info->use_gpu = 1;
             int GPUID = monteCarlo->processor_info->rank%Ngpus;
             monteCarlo->processor_info->gpu_id = GPUID;
@@ -97,7 +100,11 @@ namespace
                 omp_set_default_device(GPUID);
             #endif
 
+            #ifdef HAVE_HIP
+            CHECK(hipSetDevice(GPUID));
+            #else
             cudaSetDevice(GPUID);
+            #endif
             //cudaDeviceSetLimit( cudaLimitStackSize, 64*1024 );
             #endif
          }
@@ -111,7 +118,7 @@ namespace
          monteCarlo->processor_info->gpu_id = -1;
 #endif
 
-#ifdef HAVE_CUDA
+#if defined(HAVE_CUDA) || defined(HAVE_HIP)
     if( monteCarlo->processor_info->use_gpu )
         warmup_kernel();
 #endif

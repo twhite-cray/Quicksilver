@@ -11,4 +11,8 @@ DEVICE
 int getGlobalThreadID();
 #endif
 
+#if defined (HAVE_HIP)
+void warmup_kernel();
+#endif
+
 #endif

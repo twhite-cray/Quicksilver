@@ -181,6 +181,15 @@ void cycleTracking(MonteCarlo *monteCarlo)
                     // * AS a single thread on the CPU.
                     switch (execPolicy)
                     {
+                      case gpuWithHip:
+                        {
+                          for ( int particle_index = 0; particle_index < numParticles; particle_index++ )
+                          {
+                            CycleTrackingGuts( monteCarlo, particle_index, processingVault, processedVault );
+                          }
+                        }
+                       break;
+
                       case gpuWithCUDA:
                        {
                           #if defined (HAVE_CUDA)
