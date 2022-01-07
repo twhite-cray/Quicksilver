@@ -53,7 +53,7 @@ void BalanceRatioTest( MonteCarlo *monteCarlo, Parameters &params )
     uint64_t absorb     = balTally._absorb;
     uint64_t fission    = balTally._fission;
     uint64_t scatter    = balTally._scatter;
-    double absorbRatio, fissionRatio, scatterRatio;
+    double absorbRatio = 0, fissionRatio = 0, scatterRatio = 0;
 
     double percent_tolerance = 1.0;
 
@@ -143,7 +143,7 @@ void BalanceEventTest( MonteCarlo *monteCarlo )
     else
     {
         fprintf(stdout, " FAIL:: Collision to Facet Crossing Ratio balanced NOT maintained within %g%% tolerance\n", tolerance );
-        fprintf(stdout, "\tFacet Crossing: %llu\tCollision: %llu\tRatio: %g\n", facetCrossing, collisions, ratio );
+        fprintf(stdout, "\tFacet Crossing: %lu\tCollision: %lu\tRatio: %g\n", facetCrossing, collisions, ratio );
     }
 
 

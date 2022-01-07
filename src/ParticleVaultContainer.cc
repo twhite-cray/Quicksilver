@@ -197,8 +197,6 @@ sizeExtra()
 void ParticleVaultContainer::
 collapseProcessing()
 {
-    uint64_t size_processing = this->sizeProcessing(); 
-
     uint64_t num_vaults = this->_processingVault.size();
 
     uint64_t fill_vault_index = 0;
@@ -235,8 +233,6 @@ collapseProcessing()
 void ParticleVaultContainer::
 collapseProcessed()
 {
-    uint64_t size_processed = this->sizeProcessed(); 
-
     uint64_t num_vaults = this->_processedVault.size();
 
     uint64_t fill_vault_index = 0;

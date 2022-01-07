@@ -8,7 +8,7 @@ class IndexToTuple4
 {
  public:
    IndexToTuple4(int nx, int ny, int nz, int nb)
-   : nx_(nx), ny_(ny), nz_(nz), nb_(nb)
+   : nx_(nx), ny_(ny), nz_(nz)
    {};
 
    Tuple4 operator()(Long64 index) const
@@ -27,7 +27,6 @@ class IndexToTuple4
    int nx_;
    int ny_;
    int nz_;
-   int nb_;
 };
 
 #endif

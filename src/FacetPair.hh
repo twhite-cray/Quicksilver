@@ -11,12 +11,12 @@ class FacetPair
              int domainGid2, const MC_Location& location2)
    : _domainGid1(domainGid1),
      _domainIndex1(location1.domain),
-     _cellIndex1(location1.cell),
      _facetIndex1(location1.facet),
+     _cellIndex1(location1.cell),
      _domainGid2(domainGid2),
      _domainIndex2(location2.domain),
-     _cellIndex2(location2.cell),
-     _facetIndex2(location2.facet)
+     _facetIndex2(location2.facet),
+     _cellIndex2(location2.cell)
    {
    }
 

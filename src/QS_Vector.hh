@@ -13,17 +13,17 @@ class qs_vector
 {
  public:
 
-   qs_vector() : _data(0), _capacity(0), _size(0), _memPolicy(MemoryControl::AllocationPolicy::HOST_MEM), _isOpen(0) {};
+   qs_vector() : _data(0), _capacity(0), _size(0), _isOpen(0), _memPolicy(MemoryControl::AllocationPolicy::HOST_MEM) {};
 
    qs_vector(int size, MemoryControl::AllocationPolicy memPolicy = MemoryControl::AllocationPolicy::HOST_MEM )
-   : _data(0), _capacity(size), _size(size), _memPolicy(memPolicy), _isOpen(0) 
+   : _data(0), _capacity(size), _size(size), _isOpen(0), _memPolicy(memPolicy) 
    {
       _data = MemoryControl::allocate<T>(size, memPolicy);
    }
 
 
    qs_vector( int size, const T& value, MemoryControl::AllocationPolicy memPolicy = MemoryControl::AllocationPolicy::HOST_MEM )
-   : _data(0), _capacity(size), _size(size), _memPolicy(memPolicy), _isOpen(0) 
+   : _data(0), _capacity(size), _size(size), _isOpen(0), _memPolicy(memPolicy) 
    { 
       _data = MemoryControl::allocate<T>(size, memPolicy);
 
@@ -32,7 +32,7 @@ class qs_vector
    }
 
    qs_vector(const qs_vector<T>& aa )
-   : _data(0), _capacity(aa._capacity), _size(aa._size), _memPolicy(aa._memPolicy), _isOpen(aa._isOpen)
+   : _data(0), _capacity(aa._capacity), _size(aa._size), _isOpen(aa._isOpen), _memPolicy(aa._memPolicy)
    {
       _data = MemoryControl::allocate<T>(_capacity, _memPolicy);
  

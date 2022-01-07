@@ -15,9 +15,9 @@ public:
     MPI_Comm  comm_mc_world;
 
     MC_Processor_Info()
-    : comm_mc_world(MPI_COMM_WORLD),
-      use_gpu(0),
-      gpu_id(0)
+    : use_gpu(0),
+      gpu_id(0),
+      comm_mc_world(MPI_COMM_WORLD)
     {
       mpiComm_rank(comm_mc_world, &rank);
       mpiComm_size(comm_mc_world, &num_processors);

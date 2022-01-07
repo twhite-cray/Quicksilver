@@ -2,7 +2,7 @@
 #define CORALBENCHMARK_HH
 
 class MonteCarlo;
-class Parameters;
+struct Parameters;
 
 void coralBenchmarkCorrectness( MonteCarlo* monteCarlo, Parameters &params );
 

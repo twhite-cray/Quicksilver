@@ -6,19 +6,9 @@
 
 #include <cstdlib>
 
-static void* qsMalloc(size_t iSize)
-{
-   return std::malloc(iSize);
-}
-
 static void* qsCalloc(size_t num, size_t iSize)
 {
    return std::calloc(num, iSize);
-}
-
-static void* qsRealloc(void* ptr, size_t iSize)
-{
-   return std::realloc(ptr, iSize);
 }
 
 static void qsFree(void* ptr)

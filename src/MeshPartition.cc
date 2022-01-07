@@ -92,7 +92,6 @@ namespace
       set<int>      remoteDomainSet;
 
       Long64 root = grid.whichCell(domainCenter[myDomainGid]);
-      Tuple tmp = grid.cellIndexToTuple(root);
 
       floodQueue.push(root);
       wetCells.insert(root);
@@ -156,7 +155,6 @@ namespace
          else // iCell is a remote cell
          {
             const int& remoteNbrIndex = remoteDomainMap[iDomainGid];
-            Tuple iTuple = grid.cellIndexToTuple(iCellGid);
             vector<Long64> faceNbr;
             grid.getFaceNbrGids(iCellGid, faceNbr);
             for (unsigned ii=0; ii<6; ++ii)

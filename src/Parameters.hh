@@ -98,9 +98,9 @@ struct SimulationParameters
 {
    SimulationParameters()
    : inputFile(),
+     energySpectrum(""),
      crossSectionsOut(""),
      boundaryCondition("reflect"),
-     energySpectrum(""),
      loadBalance(0),
      cycleTimers(0),
      debugThreads(0),

@@ -16,11 +16,10 @@ class Tuple4ToIndex
    Long64 nx_;  // needs to be Long64 to force 64-bit math below
    Long64 ny_;
    Long64 nz_;
-   Long64 nb_;
 };
 
 inline Tuple4ToIndex::Tuple4ToIndex(int nx, int ny, int nz, int nb)
-: nx_(nx), ny_(ny), nz_(nz), nb_(nb)
+: nx_(nx), ny_(ny), nz_(nz)
 {}
 
 inline Long64

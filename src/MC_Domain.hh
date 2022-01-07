@@ -9,7 +9,7 @@
 #include "MC_Facet_Geometry.hh"
 #include "BulkStorage.hh"
 
-class Parameters;
+struct Parameters;
 class MeshPartition;
 class GlobalFccGrid;
 class DecompositionObject;
