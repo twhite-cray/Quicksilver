@@ -71,48 +71,23 @@ namespace
 //Init GPU usage information
    void initGPUInfo( MonteCarlo* monteCarlo)
    {
-      #if defined(HAVE_OPENMP_TARGET)
-         int Ngpus = omp_get_num_devices();
-      #elif defined(HAVE_HIP)
          int Ngpus = 0;
          CHECK(hipGetDeviceCount(&Ngpus));
-      #else
-         int Ngpus = 0;
-      #endif
 
          if( Ngpus != 0 )
          {
-            #if defined(HAVE_OPENMP_TARGET) || defined(HAVE_HIP)
             monteCarlo->processor_info->use_gpu = 1;
             int GPUID = monteCarlo->processor_info->rank%Ngpus;
             monteCarlo->processor_info->gpu_id = GPUID;
-            
-            #if defined(HAVE_OPENMP_TARGET)
-                omp_set_default_device(GPUID);
-            #endif
-
-            #ifdef HAVE_HIP
             CHECK(hipSetDevice(GPUID));
-            #else
-            cudaSetDevice(GPUID);
-            #endif
-            //cudaDeviceSetLimit( cudaLimitStackSize, 64*1024 );
-            #endif
          }
          else
          {
             monteCarlo->processor_info->use_gpu = 0;
             monteCarlo->processor_info->gpu_id = -1;
          }
-#ifdef USE_OPENMP_NO_GPU
-         monteCarlo->processor_info->use_gpu = 0;
-         monteCarlo->processor_info->gpu_id = -1;
-#endif
-
-#if defined(HAVE_HIP)
     if( monteCarlo->processor_info->use_gpu )
         warmup_kernel();
-#endif
 
          //printf("monteCarlo->processor_info->use_gpu = %d\n", monteCarlo->processor_info->use_gpu);
          

@@ -20,28 +20,18 @@
 //#define MC_MIN(a, b)       {std::min(a,b)}
 #define MC_MIN(a, b)       { ((a < b) ? a : b) } 
 
-// If not compiled with OpenMP, define stub OpenMP
-// function that will work for the code.
-#ifdef HAVE_OPENMP
-    #include <omp.h>
-#else
-    #include <iostream>
-    #include <cstdlib>
-    #define omp_get_thread_num()   0
-    #define omp_get_max_threads()  1
-    #define omp_get_num_procs()    1
-#endif
-#else
-#endif
+#include <iostream>
+#include <cstdlib>
+#define omp_get_thread_num()   0
+#define omp_get_max_threads()  1
+#define omp_get_num_procs()    1
 
-#if defined(HAVE_OPENMP) && defined(HAVE_DEBUG)
-#define MC_VERIFY_THREAD_ZERO MC_Verify_Thread_Zero(__FILE__, __LINE__);
-#else
 #define MC_VERIFY_THREAD_ZERO 
-#endif
 
 #ifdef USE_PRINT_DEBUG
 #define PRINT_DEBUG printf("FILE: %s\tLINE: %d\n", __FILE__, __LINE__ )
 #else
 #define PRINT_DEBUG
+#endif
+
 #endif

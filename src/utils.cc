@@ -17,40 +17,12 @@
 int mc_get_num_physical_procs(void)
 {
    int num_physical_cores = omp_get_num_procs();
-   #if defined(HAVE_OPENMP) && defined(HAVE_KNL)
-   int num_threads_per_core = 0;
-   char *env_str = getenv("KMP_PLACE_THREADS");
-   if (env_str)
-   {
-      char *ptr = strchr(env_str, (int)'t');
-      if (ptr)
-      {
-         int num_threads_per_core = 1;
-         ptr--;
-         while ((ptr > env_str) && isdigit(*ptr) )
-         { num_threads_per_core = atoi(ptr); ptr--; }
-         if (num_threads_per_core > 0) 
-         { num_physical_cores = omp_get_num_procs() / num_threads_per_core; }
-      }
-   }
-   #endif
    return num_physical_cores;
 }
 
 
 void MC_Verify_Thread_Zero(char const * const file, int line)
 {
-#ifdef HAVE_OPENMP
-    int thread_id = omp_get_thread_num();
-    if (thread_id != 0)
-    {
-        int mpi_rank = -1;
-        mpiComm_rank(mcco->processor_info->comm_mc_world, &mpi_rank);
-        fprintf(stderr,"Fatal Error: %s:%d MPI Routine called by thread other than zero."
-                       "\n\tMPI Process %d, Thread %d", file, line, mpi_rank, thread_id);
-        mpiAbort(MPI_COMM_WORLD, -1); abort();
-    }
-#endif
     return;
 }
 

@@ -171,31 +171,6 @@ void cycleTracking(MonteCarlo *monteCarlo)
                         }
                        break;
                        
-                      case gpuWithOpenMP:
-                       {
-                          int nthreads=128;
-                          if (numParticles <  64*56 ) 
-                             nthreads = 64;
-                          int nteams = (numParticles + nthreads - 1 ) / nthreads;
-                          nteams = nteams > 1 ? nteams : 1;
-                          #ifdef HAVE_OPENMP_TARGET
-                          #pragma omp target enter data map(to:monteCarlo[0:1]) 
-                          #pragma omp target enter data map(to:processingVault[0:1]) 
-                          #pragma omp target enter data map(to:processedVault[0:1])
-                          #pragma omp target teams distribute parallel for num_teams(nteams) thread_limit(128)
-                          #endif
-                          for ( int particle_index = 0; particle_index < numParticles; particle_index++ )
-                          {
-                             CycleTrackingGuts( monteCarlo, particle_index, processingVault, processedVault );
-                          }
-                          #ifdef HAVE_OPENMP_TARGET
-                          #pragma omp target exit data map(from:monteCarlo[0:1])
-                          #pragma omp target exit data map(from:processingVault[0:1])
-                          #pragma omp target exit data map(from:processedVault[0:1])
-                          #endif
-                       }
-                       break;
-
                       case cpu:
                        #include "mc_omp_parallel_for_schedule_static.hh"
                        for ( int particle_index = 0; particle_index < numParticles; particle_index++ )

@@ -1,7 +1,6 @@
 #ifndef CUDAUTILS_HH
 #define CUDAUTILS_HH
 
-#if defined(HAVE_HIP)
 #include <hip/hip_runtime.h>
 __attribute__((unused))
 static void checkHip(const hipError_t err, const char *const file, const int line)
@@ -12,11 +11,10 @@ static void checkHip(const hipError_t err, const char *const file, const int lin
   exit(err);
 }
 #define CHECK(X) checkHip(X,__FILE__,__LINE__)
-#endif
 
 #define VAR_MEM MemoryControl::AllocationPolicy::HOST_MEM
 
-enum ExecutionPolicy{ cpu, gpuWithOpenMP, gpuWithHip };
+enum ExecutionPolicy{ cpu, gpuWithHip };
 
 inline ExecutionPolicy getExecutionPolicy( int useGPU )
 {
@@ -24,11 +22,7 @@ inline ExecutionPolicy getExecutionPolicy( int useGPU )
 
     if( useGPU )
     {
-        #if defined (HAVE_OPENMP_TARGET)
-        execPolicy = ExecutionPolicy::gpuWithOpenMP;
-        #elif defined (HAVE_HIP)
-        execPolicy = ExecutionPolicy::gpuWithHip;
-        #endif
+      execPolicy = ExecutionPolicy::gpuWithHip;
     }
     return execPolicy;
 }

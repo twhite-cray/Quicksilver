@@ -13,37 +13,10 @@
 
 void mpiInit( int *argc, char ***argv)
 {
-
-#ifdef HAVE_OPENMP
-   { // limit scope
-      char const* const provided_string[4] = \
-         {"MPI_THREAD_SINGLE","MPI_THREAD_FUNNELED","MPI_THREAD_SERIALIZED","MPI_THREAD_MULTIPLE"};
-      int provided, required = MPI_THREAD_FUNNELED;
-      
-      int err = MPI_Init_thread(argc, argv, required, &provided);
-      qs_assert(err == MPI_SUCCESS);
-      
-      int rank = -1;
-      mpiComm_rank(MPI_COMM_WORLD, &rank);
-      if (rank == 0)
-         fprintf(stdout,"MPI Initialized         : %s\n", provided_string[provided]); 
-
-      if ((required > MPI_THREAD_SINGLE) && (required > provided))
-      {
-         printf("MPI-OpenMP Error.\n\tCode requires %s thread support. MPI library provides %s support.\n",
-                provided_string[required],provided_string[provided]);
-         qs_assert(false);
-      }
-   } // limit scope
-   
-#else
    { // limit scope
       int err = MPI_Init(argc, argv);
       qs_assert(err == MPI_SUCCESS);
    } //limit scope
-
-#endif
-
 }
 
 

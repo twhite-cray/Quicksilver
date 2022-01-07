@@ -93,11 +93,6 @@ MC_Nearest_Facet MCT_Nearest_Facet(MC_Particle *mc_particle,
                                    bool new_segment,
                                    MonteCarlo* monteCarlo )
 {
-//    #ifndef BCMN_HAVE_OPENMP
-//    MC_FASTTIMER_START(MC_Fast_Timer::Nearest_Facet);
-//    #endif
-//
-
     if (location.domain < 0 || location.cell < 0)
     {
        qs_assert(false);
@@ -128,10 +123,6 @@ MC_Nearest_Facet MCT_Nearest_Facet(MC_Particle *mc_particle,
 //           MC_Warning( "mc_particle.identifier %" PRIu64 "\n", mc_particle->identifier );
 //        }
     }
-
-//    #ifndef BCMN_HAVE_OPENMP
-//    MC_FASTTIMER_STOP(MC_Fast_Timer::Nearest_Facet);
-//    #endif
 
     return nearest_facet;
 }  // End MCT_Nearest_Facet
