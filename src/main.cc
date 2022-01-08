@@ -172,7 +172,6 @@ void cycleTracking(MonteCarlo *monteCarlo)
                        break;
                        
                       case cpu:
-                       #include "mc_omp_parallel_for_schedule_static.hh"
                        for ( int particle_index = 0; particle_index < numParticles; particle_index++ )
                        {
                           CycleTrackingGuts( monteCarlo, particle_index, processingVault, processedVault );

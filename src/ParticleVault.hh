@@ -107,7 +107,6 @@ popBaseParticle(MC_Base_Particle &base_particle)
 {
    bool notEmpty = false;
 
-#include "mc_omp_critical.hh"
 {
    if (!empty())
    {
@@ -125,7 +124,6 @@ popParticle(MC_Particle &particle)
 {
    bool notEmpty = false;
 
-#include "mc_omp_critical.hh"
 {
    if (!empty())
    {
@@ -199,7 +197,6 @@ invalidateParticle( int index )
 inline void ParticleVault::
 eraseSwapParticle(int index)
 {
-    #include "mc_omp_critical.hh"
     {
         _particles[index] = _particles.back();
         _particles.pop_back();
