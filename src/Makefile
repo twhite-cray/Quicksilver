@@ -273,8 +273,9 @@ SOURCES= \
     CoralBenchmark.cc \
     CycleTracking.cc \
     DecompositionObject.cc \
+    Device.cc \
     DirectionCosine.cc \
-	EnergySpectrum.cc \
+    EnergySpectrum.cc \
     GlobalFccGrid.cc \
     GridAssignmentObject.cc \
     InputBlock.cc \
@@ -339,6 +340,6 @@ distclean: clean
 
 depend:
 	@echo "Rebuilding dependencies..."
-	@makedepend -f .depend -Y. --$(CXXFLAGS) $(CPPFLAGS)-- $(SOURCES) 2> /dev/null
+	@make depend -f .depend -Y. --$(CXXFLAGS) $(CPPFLAGS)-- $(SOURCES) 2> /dev/null
 
 -include .depend

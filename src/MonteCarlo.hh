@@ -5,6 +5,7 @@
 #include "MC_Domain.hh"
 #include "Parameters.hh"
 
+class Device;
 class MC_RNG_State;
 class NuclearData;
 class MaterialDatabase;
@@ -28,17 +29,19 @@ public:
 
    qs_vector<MC_Domain> domain;
 
-    Parameters _params;
-    NuclearData* _nuclearData;
-    ParticleVaultContainer* _particleVaultContainer;
-    MaterialDatabase* _materialDatabase;
-    Tallies *_tallies;
-    MC_Time_Info *time_info;
-    MC_Fast_Timer_Container *fast_timer;
-    MC_Processor_Info *processor_info;
-    MC_Particle_Buffer *particle_buffer;
+   Parameters _params;
+   NuclearData* _nuclearData;
+   ParticleVaultContainer* _particleVaultContainer;
+   MaterialDatabase* _materialDatabase;
+   Tallies *_tallies;
+   MC_Time_Info *time_info;
+   MC_Fast_Timer_Container *fast_timer;
+   MC_Processor_Info *processor_info;
+   MC_Particle_Buffer *particle_buffer;
 
-    double source_particle_weight;
+   double source_particle_weight;
+
+   Device *_device;
 
 private:
    // Disable copy constructor and assignment operator

@@ -1,4 +1,5 @@
 #include "MonteCarlo.hh"
+#include "Device.hh"
 #include "NuclearData.hh"
 #include "MaterialDatabase.hh"
 #include "ParticleVaultContainer.hh"
@@ -80,7 +81,7 @@ MonteCarlo::MonteCarlo(const Parameters& params)
 
     particle_buffer         = new MC_Particle_Buffer(this, batch_size);
     _particleVaultContainer = new ParticleVaultContainer(batch_size, num_batches, num_extra_vaults);
-
+    _device = new Device();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -88,6 +89,7 @@ MonteCarlo::MonteCarlo(const Parameters& params)
 //----------------------------------------------------------------------------------------------------------------------
 MonteCarlo::~MonteCarlo()
 {
+  delete _device;
   delete _nuclearData;
   delete _particleVaultContainer;
   delete _materialDatabase;

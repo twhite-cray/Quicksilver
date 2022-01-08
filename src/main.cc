@@ -1,4 +1,5 @@
 #include <iostream>
+#include "Device.hh"
 #include "utils.hh"
 #include "Parameters.hh"
 #include "utilsMpi.hh"
@@ -111,6 +112,8 @@ void cycleInit( bool loadBalance )
     PopulationControl(mcco, loadBalance); // controls particle population
 
     RouletteLowWeightParticles(mcco); // Delete particles with low statistical weight
+
+    mcco->_device->cycleInit();
 
     MC_FASTTIMER_STOP(MC_Fast_Timer::cycleInit);
 }
@@ -256,6 +259,8 @@ void cycleTracking(MonteCarlo *monteCarlo)
 void cycleFinalize()
 {
     MC_FASTTIMER_START(MC_Fast_Timer::cycleFinalize);
+
+    mcco->_device->cycleFinalize();
 
     mcco->_tallies->_balanceTask[0]._end = mcco->_particleVaultContainer->sizeProcessed();
 
