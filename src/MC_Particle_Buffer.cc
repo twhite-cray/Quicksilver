@@ -344,11 +344,7 @@ void MC_Particle_Buffer::Delete_Completed_Extra_Send_Buffers()
 MC_Particle_Buffer::MC_Particle_Buffer(MonteCarlo *mcco_, size_t bufferSize_)
 {
     this->mcco  = mcco_;
-#ifdef HAVE_ASYNC_MPI
     this->new_test_done_method = MC_New_Test_Done_Method::NonBlocking;
-#else
-    this->new_test_done_method = MC_New_Test_Done_Method::Blocking;
-#endif
 
     this->test_done.Zero_Out();
 
