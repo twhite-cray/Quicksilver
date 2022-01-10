@@ -132,6 +132,7 @@ void cycleTracking(MonteCarlo *monteCarlo)
 
     //Post Inital Receives for Particle Buffer
     monteCarlo->particle_buffer->Post_Receive_Particle_Buffer( my_particle_vault.getVaultSize() );
+    monteCarlo->_device->startRecvs();
 
     //Get Test For Done Method (Blocking or non-blocking
     MC_New_Test_Done_Method::Enum new_test_done_method = monteCarlo->particle_buffer->new_test_done_method;

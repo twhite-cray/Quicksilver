@@ -9,6 +9,7 @@
 
 
 // forward declarations
+class Device;
 class MC_Particle;
 class MonteCarlo;
 class SendQueue;
@@ -146,6 +147,7 @@ private:
     MC_Particle_Buffer( const MC_Particle_Buffer& );                    // disable copy constructor
     MC_Particle_Buffer& operator=( const MC_Particle_Buffer& tmp );     // disable assignment operator
 
+    friend class Device;
 };
 
 /*

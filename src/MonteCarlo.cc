@@ -81,7 +81,7 @@ MonteCarlo::MonteCarlo(const Parameters& params)
 
     particle_buffer         = new MC_Particle_Buffer(this, batch_size);
     _particleVaultContainer = new ParticleVaultContainer(batch_size, num_batches, num_extra_vaults);
-    _device = new Device();
+    _device = new Device(*this);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
