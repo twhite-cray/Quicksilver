@@ -40,26 +40,40 @@ void Device::init(MonteCarlo &mc)
 
   const int ndiSize = mc._nuclearData->_isotopes.size();
   CHECK(hipHostMalloc(&isotopes,ndiSize*sizeof(DeviceNuclearDataIsotope)));
-  const int groupSize = mc._nuclearData->_isotopes[0]._species[0]._reactions[0]._crossSection.size();
+  const int rSize = mc._nuclearData->_isotopes[0]._species[0]._reactions.size()+1;
+  const int gSize = mc._nuclearData->_isotopes[0]._species[0]._reactions[0]._crossSection.size();
   for (const auto &isotope : mc._nuclearData->_isotopes) {
     for (const auto &species : isotope._species) {
+      assert(rSize == species._reactions.size()+1);
       for (const auto &reaction: species._reactions) {
-        assert(groupSize == reaction._crossSection.size());
+        assert(gSize == reaction._crossSection.size());
       }
     }
   }
 
-  double *tcs = nullptr;
-  CHECK(hipHostMalloc(&tcs,ndiSize*groupSize*sizeof(double)));
+  DeviceReaction *rs = nullptr;
+  CHECK(hipHostMalloc(&rs,ndiSize*rSize*sizeof(DeviceReaction)));
+  double *xs = nullptr;
+  CHECK(hipHostMalloc(&xs,ndiSize*rSize*gSize*sizeof(double)));
   for (int i = 0; i < ndiSize; i++) {
-    isotopes[i].totalCrossSections = tcs;
-    const auto &reactions = mc._nuclearData->_isotopes[i]._species[0]._reactions;
-    for (int j = 0; j < groupSize; j++) {
-      double sum = 0;
-      for (const auto &reaction : reactions) sum += reaction._crossSection[j];
-      tcs[j] = sum;
+    isotopes[i].reactions = rs;
+    for (int j = 0; j < rSize; j++) {
+      isotopes[i].reactions[j].crossSections = xs;
+      xs += gSize;
     }
-    tcs += groupSize;
+    rs += rSize;
+  }
+
+  for (int i = 0; i < ndiSize; i++) {
+    for (int k = 0; k < gSize; k++) {
+      double sum = 0;
+      for (int j = 1; j < rSize; j++) {
+        const double xs = mc._nuclearData->_isotopes[i]._species[0]._reactions[j-1]._crossSection[k];
+        sum += xs;
+        isotopes[i].reactions[j].crossSections[k] = xs;
+      }
+      isotopes[i].reactions[0].crossSections[k] = sum;
+    }
   }
 }
 

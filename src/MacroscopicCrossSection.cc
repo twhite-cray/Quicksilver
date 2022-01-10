@@ -39,14 +39,14 @@ double macroscopicCrossSection(MonteCarlo* monteCarlo, int reactionIndex, int do
    if (reactionIndex < 0)
    {
       // Return total cross section
-      microscopicCrossSection = device.isotopes[isotopeGid].totalCrossSections[energyGroup];
+      microscopicCrossSection = device.isotopes[isotopeGid].reactions[0].crossSections[energyGroup];
       assert(microscopicCrossSection == monteCarlo->_nuclearData->getTotalCrossSection(isotopeGid, energyGroup));
    }
    else
    {
       // Return the reaction cross section
-      microscopicCrossSection = monteCarlo->_nuclearData->getReactionCrossSection((unsigned int)reactionIndex,
-                isotopeGid, energyGroup);
+      microscopicCrossSection = device.isotopes[isotopeGid].reactions[reactionIndex+1].crossSections[energyGroup];
+      assert(microscopicCrossSection == monteCarlo->_nuclearData->getReactionCrossSection((unsigned int)reactionIndex, isotopeGid, energyGroup));
    }
 
    return atomFraction * cellNumberDensity * microscopicCrossSection;

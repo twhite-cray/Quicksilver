@@ -34,8 +34,12 @@ struct DeviceMaterial {
   DeviceIsotope *iso;
 };
 
+struct DeviceReaction {
+  double *crossSections;
+};
+
 struct DeviceNuclearDataIsotope {
-  double *totalCrossSections;
+  DeviceReaction *reactions;
 };
 
 struct Device {
