@@ -1,20 +1,23 @@
 #pragma once
-#include <mpi.h>
-#include <vector>
+#include "MC_Cell_State.hh"
 
 class MonteCarlo;
 
-class Device {
-  public:
-    Device(MonteCarlo &);
-    void cycleInit();
-    void cycleFinalize();
-    void startRecvs();
-  protected:
-    MonteCarlo &_mc;
+struct DeviceCellState {
+  DeviceCellState &operator=(const MC_Cell_State &that)
+  {
+    _material = that._material;
+    return *this;
+  }
+  int _material;
+};
 
-    char *_recvBuf;
-    int _recvCount;
-    std::vector<int> _recvSrcs;
-    std::vector<MPI_Request> _recvReqs;
+struct DeviceDomain {
+  DeviceCellState *cell_state;
+};
+
+struct Device {
+  Device(): domain(nullptr) {}
+  void init(MonteCarlo &mc);
+  DeviceDomain *domain;
 };

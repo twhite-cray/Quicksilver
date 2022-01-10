@@ -63,6 +63,7 @@ MonteCarlo* initMC(const Parameters& params)
 
    //   used when debugging cross sections
    checkCrossSections(monteCarlo, params);
+   monteCarlo->_device.init(*monteCarlo);
    return monteCarlo;
 }
 

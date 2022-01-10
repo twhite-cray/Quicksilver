@@ -16,7 +16,8 @@ double macroscopicCrossSection(MonteCarlo* monteCarlo, int reactionIndex, int do
                                int isoIndex, int energyGroup)
 {
    // Initialize various data items.
-   int globalMatIndex = monteCarlo->domain[domainIndex].cell_state[cellIndex]._material;
+   int globalMatIndex = monteCarlo->_device.domain[domainIndex].cell_state[cellIndex]._material;
+   assert(globalMatIndex == monteCarlo->domain[domainIndex].cell_state[cellIndex]._material);
 
    double atomFraction = monteCarlo->_materialDatabase->_mat[globalMatIndex]._iso[isoIndex]._atomFraction;
 

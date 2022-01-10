@@ -1,11 +1,11 @@
 #ifndef MONTECARLO_HH
 #define MONTECARLO_HH
 
+#include "Device.hh"
 #include "QS_Vector.hh"
 #include "MC_Domain.hh"
 #include "Parameters.hh"
 
-class Device;
 class MC_RNG_State;
 class NuclearData;
 class MaterialDatabase;
@@ -41,7 +41,7 @@ public:
 
    double source_particle_weight;
 
-   Device *_device;
+   Device _device;
 
 private:
    // Disable copy constructor and assignment operator

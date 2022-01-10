@@ -1,5 +1,4 @@
 #include <iostream>
-#include "Device.hh"
 #include "utils.hh"
 #include "Parameters.hh"
 #include "utilsMpi.hh"
@@ -113,8 +112,6 @@ void cycleInit( bool loadBalance )
 
     RouletteLowWeightParticles(mcco); // Delete particles with low statistical weight
 
-    mcco->_device->cycleInit();
-
     MC_FASTTIMER_STOP(MC_Fast_Timer::cycleInit);
 }
 
@@ -132,8 +129,6 @@ void cycleTracking(MonteCarlo *monteCarlo)
 
     //Post Inital Receives for Particle Buffer
     monteCarlo->particle_buffer->Post_Receive_Particle_Buffer( my_particle_vault.getVaultSize() );
-    monteCarlo->_device->startRecvs();
-
     //Get Test For Done Method (Blocking or non-blocking
     MC_New_Test_Done_Method::Enum new_test_done_method = monteCarlo->particle_buffer->new_test_done_method;
 
@@ -260,8 +255,6 @@ void cycleTracking(MonteCarlo *monteCarlo)
 void cycleFinalize()
 {
     MC_FASTTIMER_START(MC_Fast_Timer::cycleFinalize);
-
-    mcco->_device->cycleFinalize();
 
     mcco->_tallies->_balanceTask[0]._end = mcco->_particleVaultContainer->sizeProcessed();
 
