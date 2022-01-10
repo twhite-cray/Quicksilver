@@ -16,10 +16,11 @@ double macroscopicCrossSection(MonteCarlo* monteCarlo, int reactionIndex, int do
                                int isoIndex, int energyGroup)
 {
    // Initialize various data items.
-   int globalMatIndex = monteCarlo->_device.domain[domainIndex].cell_state[cellIndex]._material;
+   const int globalMatIndex = monteCarlo->_device.domain[domainIndex].cell_state[cellIndex].material;
    assert(globalMatIndex == monteCarlo->domain[domainIndex].cell_state[cellIndex]._material);
 
-   double atomFraction = monteCarlo->_materialDatabase->_mat[globalMatIndex]._iso[isoIndex]._atomFraction;
+   const double atomFraction = monteCarlo->_device.mat[globalMatIndex].iso[isoIndex].atomFraction;
+   assert(atomFraction == monteCarlo->_materialDatabase->_mat[globalMatIndex]._iso[isoIndex]._atomFraction);
 
    double microscopicCrossSection = 0.0;
    // The cell number density is the fraction of the atoms in cell

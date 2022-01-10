@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <cmath>
 #include "qs_assert.hh"
+#include "QS_Vector.hh"
 
 // For this material, store the global id in NuclearData of the isotope
 class Isotope
