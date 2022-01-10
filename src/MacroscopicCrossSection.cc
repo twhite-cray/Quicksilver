@@ -39,7 +39,8 @@ double macroscopicCrossSection(MonteCarlo* monteCarlo, int reactionIndex, int do
    if (reactionIndex < 0)
    {
       // Return total cross section
-      microscopicCrossSection = monteCarlo->_nuclearData->getTotalCrossSection(isotopeGid, energyGroup);
+      microscopicCrossSection = device.isotopes[isotopeGid].totalCrossSections[energyGroup];
+      assert(microscopicCrossSection == monteCarlo->_nuclearData->getTotalCrossSection(isotopeGid, energyGroup));
    }
    else
    {

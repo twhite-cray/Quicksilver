@@ -2,6 +2,7 @@
 
 #include "cudaUtils.hh"
 #include "MonteCarlo.hh"
+#include "NuclearData.hh"
 
 void Device::init(MonteCarlo &mc)
 {
@@ -35,6 +36,30 @@ void Device::init(MonteCarlo &mc)
     const int isoSize = mc._materialDatabase->_mat[i]._iso.size();
     for (int j = 0; j < isoSize; j++) iso[j] = mc._materialDatabase->_mat[i]._iso[j];
     iso += isoSize;
+  }
+
+  const int ndiSize = mc._nuclearData->_isotopes.size();
+  CHECK(hipHostMalloc(&isotopes,ndiSize*sizeof(DeviceNuclearDataIsotope)));
+  const int groupSize = mc._nuclearData->_isotopes[0]._species[0]._reactions[0]._crossSection.size();
+  for (const auto &isotope : mc._nuclearData->_isotopes) {
+    for (const auto &species : isotope._species) {
+      for (const auto &reaction: species._reactions) {
+        assert(groupSize == reaction._crossSection.size());
+      }
+    }
+  }
+
+  double *tcs = nullptr;
+  CHECK(hipHostMalloc(&tcs,ndiSize*groupSize*sizeof(double)));
+  for (int i = 0; i < ndiSize; i++) {
+    isotopes[i].totalCrossSections = tcs;
+    const auto &reactions = mc._nuclearData->_isotopes[i]._species[0]._reactions;
+    for (int j = 0; j < groupSize; j++) {
+      double sum = 0;
+      for (const auto &reaction : reactions) sum += reaction._crossSection[j];
+      tcs[j] = sum;
+    }
+    tcs += groupSize;
   }
 }
 

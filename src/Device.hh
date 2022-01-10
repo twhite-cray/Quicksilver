@@ -34,10 +34,15 @@ struct DeviceMaterial {
   DeviceIsotope *iso;
 };
 
+struct DeviceNuclearDataIsotope {
+  double *totalCrossSections;
+};
+
 struct Device {
   Device(): domain(nullptr), mat(nullptr) {}
   Device(const Device &) = default;
   void init(MonteCarlo &mc);
   DeviceDomain *domain;
   DeviceMaterial *mat;
+  DeviceNuclearDataIsotope *isotopes;
 };

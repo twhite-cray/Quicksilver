@@ -185,6 +185,9 @@ class qs_vector
        return pos;
    }
 
+   const T *begin() const { return _data; }
+   const T *end() const { return _data+_size; }
+
  private:
    T* _data;
    int _capacity;
