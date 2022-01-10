@@ -15,23 +15,25 @@ HOST_DEVICE
 double macroscopicCrossSection(MonteCarlo* monteCarlo, int reactionIndex, int domainIndex, int cellIndex,
                                int isoIndex, int energyGroup)
 {
-  const Device &device = monteCarlo->_device;
-  // The cell number density is the fraction of the atoms in cell
-  // volume of this isotope.  We set this (elsewhere) to 1/nIsotopes.
-  // This is a statement that we treat materials as if all of their
-  // isotopes are present in equal amounts
+   const Device &device = monteCarlo->_device;
+   // The cell number density is the fraction of the atoms in cell
+   // volume of this isotope.  We set this (elsewhere) to 1/nIsotopes.
+   // This is a statement that we treat materials as if all of their
+   // isotopes are present in equal amounts
 
-  const DeviceCellState &cellState = device.domain[domainIndex].cellState[cellIndex];
-  const double cellNumberDensity = cellState.cellNumberDensity;
-  assert(cellNumberDensity == monteCarlo->domain[domainIndex].cell_state[cellIndex]._cellNumberDensity);
-  const int globalMatIndex = cellState.material;
-  assert(globalMatIndex == monteCarlo->domain[domainIndex].cell_state[cellIndex]._material);
+   const DeviceCellState &cellState = device.domain[domainIndex].cellState[cellIndex];
+   const double cellNumberDensity = cellState.cellNumberDensity;
+   assert(cellNumberDensity == monteCarlo->domain[domainIndex].cell_state[cellIndex]._cellNumberDensity);
+   const int globalMatIndex = cellState.material;
+   assert(globalMatIndex == monteCarlo->domain[domainIndex].cell_state[cellIndex]._material);
 
-   const double atomFraction = monteCarlo->_device.mat[globalMatIndex].iso[isoIndex].atomFraction;
+   const DeviceIsotope &iso = device.mat[globalMatIndex].iso[isoIndex];
+   const double atomFraction = iso.atomFraction;
    assert(atomFraction == monteCarlo->_materialDatabase->_mat[globalMatIndex]._iso[isoIndex]._atomFraction);
+   const int isotopeGid = iso.gid;
+   assert(isotopeGid == monteCarlo->_materialDatabase->_mat[globalMatIndex]._iso[isoIndex]._gid);
 
    double microscopicCrossSection = 0.0;
-   int isotopeGid = monteCarlo->_materialDatabase->_mat[globalMatIndex]._iso[isoIndex]._gid;
    if ( atomFraction == 0.0 || cellNumberDensity == 0.0) { return 1e-20; }
 
    if (reactionIndex < 0)

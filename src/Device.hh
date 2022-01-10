@@ -23,9 +23,11 @@ struct DeviceIsotope {
   DeviceIsotope &operator=(const Isotope &that)
   {
     atomFraction = that._atomFraction;
+    gid = that._gid;
     return *this;
   }
   double atomFraction;
+  int gid;
 };
 
 struct DeviceMaterial {
