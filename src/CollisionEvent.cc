@@ -70,7 +70,7 @@ bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle, unsigned i
       int numReacts = monteCarlo->_nuclearData->getNumberReactions(uniqueNumber);
       for (int reactIndex = 0; reactIndex < numReacts; reactIndex++)
       {
-         currentCrossSection -= macroscopicCrossSection(monteCarlo, reactIndex, mc_particle.domain, mc_particle.cell,
+         currentCrossSection -= macroscopicCrossSection(monteCarlo->_device, reactIndex, mc_particle.domain, mc_particle.cell,
                    isoIndex, mc_particle.energy_group);
          if (currentCrossSection < 0)
          {

@@ -3,10 +3,11 @@
 
 #include "DeclareMacro.hh"
 
+struct Device;
 class MonteCarlo;
 
 HOST_DEVICE
-double macroscopicCrossSection(MonteCarlo* monteCarlo, int reactionIndex, int domainIndex, int cellIndex,
+double macroscopicCrossSection(const Device &device, int reactionIndex, int domainIndex, int cellIndex,
                                int isoIndex, int energyGroup);
 HOST_DEVICE_END
 

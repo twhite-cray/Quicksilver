@@ -12,10 +12,9 @@
 //  A reactionIndex of -1 means total cross section.
 //----------------------------------------------------------------------------------------------------------------------
 HOST_DEVICE 
-double macroscopicCrossSection(MonteCarlo* monteCarlo, int reactionIndex, int domainIndex, int cellIndex,
+double macroscopicCrossSection(const Device &device, int reactionIndex, int domainIndex, int cellIndex,
                                int isoIndex, int energyGroup)
 {
-   const Device &device = monteCarlo->_device;
    // The cell number density is the fraction of the atoms in cell
    // volume of this isotope.  We set this (elsewhere) to 1/nIsotopes.
    // This is a statement that we treat materials as if all of their
@@ -23,31 +22,17 @@ double macroscopicCrossSection(MonteCarlo* monteCarlo, int reactionIndex, int do
 
    const DeviceCellState &cellState = device.domain[domainIndex].cellState[cellIndex];
    const double cellNumberDensity = cellState.cellNumberDensity;
-   assert(cellNumberDensity == monteCarlo->domain[domainIndex].cell_state[cellIndex]._cellNumberDensity);
    const int globalMatIndex = cellState.material;
-   assert(globalMatIndex == monteCarlo->domain[domainIndex].cell_state[cellIndex]._material);
 
    const DeviceIsotope &iso = device.mat[globalMatIndex].iso[isoIndex];
    const double atomFraction = iso.atomFraction;
-   assert(atomFraction == monteCarlo->_materialDatabase->_mat[globalMatIndex]._iso[isoIndex]._atomFraction);
    const int isotopeGid = iso.gid;
-   assert(isotopeGid == monteCarlo->_materialDatabase->_mat[globalMatIndex]._iso[isoIndex]._gid);
 
-   double microscopicCrossSection = 0.0;
    if ( atomFraction == 0.0 || cellNumberDensity == 0.0) { return 1e-20; }
 
-   if (reactionIndex < 0)
-   {
-      // Return total cross section
-      microscopicCrossSection = device.isotopes[isotopeGid].reactions[0].crossSections[energyGroup];
-      assert(microscopicCrossSection == monteCarlo->_nuclearData->getTotalCrossSection(isotopeGid, energyGroup));
-   }
-   else
-   {
-      // Return the reaction cross section
-      microscopicCrossSection = device.isotopes[isotopeGid].reactions[reactionIndex+1].crossSections[energyGroup];
-      assert(microscopicCrossSection == monteCarlo->_nuclearData->getReactionCrossSection((unsigned int)reactionIndex, isotopeGid, energyGroup));
-   }
+   const int rix = (reactionIndex < 0) ? 0 : reactionIndex+1;
+   // 0 -> total cross section
+   const double microscopicCrossSection = device.isotopes[isotopeGid].reactions[rix].crossSections[energyGroup];
 
    return atomFraction * cellNumberDensity * microscopicCrossSection;
 
@@ -77,7 +62,7 @@ double weightedMacroscopicCrossSection(MonteCarlo* monteCarlo, int taskIndex, in
    double sum = 0.0;
    for (int isoIndex = 0; isoIndex < nIsotopes; isoIndex++)
    {
-      sum += macroscopicCrossSection(monteCarlo, -1, domainIndex, cellIndex,
+      sum += macroscopicCrossSection(monteCarlo->_device, -1, domainIndex, cellIndex,
                                      isoIndex, energyGroup);
    }
 
