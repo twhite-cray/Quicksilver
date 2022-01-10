@@ -42,6 +42,7 @@ void Device::init(MonteCarlo &mc)
   for (int i = 0; i < matSize; i++) {
     mats[i].isos = isos;
     const int isoSize = mc._materialDatabase->_mat[i]._iso.size();
+    mats[i].isoSize = isoSize;
     for (int j = 0; j < isoSize; j++) isos[j] = mc._materialDatabase->_mat[i]._iso[j];
     isos += isoSize;
   }

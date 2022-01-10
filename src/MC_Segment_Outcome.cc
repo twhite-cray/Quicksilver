@@ -30,6 +30,7 @@ HOST_DEVICE_END
 HOST_DEVICE 
 MC_Segment_Outcome_type::Enum MC_Segment_Outcome(MonteCarlo* monteCarlo, MC_Particle &mc_particle, unsigned int &flux_tally_index)
 {
+    Device &device = monteCarlo->_device;
     // initialize distances to large number
     int number_of_events = 3;
     double distance[3];
@@ -51,7 +52,7 @@ MC_Segment_Outcome_type::Enum MC_Segment_Outcome(MonteCarlo* monteCarlo, MC_Part
 
     // Randomly determine the distance to the next collision
     // based upon the composition of the current cell.
-    double macroscopic_total_cross_section = weightedMacroscopicCrossSection(monteCarlo, 0,
+    double macroscopic_total_cross_section = weightedMacroscopicCrossSection(device, 0,
                              mc_particle.domain, mc_particle.cell, mc_particle.energy_group);
 
     // Cache the cross section

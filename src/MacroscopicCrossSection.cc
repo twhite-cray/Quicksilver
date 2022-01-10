@@ -47,30 +47,20 @@ HOST_DEVICE_END
 //materials in a cell.
 //----------------------------------------------------------------------------------------------------------------------
 HOST_DEVICE
-double weightedMacroscopicCrossSection(MonteCarlo* monteCarlo, int taskIndex, int domainIndex,
+double weightedMacroscopicCrossSection(Device &device, int taskIndex, int domainIndex,
                                        int cellIndex, int energyGroup)
 {
-   Device &device = monteCarlo->_device;
-   double* precomputedCrossSection =
-      &monteCarlo->domain[domainIndex].cell_state[cellIndex]._total[energyGroup];
-   qs_assert (precomputedCrossSection != NULL);
    const double xs = device.domains[domainIndex].cellStates[cellIndex].totals[energyGroup];
-   assert(*precomputedCrossSection == xs);
    if (xs > 0.0) return xs;
 
    const int globalMatIndex = device.domains[domainIndex].cellStates[cellIndex].material;
-   assert(globalMatIndex == monteCarlo->domain[domainIndex].cell_state[cellIndex]._material);
-   int nIsotopes = (int)monteCarlo->_materialDatabase->_mat[globalMatIndex]._iso.size();
+   const int nIsotopes = device.mats[globalMatIndex].isoSize;
    double sum = 0.0;
    for (int isoIndex = 0; isoIndex < nIsotopes; isoIndex++)
    {
-      sum += macroscopicCrossSection(device, -1, domainIndex, cellIndex,
-                                     isoIndex, energyGroup);
+      sum += macroscopicCrossSection(device, -1, domainIndex, cellIndex, isoIndex, energyGroup);
    }
-
-   ATOMIC_WRITE( *precomputedCrossSection, sum );
    device.domains[domainIndex].cellStates[cellIndex].totals[energyGroup] = sum;
-
    return sum;
 }
 HOST_DEVICE_END

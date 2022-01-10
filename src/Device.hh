@@ -33,6 +33,7 @@ struct DeviceIsotope {
 
 struct DeviceMaterial {
   DeviceIsotope *isos;
+  int isoSize;
 };
 
 struct DeviceReaction {
