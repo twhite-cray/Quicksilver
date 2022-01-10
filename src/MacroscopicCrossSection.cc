@@ -20,11 +20,11 @@ double macroscopicCrossSection(const Device &device, int reactionIndex, int doma
    // This is a statement that we treat materials as if all of their
    // isotopes are present in equal amounts
 
-   const DeviceCellState &cellState = device.domain[domainIndex].cellState[cellIndex];
+   const DeviceCellState &cellState = device.domains[domainIndex].cellStates[cellIndex];
    const double cellNumberDensity = cellState.cellNumberDensity;
    const int globalMatIndex = cellState.material;
 
-   const DeviceIsotope &iso = device.mat[globalMatIndex].iso[isoIndex];
+   const DeviceIsotope &iso = device.mats[globalMatIndex].isos[isoIndex];
    const double atomFraction = iso.atomFraction;
    const int isotopeGid = iso.gid;
 
@@ -35,7 +35,6 @@ double macroscopicCrossSection(const Device &device, int reactionIndex, int doma
    const double microscopicCrossSection = device.isotopes[isotopeGid].reactions[rix].crossSections[energyGroup];
 
    return atomFraction * cellNumberDensity * microscopicCrossSection;
-
 }
 HOST_DEVICE_END
 
@@ -51,12 +50,14 @@ HOST_DEVICE
 double weightedMacroscopicCrossSection(MonteCarlo* monteCarlo, int taskIndex, int domainIndex,
                                        int cellIndex, int energyGroup)
 {
+   Device &device = monteCarlo->_device;
    double* precomputedCrossSection =
       &monteCarlo->domain[domainIndex].cell_state[cellIndex]._total[energyGroup];
    qs_assert (precomputedCrossSection != NULL);
+   assert(*precomputedCrossSection == device.domains[domainIndex].cellStates[cellIndex].totals[energyGroup]);
    if (*precomputedCrossSection > 0.0)
       return *precomputedCrossSection;
-   
+
    int globalMatIndex = monteCarlo->domain[domainIndex].cell_state[cellIndex]._material;
    int nIsotopes = (int)monteCarlo->_materialDatabase->_mat[globalMatIndex]._iso.size();
    double sum = 0.0;
@@ -67,6 +68,7 @@ double weightedMacroscopicCrossSection(MonteCarlo* monteCarlo, int taskIndex, in
    }
 
    ATOMIC_WRITE( *precomputedCrossSection, sum );
+   device.domains[domainIndex].cellStates[cellIndex].totals[energyGroup] = sum;
 
    return sum;
 }

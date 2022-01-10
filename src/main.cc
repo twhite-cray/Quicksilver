@@ -112,6 +112,8 @@ void cycleInit( bool loadBalance )
 
     RouletteLowWeightParticles(mcco); // Delete particles with low statistical weight
 
+    mcco->_device.cycleInit(*mcco);
+
     MC_FASTTIMER_STOP(MC_Fast_Timer::cycleInit);
 }
 

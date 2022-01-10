@@ -11,12 +11,13 @@ struct DeviceCellState {
     material = that._material;
     return *this;
   }
+  double *totals;
   double cellNumberDensity;
   int material;
 };
 
 struct DeviceDomain {
-  DeviceCellState *cellState;
+  DeviceCellState *cellStates;
 };
 
 struct DeviceIsotope {
@@ -31,7 +32,7 @@ struct DeviceIsotope {
 };
 
 struct DeviceMaterial {
-  DeviceIsotope *iso;
+  DeviceIsotope *isos;
 };
 
 struct DeviceReaction {
@@ -43,10 +44,11 @@ struct DeviceNuclearDataIsotope {
 };
 
 struct Device {
-  Device(): domain(nullptr), mat(nullptr) {}
+  Device(): domains(nullptr), mats(nullptr), isotopes(nullptr) {}
   Device(const Device &) = default;
   void init(MonteCarlo &mc);
-  DeviceDomain *domain;
-  DeviceMaterial *mat;
+  void cycleInit(MonteCarlo &mc);
+  DeviceDomain *domains;
+  DeviceMaterial *mats;
   DeviceNuclearDataIsotope *isotopes;
 };
