@@ -7,14 +7,16 @@ class MonteCarlo;
 struct DeviceCellState {
   DeviceCellState &operator=(const MC_Cell_State &that)
   {
+    cellNumberDensity = that._cellNumberDensity;
     material = that._material;
     return *this;
   }
+  double cellNumberDensity;
   int material;
 };
 
 struct DeviceDomain {
-  DeviceCellState *cell_state;
+  DeviceCellState *cellState;
 };
 
 struct DeviceIsotope {

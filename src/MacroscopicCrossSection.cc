@@ -15,20 +15,22 @@ HOST_DEVICE
 double macroscopicCrossSection(MonteCarlo* monteCarlo, int reactionIndex, int domainIndex, int cellIndex,
                                int isoIndex, int energyGroup)
 {
-   // Initialize various data items.
-   const int globalMatIndex = monteCarlo->_device.domain[domainIndex].cell_state[cellIndex].material;
-   assert(globalMatIndex == monteCarlo->domain[domainIndex].cell_state[cellIndex]._material);
+  const Device &device = monteCarlo->_device;
+  // The cell number density is the fraction of the atoms in cell
+  // volume of this isotope.  We set this (elsewhere) to 1/nIsotopes.
+  // This is a statement that we treat materials as if all of their
+  // isotopes are present in equal amounts
+
+  const DeviceCellState &cellState = device.domain[domainIndex].cellState[cellIndex];
+  const double cellNumberDensity = cellState.cellNumberDensity;
+  assert(cellNumberDensity == monteCarlo->domain[domainIndex].cell_state[cellIndex]._cellNumberDensity);
+  const int globalMatIndex = cellState.material;
+  assert(globalMatIndex == monteCarlo->domain[domainIndex].cell_state[cellIndex]._material);
 
    const double atomFraction = monteCarlo->_device.mat[globalMatIndex].iso[isoIndex].atomFraction;
    assert(atomFraction == monteCarlo->_materialDatabase->_mat[globalMatIndex]._iso[isoIndex]._atomFraction);
 
    double microscopicCrossSection = 0.0;
-   // The cell number density is the fraction of the atoms in cell
-   // volume of this isotope.  We set this (elsewhere) to 1/nIsotopes.
-   // This is a statement that we treat materials as if all of their
-   // isotopes are present in equal amounts
-   double cellNumberDensity = monteCarlo->domain[domainIndex].cell_state[cellIndex]._cellNumberDensity;
-
    int isotopeGid = monteCarlo->_materialDatabase->_mat[globalMatIndex]._iso[isoIndex]._gid;
    if ( atomFraction == 0.0 || cellNumberDensity == 0.0) { return 1e-20; }
 

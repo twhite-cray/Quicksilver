@@ -15,7 +15,7 @@ void Device::init(MonteCarlo &mc)
   DeviceCellState *cs = nullptr;
   CHECK(hipHostMalloc(&cs,csSizeSum*sizeof(DeviceCellState)));
   for (int i = 0; i < domainSize; i++) {
-    domain[i].cell_state = cs;
+    domain[i].cellState = cs;
     const int csSize = mc.domain[i].cell_state.size();
     for (int j = 0; j < csSize; j++) cs[j] = mc.domain[i].cell_state[j];
     cs += csSize;
