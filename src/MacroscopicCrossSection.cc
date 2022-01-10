@@ -54,16 +54,17 @@ double weightedMacroscopicCrossSection(MonteCarlo* monteCarlo, int taskIndex, in
    double* precomputedCrossSection =
       &monteCarlo->domain[domainIndex].cell_state[cellIndex]._total[energyGroup];
    qs_assert (precomputedCrossSection != NULL);
-   assert(*precomputedCrossSection == device.domains[domainIndex].cellStates[cellIndex].totals[energyGroup]);
-   if (*precomputedCrossSection > 0.0)
-      return *precomputedCrossSection;
+   const double xs = device.domains[domainIndex].cellStates[cellIndex].totals[energyGroup];
+   assert(*precomputedCrossSection == xs);
+   if (xs > 0.0) return xs;
 
-   int globalMatIndex = monteCarlo->domain[domainIndex].cell_state[cellIndex]._material;
+   const int globalMatIndex = device.domains[domainIndex].cellStates[cellIndex].material;
+   assert(globalMatIndex == monteCarlo->domain[domainIndex].cell_state[cellIndex]._material);
    int nIsotopes = (int)monteCarlo->_materialDatabase->_mat[globalMatIndex]._iso.size();
    double sum = 0.0;
    for (int isoIndex = 0; isoIndex < nIsotopes; isoIndex++)
    {
-      sum += macroscopicCrossSection(monteCarlo->_device, -1, domainIndex, cellIndex,
+      sum += macroscopicCrossSection(device, -1, domainIndex, cellIndex,
                                      isoIndex, energyGroup);
    }
 
