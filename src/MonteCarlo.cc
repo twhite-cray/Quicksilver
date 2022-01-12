@@ -31,7 +31,7 @@ MonteCarlo::MonteCarlo(const Parameters& params)
         cudaMallocManaged( &ptr1, sizeof(Tallies), cudaMemAttachHost );
         cudaMallocManaged( &ptr2, sizeof(MC_Processor_Info), cudaMemAttachHost );
         cudaMallocManaged( &ptr3, sizeof(MC_Time_Info), cudaMemAttachHost );
-        cudaMallocManaged( &ptr4, sizeof(MC_Fast_Timer_Container) );
+        cudaMallocManaged( &ptr4, sizeof(MC_Fast_Timer_Container), cudaMemAttachGlobal );
 
         _tallies                = new(ptr1) Tallies( params.simulationParams.balanceTallyReplications, 
                                                      params.simulationParams.fluxTallyReplications,
@@ -98,7 +98,7 @@ MonteCarlo::MonteCarlo(const Parameters& params)
 
     #if defined(HAVE_UVM)
         void *ptr5, *ptr6;
-        cudaMallocManaged( &ptr5, sizeof(MC_Particle_Buffer) );
+        cudaMallocManaged( &ptr5, sizeof(MC_Particle_Buffer), cudaMemAttachGlobal );
         cudaMallocManaged( &ptr6, sizeof(ParticleVaultContainer), cudaMemAttachHost );
         particle_buffer         = new(ptr5) MC_Particle_Buffer(this, batch_size);
         _particleVaultContainer = new(ptr6) ParticleVaultContainer(batch_size, num_batches, num_extra_vaults);

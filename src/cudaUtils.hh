@@ -37,4 +37,19 @@ inline ExecutionPolicy getExecutionPolicy( int useGPU )
     }
     return execPolicy;
 }
+
+#ifdef HAVE_CUDA
+#include <cstdio>
+#include <cstdlib>
+__attribute__((unused))
+static void checkCuda(const cudaError_t err, const char *const file, const int line)
+{
+  if (err == cudaSuccess) return;
+  fprintf(stderr,"CUDA ERROR AT LINE %d OF FILE '%s': %s %s\n",line,file,cudaGetErrorName(err),cudaGetErrorString(err));
+  fflush(stderr);
+  exit(err);
+}
+#define CHECK(X) checkCuda(X,__FILE__,__LINE__)
+#endif
+
 #endif
