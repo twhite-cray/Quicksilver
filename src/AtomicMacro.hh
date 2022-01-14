@@ -1,3 +1,5 @@
+#pragma once
+
 //Determine which atomics to use based on platform being compiled for
 //
 //If compiling with CUDA
@@ -12,7 +14,7 @@
 #if defined (HAVE_CUDA)
 
     //If in a CUDA GPU section use the CUDA atomics
-    #ifdef  __CUDA_ARCH__
+    #if defined(__CUDA_ARCH__) || __HIP_DEVICE_COMPILE__
 
         //Currently not atomic here. But its only used when it does not necissarially need to be atomic.
         #define ATOMIC_WRITE( x, v ) \

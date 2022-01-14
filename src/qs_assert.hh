@@ -9,6 +9,8 @@
         printf("ERROR\n"); \
       } \
    } while(0)
+#elif __HIP_DEVICE_COMPILE__
+#define qs_assert( cond) { if (!(cond)) abort(); }
 #else
 #define qs_assert( cond)                        \
    do \

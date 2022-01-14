@@ -1,3 +1,4 @@
+#if !__HIP_DEVICE_COMPILE__
 #include "MC_SourceNow.hh"
 #include "QS_Vector.hh"
 #include <iostream>
@@ -23,7 +24,6 @@ namespace
 {
    double Get_Speed_From_Energy(double energy);
 }
-
 
 void MC_SourceNow(MonteCarlo *monteCarlo)
 {
@@ -176,3 +176,5 @@ namespace
                                    ((energy + rest_mass_energy) * (energy + rest_mass_energy)));
    }
 }
+
+#endif
