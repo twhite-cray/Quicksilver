@@ -1,6 +1,4 @@
 #include "ParticleVaultContainer.hh"
-#include "ParticleVault.hh"
-#include "SendQueue.hh"
 #include "MemoryControl.hh"
 #include "qs_assert.hh"
 
@@ -17,9 +15,7 @@ ParticleVaultContainer( uint64_t vault_size )
     _processedVault.reserve( vault_size );
     _processingVault.reserve( vault_size );
     _extraVault.reserve( vault_size );
-
-    _sendQueue = MemoryControl::allocate<SendQueue>(1 ,VAR_MEM);
-    _sendQueue->reserve( vault_size );
+    _sendQueue.reserve( vault_size );
 }
 
 //--------------------------------------------------------------
@@ -30,7 +26,6 @@ ParticleVaultContainer( uint64_t vault_size )
 ParticleVaultContainer::
 ~ParticleVaultContainer()
 {
-    MemoryControl::deallocate( _sendQueue, 1, VAR_MEM );
 }
 
 //--------------------------------------------------------------
@@ -41,7 +36,7 @@ HOST_DEVICE
 SendQueue* ParticleVaultContainer::
 getSendQueue()
 {
-    return this->_sendQueue;
+    return &(this->_sendQueue);
 }
 HOST_DEVICE_END
 

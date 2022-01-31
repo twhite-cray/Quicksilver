@@ -5,6 +5,7 @@
 
 #include "portability.hh"
 #include "ParticleVault.hh"
+#include "SendQueue.hh"
 
 //---------------------------------------------------------------
 // ParticleVaultContainer is a container of ParticleVaults. 
@@ -19,7 +20,6 @@
 
 class MC_Base_Particle;
 class MC_Particle;
-class SendQueue;
 
 typedef unsigned long long int uint64_cu;
 
@@ -71,7 +71,7 @@ class ParticleVaultContainer
 
     //The send queue - stores particle index and neighbor index 
     //for any particles that hit (TRANSIT_OFF_PROCESSOR) 
-    SendQueue *_sendQueue;
+    SendQueue _sendQueue;
 
     ParticleVault _processingVault;
     ParticleVault _processedVault;
