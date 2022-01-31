@@ -38,8 +38,6 @@ MonteCarlo::MonteCarlo(const Parameters& params)
 
     size_t num_processors = processor_info->num_processors;
     size_t num_particles  = params.simulationParams.nParticles;
-    size_t batch_size     = params.simulationParams.batchSize;
-    size_t num_batches    = params.simulationParams.nBatches;
 
     size_t num_particles_on_process = num_particles / num_processors;
 
@@ -47,15 +45,6 @@ MonteCarlo::MonteCarlo(const Parameters& params)
     {
         MC_Fatal_Jump( "Not enough particles for each process ( Ranks: %d Num Particles: %d ) \n", num_processors, num_particles ); 
         num_particles_on_process = 1;
-    }
-
-    if ( batch_size == 0 ) //batch size unset - use num_batches to get batch_size
-    {
-        batch_size = (num_particles_on_process / num_batches) + ((num_particles_on_process%num_batches == 0) ? 0 : 1) ;
-    }
-    else //batch size explicatly set - use to find num_batches
-    {
-        num_batches = num_particles_on_process / batch_size + (( num_particles_on_process%batch_size == 0 ) ? 0 : 1);
     }
 
     size_t vector_size = 0;
@@ -67,19 +56,19 @@ MonteCarlo::MonteCarlo(const Parameters& params)
         const MaterialParameters& mp = matIter->second;
         double nuBar = params.crossSectionParams.at(mp.fissionCrossSection).nuBar;
         size_t nb = ceil( nuBar );
-        size_t test_size = nb*( batch_size );
+        size_t test_size = nb*( num_particles_on_process );
 
         if ( test_size > vector_size )
             vector_size = test_size;
     }
     if ( vector_size == 0 )
-        vector_size = 2*batch_size;
+        vector_size = 2*num_particles_on_process;
 
-    int num_extra_vaults = ( vector_size / batch_size ) + 1;
+    int num_extra_vaults = ( vector_size / num_particles_on_process ) + 1;
     //Previous definition was not enough extra space for some reason? need to determine why still
 
-    particle_buffer         = new MC_Particle_Buffer(this, batch_size);
-    _particleVaultContainer = new ParticleVaultContainer(batch_size, num_batches, num_extra_vaults);
+    particle_buffer         = new MC_Particle_Buffer(this, num_particles_on_process);
+    _particleVaultContainer = new ParticleVaultContainer(num_particles_on_process, 1, num_extra_vaults);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -130,8 +130,6 @@ ostream& operator<<(ostream& out, const SimulationParameters& pp)
    out << "   ly: " << pp.ly << "\n";
    out << "   lz: " << pp.lz << "\n";
    out << "   nParticles: " << pp.nParticles << "\n";
-   out << "   batchSize: " << pp.batchSize << "\n";
-   out << "   nBatches: " << pp.nBatches << "\n";
    out << "   nSteps: " << pp.nSteps << "\n";
    out << "   nx: " << pp.nx << "\n";
    out << "   ny: " << pp.ny << "\n";
@@ -240,8 +238,6 @@ namespace
       addArg("ly",               'Y', 1, 'd', &(sp.ly),          0,      "y-size of simulation (cm)");
       addArg("lz",               'Z', 1, 'd', &(sp.lz),          0,      "z-size of simulation (cm)");
       addArg("nParticles",       'n', 1, 'u', &(sp.nParticles),  0,      "number of particles");
-      addArg("batchSize",        'g', 1, 'u', &(sp.batchSize),   0,      "number of particles in a vault/batch");
-      addArg("nBatches",         'b', 1, 'u', &(sp.nBatches),    0,      "number of vault/batch to start (sets batchSize automaticaly)");
       addArg("nSteps",           'N', 1, 'i', &(sp.nSteps),      0,      "number of time steps");
       addArg("nx",               'x', 1, 'i', &(sp.nx),          0,      "number of mesh elements in x");
       addArg("ny",               'y', 1, 'i', &(sp.ny),          0,      "number of mesh elements in y");
@@ -396,8 +392,6 @@ namespace
       input.getValue<double>("ly",          sp.ly);
       input.getValue<double>("lz",          sp.lz);
       input.getValue<uint64_t>("nParticles",  sp.nParticles);
-      input.getValue<uint64_t>("batchSize",  sp.batchSize);
-      input.getValue<uint64_t>("nBatches",  sp.nBatches);
       input.getValue<int>   ("nSteps",      sp.nSteps);
       input.getValue<int>   ("nx",          sp.nx);
       input.getValue<int>   ("ny",          sp.ny);

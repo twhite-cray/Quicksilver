@@ -105,8 +105,6 @@ struct SimulationParameters
      cycleTimers(0),
      debugThreads(0),
      nParticles(1000000), // 10^6
-     batchSize(0), // default to use nBatches
-     nBatches(10),
      nSteps(10),
      nx(10), //speed up early testing
      ny(10),
@@ -141,8 +139,6 @@ struct SimulationParameters
    int cycleTimers;              //!< enable or disable cycle timers 
    int debugThreads;             //!< enable or disable thread debugging lines
    uint64_t nParticles;          //!< number of particles
-   uint64_t batchSize;           //!< number of particles in a batch
-   uint64_t nBatches;            //!< number of batches to start
    int nSteps;                   //!< number of time steps
    int nx;                       //!< number of mesh elements in x-direction
    int ny;                       //!< number of mesh elements in y-direction
