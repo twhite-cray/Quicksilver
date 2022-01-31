@@ -68,7 +68,9 @@ MonteCarlo::MonteCarlo(const Parameters& params)
     //Previous definition was not enough extra space for some reason? need to determine why still
 
     particle_buffer         = new MC_Particle_Buffer(this, num_particles_on_process);
-    _particleVaultContainer = new ParticleVaultContainer(num_particles_on_process, 1, num_extra_vaults);
+    constexpr float fudge = 1.5;
+    const long vault_size = fudge * num_particles_on_process;
+    _particleVaultContainer = new ParticleVaultContainer(vault_size, 1, num_extra_vaults);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

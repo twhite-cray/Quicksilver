@@ -89,6 +89,7 @@ pushParticle(MC_Particle &particle)
 {
     MC_Base_Particle base_particle(particle);
     size_t indx = _particles.atomic_Index_Inc(1);
+    assert(indx < _particles.size());
     _particles[indx] = base_particle;
 }
 

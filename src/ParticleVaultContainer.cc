@@ -21,7 +21,6 @@ ParticleVaultContainer( uint64_t vault_size,
   _processedVault ( num_vaults       ),
   _extraVault     ( num_extra_vaults, VAR_MEM )
 {
-
     //Allocate and reserve space for particles for each vault
     for( uint64_t vault = 0; vault < num_vaults; vault++ )
     {
@@ -111,6 +110,7 @@ getTaskProcessedVault(uint64_t vaultIndex)
 uint64_t ParticleVaultContainer::
 getFirstEmptyProcessedVault()
 {
+    return 0;
     uint64_t index = 0;
 
     while( _processedVault[index]->size() != 0 )
@@ -121,9 +121,9 @@ getFirstEmptyProcessedVault()
             ParticleVault* vault = MemoryControl::allocate<ParticleVault>(1,VAR_MEM);
             vault->reserve( _vaultSize );
             this->_processedVault.push_back(vault);
+            printf("TREY getFirstEmptyProcessedVault _processedVault %lu %lu\n",this->_processedVault.size(),index);
         }
     }
-
     return index;
 }
 
@@ -285,15 +285,16 @@ swapProcessingProcessedVaults()
 
     while( need_to_swap )
     {
-        std::swap( this->_processedVault[processed_vault], this->_processingVault[processed_vault] );
-        processed_vault++;
-
         if( processed_vault == this->_processingVault.size() )
         {
             ParticleVault* vault = MemoryControl::allocate<ParticleVault>(1,VAR_MEM);
             vault->reserve( _vaultSize );
             this->_processingVault.push_back(vault);
+            printf("TREY swapProcessingProcessedVaults _processingVault %lu\n",this->_processingVault.size());
         }
+
+        std::swap( this->_processedVault[processed_vault], this->_processingVault[processed_vault] );
+        processed_vault++;
 
         if( processed_vault < this->_processedVault.size() )
         {
@@ -323,6 +324,7 @@ addProcessingParticle( MC_Base_Particle &particle, uint64_t &fill_vault_index )
            ParticleVault* vault = MemoryControl::allocate<ParticleVault>(1,VAR_MEM);
            vault->reserve( this->_vaultSize );
            _processingVault.push_back(vault);
+           printf("TREY addProcessingParticle _processingVault %lu\n",this->_processingVault.size());
         }
         space = ( _processingVault[fill_vault_index]->size() < this->_vaultSize );
     }
@@ -375,6 +377,7 @@ cleanExtraVaults()
                     ParticleVault* vault = MemoryControl::allocate<ParticleVault>(1,VAR_MEM);
                     vault->reserve( _vaultSize );
                     this->_processingVault.push_back(vault);
+                    printf("TREY cleanExtraVaults _processingVault %lu\n",this->_processingVault.size());
                 }
                 else
                 {
