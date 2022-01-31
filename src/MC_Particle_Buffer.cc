@@ -255,7 +255,7 @@ void MC_Particle_Buffer::Initialize_Map()
 //----------------------------------------------------------------------------------------------------------------------
 //  Unpack a particle buffer that was just received.
 //----------------------------------------------------------------------------------------------------------------------
-void MC_Particle_Buffer::Unpack_Particle_Buffer(int buffer_index, uint64_t &fill_vault)
+void MC_Particle_Buffer::Unpack_Particle_Buffer(int buffer_index)
 {
     MC_Base_Particle base_particle;
 
@@ -286,7 +286,7 @@ void MC_Particle_Buffer::Unpack_Particle_Buffer(int buffer_index, uint64_t &fill
 
         base_particle.last_event = MC_Tally_Event::Facet_Crossing_Communication;
 
-        mcco->_particleVaultContainer->addProcessingParticle(base_particle, fill_vault);
+        mcco->_particleVaultContainer->addProcessingParticle(base_particle);
     }
 }
 
@@ -520,7 +520,7 @@ void MC_Particle_Buffer::Post_Receive_Particle_Buffer( size_t bufferSize_ )
 //----------------------------------------------------------------------------------------------------------------------
 //  Receives a particle buffer and puts the particles in it into particle vault to be processed.
 //----------------------------------------------------------------------------------------------------------------------
-void MC_Particle_Buffer::Receive_Particle_Buffers(uint64_t &fill_vault)
+void MC_Particle_Buffer::Receive_Particle_Buffers()
 {
     for ( int buffer_index = 0; buffer_index < this->num_buffers; buffer_index++ )
     {
@@ -528,7 +528,7 @@ void MC_Particle_Buffer::Receive_Particle_Buffers(uint64_t &fill_vault)
         int flag = MCP_Test(&recv_buffer.request_list);
         if( flag )
         {
-            this->Unpack_Particle_Buffer(buffer_index, fill_vault);
+            this->Unpack_Particle_Buffer(buffer_index);
 
             // Reset the number of particles.
             recv_buffer.num_particles = 0;

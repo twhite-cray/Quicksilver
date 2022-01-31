@@ -39,12 +39,9 @@ class ParticleVaultContainer
     //Basic Getters
     uint64_t getVaultSize(){      return _vaultSize; }
 
-    uint64_t processingSize(){ return _processingVault.size(); }
     uint64_t processedSize(){ return _processedVault.size(); }
 
-    //Returns the ParticleVault that is currently pointed too 
-    //by index listed
-    ParticleVault* getTaskProcessingVault(uint64_t vaultIndex);
+    ParticleVault *getTaskProcessingVault() { return &_processingVault; }
     ParticleVault* getTaskProcessedVault( uint64_t vaultIndex);
 
     //Returns the index to the first empty Processed Vault
@@ -56,13 +53,12 @@ class ParticleVaultContainer
     HOST_DEVICE_END
 
     //Counts Particles in all vaults
-    uint64_t sizeProcessing();
+    uint64_t sizeProcessing() const { return _processingVault.size(); }
     uint64_t sizeProcessed();
 
     //Collapses Particles down into lowest amount of vaults as 
     //needed to hold them removes all but the last parially 
     //filled vault
-    void collapseProcessing();
     void collapseProcessed();
 
     //Swaps the particles in Processed for the empty vaults in 
@@ -70,7 +66,7 @@ class ParticleVaultContainer
     void swapProcessingProcessedVaults();
 
     //Adds a particle to the processing particle vault
-    void addProcessingParticle( MC_Base_Particle &particle, uint64_t &fill_vault_index );
+    void addProcessingParticle( MC_Base_Particle &particle );
     //Adds a particle to the extra particle vault
     HOST_DEVICE
     void addExtraParticle( MC_Particle &particle );
@@ -90,8 +86,7 @@ class ParticleVaultContainer
     //for any particles that hit (TRANSIT_OFF_PROCESSOR) 
     SendQueue *_sendQueue;
 
-    //The list of active particle vaults (size - grow-able)
-    std::vector<ParticleVault*> _processingVault;
+    ParticleVault _processingVault;
 
     //The list of censused particle vaults (size - grow-able)
     std::vector<ParticleVault*> _processedVault;

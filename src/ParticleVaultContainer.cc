@@ -14,23 +14,18 @@ ParticleVaultContainer::
 ParticleVaultContainer( uint64_t vault_size, 
                         uint64_t num_vaults )
 : _vaultSize      ( vault_size       ),
-  _processingVault( num_vaults       ),
   _processedVault ( num_vaults       )
 {
     //Allocate and reserve space for particles for each vault
     for( uint64_t vault = 0; vault < num_vaults; vault++ )
     {
-        //Allocate Processing Vault
-        _processingVault[vault] = 
-            MemoryControl::allocate<ParticleVault>(1 ,VAR_MEM);
-        _processingVault[vault]->reserve( vault_size );
-
         //Allocate Processed Vault
         _processedVault[vault]  = 
             MemoryControl::allocate<ParticleVault>(1 ,VAR_MEM);
         _processedVault[vault]->reserve( vault_size );
     }
 
+    _processingVault.reserve( vault_size );
     _extraVault.reserve( vault_size );
 
     _sendQueue = MemoryControl::allocate<SendQueue>(1 ,VAR_MEM);
@@ -45,29 +40,11 @@ ParticleVaultContainer( uint64_t vault_size,
 ParticleVaultContainer::
 ~ParticleVaultContainer()
 {
-    for( int64_t ii = _processingVault.size()-1; ii >= 0; ii-- )
-    {
-        MemoryControl::deallocate(_processingVault[ii], 1, VAR_MEM);
-    }
     for( int64_t jj = _processedVault.size()-1; jj >= 0; jj-- )
     {
         MemoryControl::deallocate(_processedVault[jj], 1, VAR_MEM);
     }
     MemoryControl::deallocate( _sendQueue, 1, VAR_MEM );
-}
-
-//--------------------------------------------------------------
-//------------getTaskProcessingVault----------------------------
-//Returns a pointer to the Particle Vault in the processing list
-//at the index provided
-//--------------------------------------------------------------
-
-ParticleVault* ParticleVaultContainer::
-getTaskProcessingVault(uint64_t vaultIndex)
-{
-//   qs_assert(vaultIndex >= 0);
-//   qs_assert(vaultIndex < _processingVault.size());
-   return _processingVault[vaultIndex];
 }
 
 //--------------------------------------------------------------
@@ -123,22 +100,6 @@ getSendQueue()
 HOST_DEVICE_END
 
 //--------------------------------------------------------------
-//------------sizeProcessing------------------------------------
-//returns the total number of particles in the processing vault
-//--------------------------------------------------------------
-
-uint64_t ParticleVaultContainer::
-sizeProcessing()
-{
-    uint64_t sum_size = 0;
-    for( uint64_t vault = 0; vault < _processingVault.size(); vault++ )
-    {
-        sum_size += _processingVault[vault]->size();
-    }
-    return sum_size;
-}
-
-//--------------------------------------------------------------
 //------------sizeProcessed-------------------------------------
 //returns the total number of particles in the processed vault
 //--------------------------------------------------------------
@@ -152,43 +113,6 @@ sizeProcessed()
         sum_size += _processedVault[vault]->size();
     }
     return sum_size;
-}
-
-
-//--------------------------------------------------------------
-//------------collapseProcessing--------------------------------
-//Collapses the particles in the processing vault down to the
-//first vaults needed to hold that number of particles
-//--------------------------------------------------------------
-
-void ParticleVaultContainer::
-collapseProcessing()
-{
-    uint64_t num_vaults = this->_processingVault.size();
-
-    uint64_t fill_vault_index = 0;
-    uint64_t from_vault_index = num_vaults-1;
-
-    while( fill_vault_index < from_vault_index )
-    {
-        if( _processingVault[fill_vault_index]->size() == this->_vaultSize )
-        {
-            fill_vault_index++;
-        }
-        else
-        {
-            if( this->_processingVault[from_vault_index]->size() == 0 )
-            {
-                from_vault_index--;
-            }
-            else
-            {
-                uint64_t fill_size = this->_vaultSize - this->_processingVault[fill_vault_index]->size();
-
-                this->_processingVault[fill_vault_index]->collapse( fill_size, this->_processingVault[from_vault_index] );
-            }
-        }
-    }
 }
 
 //--------------------------------------------------------------
@@ -241,36 +165,9 @@ collapseProcessed()
 void ParticleVaultContainer::
 swapProcessingProcessedVaults()
 {
-    //Collapse Processed Vault to insure the particles are all
-    //in the front of the list
-    this->collapseProcessed();
-
-    //start swapping from the beginning
-    uint64_t processed_vault = 0;
-
-    bool need_to_swap = (this->_processedVault[processed_vault]->size() > 0);
-
-    while( need_to_swap )
-    {
-        if( processed_vault == this->_processingVault.size() )
-        {
-            ParticleVault* vault = MemoryControl::allocate<ParticleVault>(1,VAR_MEM);
-            vault->reserve( _vaultSize );
-            this->_processingVault.push_back(vault);
-            printf("TREY swapProcessingProcessedVaults _processingVault %lu\n",this->_processingVault.size());
-        }
-
-        std::swap( this->_processedVault[processed_vault], this->_processingVault[processed_vault] );
-        processed_vault++;
-
-        if( processed_vault < this->_processedVault.size() )
-        {
-            need_to_swap = (this->_processedVault[processed_vault]->size() > 0);
-        }
-        else
-        {
-            need_to_swap = false;
-        }
+    assert(this->_processedVault.size() == 1);
+    if (this->_processedVault[0]->size() > 0) {
+      std::swap(this->_processingVault, *(this->_processedVault[0]));
     }
 }
 
@@ -280,22 +177,9 @@ swapProcessingProcessedVaults()
 //--------------------------------------------------------------
 
 void ParticleVaultContainer::
-addProcessingParticle( MC_Base_Particle &particle, uint64_t &fill_vault_index )
+addProcessingParticle( MC_Base_Particle &particle )
 {
-    bool space = ( _processingVault[fill_vault_index]->size() < this->_vaultSize );
-    while( !space )
-    {
-        fill_vault_index++;
-        if( !(fill_vault_index < _processingVault.size()) )
-        {
-           ParticleVault* vault = MemoryControl::allocate<ParticleVault>(1,VAR_MEM);
-           vault->reserve( this->_vaultSize );
-           _processingVault.push_back(vault);
-           printf("TREY addProcessingParticle _processingVault %lu\n",this->_processingVault.size());
-        }
-        space = ( _processingVault[fill_vault_index]->size() < this->_vaultSize );
-    }
-    _processingVault[fill_vault_index]->pushBaseParticle(particle);
+    _processingVault.pushBaseParticle(particle);
 }
 
 //--------------------------------------------------------------
@@ -322,9 +206,9 @@ cleanExtraVault()
   uint64_t size_extra = this->_extraVault.size();
   if( size_extra > 0 )
   {
-    uint64_t fill_size = this->_vaultSize - this->_processingVault[0]->size();
+    const uint64_t fill_size = this->_vaultSize - this->_processingVault.size();
     assert(size_extra < fill_size);
-    this->_processingVault[0]->collapse( fill_size, &(this->_extraVault) );
+    this->_processingVault.collapse( fill_size, &(this->_extraVault) );
   }
 }
 

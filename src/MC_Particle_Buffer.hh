@@ -110,7 +110,7 @@ class MC_Particle_Buffer
 
     void Instantiate();
     void Initialize_Map();
-    void Unpack_Particle_Buffer(int buffer_index, uint64_t &fill_vault);
+    void Unpack_Particle_Buffer(int buffer_index);
     bool Trivially_Done();
     void Delete_Completed_Extra_Send_Buffers();
 
@@ -133,7 +133,7 @@ class MC_Particle_Buffer
     void Send_Particle_Buffers();
     void Send_Particle_Buffer(int buffer);
     void Post_Receive_Particle_Buffer(size_t batchSize_ );
-    void Receive_Particle_Buffers(uint64_t &fill_vault);
+    void Receive_Particle_Buffers();
     void Cancel_Receive_Buffer_Requests();
 
     bool Test_Done_New( MC_New_Test_Done_Method::Enum test_done_method = MC_New_Test_Done_Method::Blocking);

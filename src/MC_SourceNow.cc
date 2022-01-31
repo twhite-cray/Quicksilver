@@ -62,9 +62,6 @@ void MC_SourceNow(MonteCarlo *monteCarlo)
     // Store the source particle weight for later use.
     monteCarlo->source_particle_weight = source_particle_weight;
 
-    uint64_t vault_size       = monteCarlo->_particleVaultContainer->getVaultSize();
-    uint64_t processing_index = monteCarlo->_particleVaultContainer->sizeProcessing() / vault_size;
-
     uint64_t task_index = 0;
     uint64_t particle_count = 0;
 
@@ -123,7 +120,7 @@ void MC_SourceNow(MonteCarlo *monteCarlo)
 
                 MC_Base_Particle base_particle( particle );
 
-                monteCarlo->_particleVaultContainer->addProcessingParticle( base_particle, processing_index );
+                monteCarlo->_particleVaultContainer->addProcessingParticle( base_particle );
 
                 particle_count++;
 

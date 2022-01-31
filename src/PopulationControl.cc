@@ -60,8 +60,6 @@ void PopulationControl(MonteCarlo* monteCarlo, bool loadBalance)
     if (splitRRFactor != 1.0)  // no need to split if population is already correct.
         PopulationControlGuts(splitRRFactor, localNumParticles, monteCarlo->_particleVaultContainer, taskBalance);
 
-    monteCarlo->_particleVaultContainer->collapseProcessing();
-
     return;
 }
 
@@ -71,17 +69,12 @@ namespace
 void PopulationControlGuts(const double splitRRFactor, uint64_t currentNumParticles, ParticleVaultContainer* my_particle_vault, Balance& taskBalance)
 {
     uint64_t vault_size = my_particle_vault->getVaultSize();
-    uint64_t fill_vault_index = currentNumParticles / vault_size;
+    assert(currentNumParticles < vault_size);
+    ParticleVault& taskProcessingVault = *( my_particle_vault->getTaskProcessingVault() );
 
     // March backwards through the vault so killed particles doesn't mess up the indexing
-    for (int particleIndex = currentNumParticles-1; particleIndex >= 0; particleIndex--)
+    for (int taskParticleIndex = currentNumParticles-1; taskParticleIndex >= 0; taskParticleIndex--)
     {
-        uint64_t vault_index = particleIndex / vault_size; 
-
-        ParticleVault& taskProcessingVault = *( my_particle_vault->getTaskProcessingVault(vault_index) );
-
-        uint64_t taskParticleIndex = particleIndex%vault_size;
-
         MC_Base_Particle &currentParticle = taskProcessingVault[taskParticleIndex];
         double randomNumber = rngSample(&currentParticle.random_number_seed);
         if (splitRRFactor < 1)
@@ -114,7 +107,7 @@ void PopulationControlGuts(const double splitRRFactor, uint64_t currentNumPartic
 			        &currentParticle.random_number_seed);
 	            splitParticle.identifier = splitParticle.random_number_seed;
 
-                my_particle_vault->addProcessingParticle( splitParticle, fill_vault_index );
+                my_particle_vault->addProcessingParticle( splitParticle );
 
 	        }
         }
@@ -144,9 +137,8 @@ void RouletteLowWeightParticles(MonteCarlo* monteCarlo)
 
 	    for ( int64_t particleIndex = currentNumParticles-1; particleIndex >= 0; particleIndex--)
 	    {
-            uint64_t vault_index = particleIndex / vault_size; 
 
-            ParticleVault& taskProcessingVault = *(monteCarlo->_particleVaultContainer->getTaskProcessingVault(vault_index));
+            ParticleVault& taskProcessingVault = *(monteCarlo->_particleVaultContainer->getTaskProcessingVault());
             uint64_t taskParticleIndex = particleIndex%vault_size;
 	        MC_Base_Particle &currentParticle = taskProcessingVault[taskParticleIndex];
 
@@ -166,6 +158,5 @@ void RouletteLowWeightParticles(MonteCarlo* monteCarlo)
 	            } 
 	        }
 	    }
-        monteCarlo->_particleVaultContainer->collapseProcessing();
     }
 }
