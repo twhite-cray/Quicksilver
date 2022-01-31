@@ -138,10 +138,9 @@ void cycleTracking(MonteCarlo *monteCarlo)
         while ( !done )
         {
             MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking_Kernel);
-            uint64_t processed_vault = my_particle_vault.getFirstEmptyProcessedVault();
 
             ParticleVault *processingVault = my_particle_vault.getTaskProcessingVault();
-            ParticleVault *processedVault =  my_particle_vault.getTaskProcessedVault(processed_vault);
+            ParticleVault *processedVault =  my_particle_vault.getTaskProcessedVault();
 
             int numParticles = processingVault->size();
 
@@ -215,11 +214,6 @@ void cycleTracking(MonteCarlo *monteCarlo)
             MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking_MPI);
 
             MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking_MPI);
-
-            NVTX_Range collapseRange("cycleTracking_Collapse_ProcessingandProcessed");
-            my_particle_vault.collapseProcessed();
-            collapseRange.endRange();
-
 
             //Test for done - blocking on all MPI ranks
             NVTX_Range doneRange("cycleTracking_Test_Done_New");
