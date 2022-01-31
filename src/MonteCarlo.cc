@@ -47,30 +47,11 @@ MonteCarlo::MonteCarlo(const Parameters& params)
         num_particles_on_process = 1;
     }
 
-    size_t vector_size = 0;
-
-    for (auto matIter  = params.materialParams.begin(); 
-              matIter != params.materialParams.end(); 
-              matIter++)
-    {
-        const MaterialParameters& mp = matIter->second;
-        double nuBar = params.crossSectionParams.at(mp.fissionCrossSection).nuBar;
-        size_t nb = ceil( nuBar );
-        size_t test_size = nb*( num_particles_on_process );
-
-        if ( test_size > vector_size )
-            vector_size = test_size;
-    }
-    if ( vector_size == 0 )
-        vector_size = 2*num_particles_on_process;
-
-    int num_extra_vaults = ( vector_size / num_particles_on_process ) + 1;
-    //Previous definition was not enough extra space for some reason? need to determine why still
-
     particle_buffer         = new MC_Particle_Buffer(this, num_particles_on_process);
+
     constexpr float fudge = 1.5;
     const long vault_size = fudge * num_particles_on_process;
-    _particleVaultContainer = new ParticleVaultContainer(vault_size, 1, num_extra_vaults);
+    _particleVaultContainer = new ParticleVaultContainer(vault_size, 1);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

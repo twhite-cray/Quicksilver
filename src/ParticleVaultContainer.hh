@@ -4,6 +4,7 @@
 #include "DeclareMacro.hh"
 
 #include "portability.hh"
+#include "ParticleVault.hh"
 #include "QS_Vector.hh"
 #include <vector>
 
@@ -20,7 +21,6 @@
 
 class MC_Base_Particle;
 class MC_Particle;
-class ParticleVault;
 class SendQueue;
 
 typedef unsigned long long int uint64_cu;
@@ -31,14 +31,13 @@ class ParticleVaultContainer
     
     //Constructor
     ParticleVaultContainer( uint64_t vault_size, 
-        uint64_t num_vaults, uint64_t num_extra_vaults );
+        uint64_t num_vaults );
 
     //Destructor
     ~ParticleVaultContainer();
 
     //Basic Getters
     uint64_t getVaultSize(){      return _vaultSize; }
-    uint64_t getNumExtraVaults(){ return _numExtraVaults; }
 
     uint64_t processingSize(){ return _processingVault.size(); }
     uint64_t processedSize(){ return _processedVault.size(); }
@@ -59,7 +58,6 @@ class ParticleVaultContainer
     //Counts Particles in all vaults
     uint64_t sizeProcessing();
     uint64_t sizeProcessed();
-    uint64_t sizeExtra();
 
     //Collapses Particles down into lowest amount of vaults as 
     //needed to hold them removes all but the last parially 
@@ -78,23 +76,15 @@ class ParticleVaultContainer
     void addExtraParticle( MC_Particle &particle );
     HOST_DEVICE_END
  
-    //Pushes particles from Extra Vaults onto the Processing 
+    //Pushes particles from Extra Vault onto the Processing 
     //Vault list
-    void cleanExtraVaults();
+    void cleanExtraVault();
 
   private:
     
     //The Size of the ParticleVaults (fixed at runtime for 
     //each run)
     uint64_t _vaultSize;
-
-    //The number of Extra Vaults needed based on hueristics 
-    //(fixed at runtime for each run)
-    uint64_t _numExtraVaults;
-
-    //A running index for the number of particles int the extra 
-    //particle vaults
-    uint64_cu _extraVaultIndex;
 
     //The send queue - stores particle index and neighbor index 
     //for any particles that hit (TRANSIT_OFF_PROCESSOR) 
@@ -106,9 +96,7 @@ class ParticleVaultContainer
     //The list of censused particle vaults (size - grow-able)
     std::vector<ParticleVault*> _processedVault;
 
-    //The list of extra particle vaults (size - fixed)
-    qs_vector<ParticleVault*>   _extraVault;
-     
+    ParticleVault _extraVault;
 };
 
 #endif

@@ -12,14 +12,10 @@
 
 ParticleVaultContainer::
 ParticleVaultContainer( uint64_t vault_size, 
-                        uint64_t num_vaults, 
-                        uint64_t num_extra_vaults )
+                        uint64_t num_vaults )
 : _vaultSize      ( vault_size       ),
-  _numExtraVaults ( num_extra_vaults ),
-  _extraVaultIndex( 0                ),
   _processingVault( num_vaults       ),
-  _processedVault ( num_vaults       ),
-  _extraVault     ( num_extra_vaults, VAR_MEM )
+  _processedVault ( num_vaults       )
 {
     //Allocate and reserve space for particles for each vault
     for( uint64_t vault = 0; vault < num_vaults; vault++ )
@@ -35,16 +31,7 @@ ParticleVaultContainer( uint64_t vault_size,
         _processedVault[vault]->reserve( vault_size );
     }
 
-    //Allocate and reserve space for particles for each extra vault
-    for( uint64_t e_vault = 0; 
-                  e_vault < num_extra_vaults; 
-                  e_vault++ )
-    {
-        //Allocate Extra Vault
-        _extraVault[e_vault] = 
-            MemoryControl::allocate<ParticleVault>(1 ,VAR_MEM);
-        _extraVault[e_vault]->reserve( vault_size );
-    }
+    _extraVault.reserve( vault_size );
 
     _sendQueue = MemoryControl::allocate<SendQueue>(1 ,VAR_MEM);
     _sendQueue->reserve( vault_size );
@@ -65,10 +52,6 @@ ParticleVaultContainer::
     for( int64_t jj = _processedVault.size()-1; jj >= 0; jj-- )
     {
         MemoryControl::deallocate(_processedVault[jj], 1, VAR_MEM);
-    }
-    for( int64_t ii = _extraVault.size()-1; ii >= 0; ii-- )
-    {
-        MemoryControl::deallocate(_extraVault[ii], 1, VAR_MEM);
     }
     MemoryControl::deallocate( _sendQueue, 1, VAR_MEM );
 }
@@ -171,22 +154,6 @@ sizeProcessed()
     return sum_size;
 }
 
-
-//--------------------------------------------------------------
-//------------sizeExtra-----------------------------------------
-//returns the total number of particles in the extra vault
-//--------------------------------------------------------------
-
-uint64_t ParticleVaultContainer::
-sizeExtra()
-{
-    uint64_t sum_size = 0;
-    for( uint64_t vault = 0; vault < _extraVault.size(); vault++ )
-    {
-        sum_size += _extraVault[vault]->size();
-    }
-    return sum_size;
-}
 
 //--------------------------------------------------------------
 //------------collapseProcessing--------------------------------
@@ -339,62 +306,25 @@ HOST_DEVICE
 void ParticleVaultContainer::
 addExtraParticle( MC_Particle &particle)
 {
-    uint64_cu index = 0;
-    ATOMIC_CAPTURE( this->_extraVaultIndex, 1, index ); 
-    uint64_t vault = index / this->_vaultSize;
-    _extraVault[vault]->pushParticle( particle );
+    _extraVault.pushParticle( particle );
 }
 HOST_DEVICE_END
 
 //--------------------------------------------------------------
-//------------cleanExtraVaults----------------------------------
+//------------cleanExtraVault----------------------------------
 //Moves the particles from the _extraVault into the 
 //_processedVault
 //--------------------------------------------------------------
 
 void ParticleVaultContainer::
-cleanExtraVaults()
+cleanExtraVault()
 {
-    uint64_t size_extra = this->sizeExtra();
-    if( size_extra > 0 )
-    {
-        uint64_t num_extra  = (size_extra / this->_vaultSize) + ((size_extra%this->_vaultSize == 0) ? 0 : 1);
-
-        uint64_t extra_index      = 0;
-        uint64_t processing_index = 0;
-
-        while( extra_index < num_extra )
-        {
-
-            if( this->_extraVault[extra_index]->size() == 0 )
-            {
-                extra_index++;
-            }
-            else
-            {
-                if( processing_index == this->_processingVault.size() )
-                {
-                    ParticleVault* vault = MemoryControl::allocate<ParticleVault>(1,VAR_MEM);
-                    vault->reserve( _vaultSize );
-                    this->_processingVault.push_back(vault);
-                    printf("TREY cleanExtraVaults _processingVault %lu\n",this->_processingVault.size());
-                }
-                else
-                {
-                    if( this->_processingVault[processing_index]->size() == this->_vaultSize )
-                    {
-                        processing_index++;
-                    }
-                    else
-                    {
-                        uint64_t fill_size = this->_vaultSize - this->_processingVault[processing_index]->size();
-
-                        this->_processingVault[processing_index]->collapse( fill_size, this->_extraVault[extra_index] );
-                    }
-                }
-            }
-        }
-    }
-    _extraVaultIndex = 0;
+  uint64_t size_extra = this->_extraVault.size();
+  if( size_extra > 0 )
+  {
+    uint64_t fill_size = this->_vaultSize - this->_processingVault[0]->size();
+    assert(size_extra < fill_size);
+    this->_processingVault[0]->collapse( fill_size, &(this->_extraVault) );
+  }
 }
 

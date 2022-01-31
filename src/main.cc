@@ -213,8 +213,8 @@ void cycleTracking(MonteCarlo *monteCarlo)
                 processingVault->clear(); //remove the invalid particles
                 sendQueue.clear();
 
-                // Move particles in "extra" vaults into the regular vaults.
-                my_particle_vault.cleanExtraVaults();
+                // Move particles in "extra" vault into the regular vaults.
+                my_particle_vault.cleanExtraVault();
 
                 // receive any particles that have arrived from other ranks
                 monteCarlo->particle_buffer->Receive_Particle_Buffers( fill_vault );
