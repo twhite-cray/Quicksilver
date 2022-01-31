@@ -99,8 +99,6 @@ void cycleInit( bool loadBalance )
 
     mcco->_particleVaultContainer->swapProcessingProcessedVaults();
 
-    mcco->_particleVaultContainer->collapseProcessed();
-
     mcco->_tallies->_balanceTask[0]._start = mcco->_particleVaultContainer->sizeProcessing();
 
     mcco->particle_buffer->Initialize();

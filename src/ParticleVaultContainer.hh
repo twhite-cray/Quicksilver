@@ -5,8 +5,6 @@
 
 #include "portability.hh"
 #include "ParticleVault.hh"
-#include "QS_Vector.hh"
-#include <vector>
 
 //---------------------------------------------------------------
 // ParticleVaultContainer is a container of ParticleVaults. 
@@ -30,8 +28,7 @@ class ParticleVaultContainer
   public:
     
     //Constructor
-    ParticleVaultContainer( uint64_t vault_size, 
-        uint64_t num_vaults );
+    ParticleVaultContainer( uint64_t vault_size );
 
     //Destructor
     ~ParticleVaultContainer();
@@ -39,13 +36,8 @@ class ParticleVaultContainer
     //Basic Getters
     uint64_t getVaultSize(){      return _vaultSize; }
 
-    uint64_t processedSize(){ return _processedVault.size(); }
-
     ParticleVault *getTaskProcessingVault() { return &_processingVault; }
-    ParticleVault* getTaskProcessedVault( uint64_t vaultIndex);
-
-    //Returns the index to the first empty Processed Vault
-    uint64_t getFirstEmptyProcessedVault();
+    ParticleVault *getTaskProcessedVault() { return &_processedVault; }
 
     //Returns a pointer to the Send Queue
     HOST_DEVICE
@@ -54,12 +46,7 @@ class ParticleVaultContainer
 
     //Counts Particles in all vaults
     uint64_t sizeProcessing() const { return _processingVault.size(); }
-    uint64_t sizeProcessed();
-
-    //Collapses Particles down into lowest amount of vaults as 
-    //needed to hold them removes all but the last parially 
-    //filled vault
-    void collapseProcessed();
+    uint64_t sizeProcessed() const { return _processedVault.size(); }
 
     //Swaps the particles in Processed for the empty vaults in 
     //Processing
@@ -87,10 +74,7 @@ class ParticleVaultContainer
     SendQueue *_sendQueue;
 
     ParticleVault _processingVault;
-
-    //The list of censused particle vaults (size - grow-able)
-    std::vector<ParticleVault*> _processedVault;
-
+    ParticleVault _processedVault;
     ParticleVault _extraVault;
 };
 

@@ -20,15 +20,12 @@ void EnergySpectrum::UpdateSpectrum(MonteCarlo* monteCarlo)
       MC_Load_Particle(monteCarlo, mc_particle, processing, jj);
       _censusEnergySpectrum[mc_particle.energy_group]++;
     }
-    for( uint64_t ii = 0; ii < monteCarlo->_particleVaultContainer->processedSize(); ii++)
+    ParticleVault* processed = monteCarlo->_particleVaultContainer->getTaskProcessedVault();
+    for( uint64_t jj = 0; jj < processed->size(); jj++ )
     {
-        ParticleVault* processed = monteCarlo->_particleVaultContainer->getTaskProcessedVault( ii );
-        for( uint64_t jj = 0; jj < processed->size(); jj++ )
-        {
-            MC_Particle mc_particle;
-            MC_Load_Particle(monteCarlo, mc_particle, processed, jj);
-            _censusEnergySpectrum[mc_particle.energy_group]++;
-        }
+      MC_Particle mc_particle;
+      MC_Load_Particle(monteCarlo, mc_particle, processed, jj);
+      _censusEnergySpectrum[mc_particle.energy_group]++;
     }
 }
 
