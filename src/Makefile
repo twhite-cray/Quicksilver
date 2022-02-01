@@ -293,6 +293,7 @@ SOURCES= \
     MC_SourceNow.cc \
     MacroscopicCrossSection.cc \
     MeshPartition.cc \
+    Messages.cc \
     MonteCarlo.cc \
     MpiCommObject.cc \
     NuclearData.cc \

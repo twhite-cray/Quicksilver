@@ -106,7 +106,6 @@ class MC_Particle_Buffer
     MonteCarlo *mcco;
     mcp_test_done_class          test_done;
     particle_buffer_task_class  *task;                 // buffers for each task
-    std::map<int, int>    processor_buffer_map; // Map processors to buffers. buffer_index = processor_buffer_map[processor]
 
     void Instantiate();
     void Initialize_Map();
@@ -119,6 +118,7 @@ class MC_Particle_Buffer
     // non-master threads place full buffers here for master thread to send
     // std::list<particle_buffer_base_type> thread_send_buffer_queue;
 
+    std::map<int, int>    processor_buffer_map; // Map processors to buffers. buffer_index = processor_buffer_map[processor]
     MC_New_Test_Done_Method::Enum new_test_done_method; // which algorithm to use
     int  num_buffers;         // Number of particle buffers
     int  buffer_size;         // Buffer size to be sent.
