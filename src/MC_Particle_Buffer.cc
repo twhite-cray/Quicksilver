@@ -15,10 +15,6 @@
 
 static const int MC_Tag_Particle_Buffer = 2300;
 
-// Static declarations
-static std::map<int, int> send_count;
-static std::map<int, int> recv_count;
-
 //----------------------------------------------------------------------------------------------------------------------
 //  Cancels and frees a pending request.
 //----------------------------------------------------------------------------------------------------------------------
@@ -144,22 +140,9 @@ void particle_buffer_base_type::Free_Memory()
 //----------------------------------------------------------------------------------------------------------------------
 void mcp_test_done_class::Zero_Out()
 {
-
     this->local_sent = 0;
     this->local_recv = 0;
-
-    send_count.clear();
-    recv_count.clear();
-
-
     this->BlockingSum = 0;
-
-    this->non_blocking_send[0] = 0;
-    this->non_blocking_send[1] = 0;
-    this->non_blocking_sum[0]  = 0;
-    this->non_blocking_sum[1]  = 1; // initialize these so they are not-equal, [0] != [1]
-
-    this->IallreduceRequest = MPI_REQUEST_NULL;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -344,10 +327,7 @@ void MC_Particle_Buffer::Delete_Completed_Extra_Send_Buffers()
 MC_Particle_Buffer::MC_Particle_Buffer(MonteCarlo *mcco_, size_t bufferSize_)
 {
     this->mcco  = mcco_;
-    this->new_test_done_method = MC_New_Test_Done_Method::NonBlocking;
-
     this->test_done.Zero_Out();
-
     this->num_buffers = 0;
     this->task        = NULL;
     this->buffer_size = bufferSize_;
@@ -533,8 +513,6 @@ void MC_Particle_Buffer::Receive_Particle_Buffers()
             // Reset the number of particles.
             recv_buffer.num_particles = 0;
 
-            recv_count[MC_Tag_Particle_Buffer]++;
-
             mpiIrecv(recv_buffer.int_data, recv_buffer.length, MPI_BYTE, recv_buffer.processor,
                      MC_Tag_Particle_Buffer,
                      mcco->processor_info->comm_mc_world, &recv_buffer.request_list);
@@ -557,7 +535,7 @@ void MC_Particle_Buffer::Cancel_Receive_Buffer_Requests()
 //----------------------------------------------------------------------------------------------------------------------
 //  Test to see if we are done with streaming communication.
 //----------------------------------------------------------------------------------------------------------------------
-bool MC_Particle_Buffer::Test_Done_New( MC_New_Test_Done_Method::Enum test_done_method )
+bool MC_Particle_Buffer::Test_Done_New() 
 {
     if ( !(mcco->processor_info->num_processors > 1 ))
     {
@@ -570,25 +548,10 @@ bool MC_Particle_Buffer::Test_Done_New( MC_New_Test_Done_Method::Enum test_done_
 
     mcco->_tallies->SumTasks();
 
-    if ( test_done_method == MC_New_Test_Done_Method::Blocking )
-    {
-
-        // brain dead test for done, that is synchronized, does an allreduce.
-        bool answer = this->Allreduce_ParticleCounts();
-
-        MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking_Test_Done);
-        return answer;
-    }
-    else if ( test_done_method == MC_New_Test_Done_Method::NonBlocking )
-    {
-        bool answer = this->Iallreduce_ParticleCounts();
-        MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking_Test_Done);
-        return answer;
-    }
+    bool answer = this->Allreduce_ParticleCounts();
 
     MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking_Test_Done);
-
-    return true;
+    return answer;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -611,32 +574,6 @@ bool MC_Particle_Buffer::Allreduce_ParticleCounts()
 #endif
 
     return ( hard_blocking_sum[0] == hard_blocking_sum[1] );
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-//  Perform non-blocking allreduce on particle counts, return true if local counts are equal.
-//----------------------------------------------------------------------------------------------------------------------
-bool MC_Particle_Buffer::Iallreduce_ParticleCounts()
-{
-    // non blocking allreduce request
-    int flag = MCP_Test(&this->test_done.IallreduceRequest);
-
-    if ( flag )
-    {
-        if( this->test_done.non_blocking_sum[0] == this->test_done.non_blocking_sum[1] )
-        {
-            bool answer = this->Allreduce_ParticleCounts();
-            return answer;
-        }
-        else
-        {
-            this->test_done.Get_Local_Gains_And_Losses(mcco, this->test_done.non_blocking_send);
-            mpiIAllreduce(this->test_done.non_blocking_send, this->test_done.non_blocking_sum, 
-                          2, MPI_INT64_T, MPI_SUM, mcco->processor_info->comm_mc_world, 
-                          &this->test_done.IallreduceRequest);
-        }
-    }
-    return false;
 }
 
 
@@ -669,8 +606,6 @@ void MC_Particle_Buffer::Free_Memory()
         for ( int buffer_index = 0; buffer_index < this->num_buffers; buffer_index++ )
         {
             MCP_Cancel_Request(&mytask.recv_buffer[buffer_index].request_list);
-            recv_count[MC_Tag_Particle_Buffer]--;
-
             mytask.send_buffer[buffer_index].Free_Memory();
             mytask.recv_buffer[buffer_index].Free_Memory();
         }

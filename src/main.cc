@@ -128,8 +128,6 @@ void cycleTracking(MonteCarlo *monteCarlo)
 
     //Post Inital Receives for Particle Buffer
     monteCarlo->particle_buffer->Post_Receive_Particle_Buffer( my_particle_vault.getVaultSize() );
-    //Get Test For Done Method (Blocking or non-blocking
-    MC_New_Test_Done_Method::Enum new_test_done_method = monteCarlo->particle_buffer->new_test_done_method;
 
     do
     {
@@ -217,7 +215,7 @@ void cycleTracking(MonteCarlo *monteCarlo)
 
             //Test for done - blocking on all MPI ranks
             NVTX_Range doneRange("cycleTracking_Test_Done_New");
-            done = monteCarlo->particle_buffer->Test_Done_New( new_test_done_method );
+            done = monteCarlo->particle_buffer->Test_Done_New();
             doneRange.endRange();
 
             MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking_MPI);
@@ -225,7 +223,7 @@ void cycleTracking(MonteCarlo *monteCarlo)
         } // while not done: Test_Done_New()
 
         // Everything should be done normally.
-        done = monteCarlo->particle_buffer->Test_Done_New( MC_New_Test_Done_Method::Blocking );
+        done = monteCarlo->particle_buffer->Test_Done_New();
 
     } while ( !done );
 

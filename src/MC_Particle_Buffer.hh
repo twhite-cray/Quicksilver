@@ -71,10 +71,6 @@ class mcp_test_done_class
     int local_recv;
     int BlockingSum;
 
-    int64_t non_blocking_send[2];
-    int64_t non_blocking_sum[2];
-    MPI_Request IallreduceRequest;
-
     void Get_Local_Gains_And_Losses(MonteCarlo *mcco, int64_t sent_recv[2]);
     void Post_Recv();
     void Zero_Out();
@@ -83,21 +79,6 @@ class mcp_test_done_class
     bool ThisProcessorCommunicates(int rank = -1);
 };
 
-
-    //------------------------------------------------------------------------------------------------------------------
-    //
-    //------------------------------------------------------------------------------------------------------------------
-struct MC_New_Test_Done_Method
-{
-public:
-    enum Enum
-        {
-            AllProcessorTree,
-            Blocking,
-            NonBlocking
-        };
-
-};
 
 class MC_Particle_Buffer
 {
@@ -119,7 +100,6 @@ class MC_Particle_Buffer
     // std::list<particle_buffer_base_type> thread_send_buffer_queue;
 
     std::map<int, int>    processor_buffer_map; // Map processors to buffers. buffer_index = processor_buffer_map[processor]
-    MC_New_Test_Done_Method::Enum new_test_done_method; // which algorithm to use
     int  num_buffers;         // Number of particle buffers
     int  buffer_size;         // Buffer size to be sent.
 
@@ -136,9 +116,8 @@ class MC_Particle_Buffer
     void Receive_Particle_Buffers();
     void Cancel_Receive_Buffer_Requests();
 
-    bool Test_Done_New( MC_New_Test_Done_Method::Enum test_done_method = MC_New_Test_Done_Method::Blocking);
+    bool Test_Done_New();
     bool Allreduce_ParticleCounts();
-    bool Iallreduce_ParticleCounts();
 
     void Free_Buffers();
     void Free_Memory();
