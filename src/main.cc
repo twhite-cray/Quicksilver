@@ -127,9 +127,6 @@ void cycleTracking(MonteCarlo *monteCarlo)
 
     ParticleVaultContainer &my_particle_vault = *(monteCarlo->_particleVaultContainer);
 
-    //Post Inital Receives for Particle Buffer
-    monteCarlo->particle_buffer->Post_Receive_Particle_Buffer( my_particle_vault.getVaultSize() );
-
     do
     {
         int particle_count = 0; // Initialize count of num_particles processed
@@ -186,7 +183,6 @@ void cycleTracking(MonteCarlo *monteCarlo)
             NVTX_Range cleanAndComm("cycleTracking_clean_and_comm");
 
             SendQueue &sendQueue = *(my_particle_vault.getSendQueue());
-            monteCarlo->particle_buffer->Allocate_Send_Buffer( sendQueue );
 
             //Move particles from send queue to the send buffers
             for ( int index = 0; index < sendQueue.size(); index++ )
@@ -197,11 +193,9 @@ void cycleTracking(MonteCarlo *monteCarlo)
               processingVault->getBaseParticleComm( mcb_particle, sendQueueT._particleIndex );
 
               int buffer = monteCarlo->particle_buffer->Choose_Buffer(sendQueueT._neighbor );
-              monteCarlo->particle_buffer->Buffer_Particle(mcb_particle, buffer );
               monteCarlo->_messages.addParticle(mcb_particle,buffer);
             }
 
-            monteCarlo->particle_buffer->Send_Particle_Buffers(); // post MPI sends
             monteCarlo->_messages.startSends();
 
             processingVault->clear(); //remove the invalid particles
@@ -213,7 +207,6 @@ void cycleTracking(MonteCarlo *monteCarlo)
 
             // receive any particles that have arrived from other ranks
             monteCarlo->_messages.completeRecvs();
-            monteCarlo->particle_buffer->Receive_Particle_Buffers();
             monteCarlo->_messages.completeSends();
 
             MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking_MPI);
@@ -233,11 +226,6 @@ void cycleTracking(MonteCarlo *monteCarlo)
         done = monteCarlo->particle_buffer->Test_Done_New();
 
     } while ( !done );
-
-    //Make sure to cancel all pending receive requests
-    monteCarlo->particle_buffer->Cancel_Receive_Buffer_Requests();
-    //Make sure Buffers Memory is Free
-    monteCarlo->particle_buffer->Free_Buffers();
 
    MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking);
 }
