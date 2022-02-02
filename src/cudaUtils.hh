@@ -14,16 +14,4 @@ static void checkHip(const hipError_t err, const char *const file, const int lin
 
 #define VAR_MEM MemoryControl::AllocationPolicy::HOST_MEM
 
-enum ExecutionPolicy{ cpu, gpuWithHip };
-
-inline ExecutionPolicy getExecutionPolicy( int useGPU )
-{
-    ExecutionPolicy execPolicy = ExecutionPolicy::cpu;
-
-    if( useGPU )
-    {
-      execPolicy = ExecutionPolicy::gpuWithHip;
-    }
-    return execPolicy;
-}
 #endif

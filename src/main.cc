@@ -122,9 +122,6 @@ void cycleTracking(MonteCarlo *monteCarlo)
 
     bool done = false;
 
-    //Determine whether or not to use GPUs if they are available (set for each MPI rank)
-    ExecutionPolicy execPolicy = getExecutionPolicy( monteCarlo->processor_info->use_gpu );
-
     ParticleVaultContainer &my_particle_vault = *(monteCarlo->_particleVaultContainer);
 
     do
@@ -145,31 +142,10 @@ void cycleTracking(MonteCarlo *monteCarlo)
             {
               NVTX_Range trackingKernel("cycleTracking_TrackingKernel"); // range ends at end of scope
 
-              // The tracking kernel can run
-              // * As a cuda kernel
-              // * As an OpenMP 4.5 parallel loop on the GPU
-              // * As an OpenMP 3.0 parallel loop on the CPU
-              // * AS a single thread on the CPU.
-              switch (execPolicy)
+              for ( int particle_index = 0; particle_index < numParticles; particle_index++ )
               {
-                case gpuWithHip:
-                  {
-                    for ( int particle_index = 0; particle_index < numParticles; particle_index++ )
-                    {
-                      CycleTrackingGuts( monteCarlo, particle_index, processingVault, processedVault );
-                    }
-                  }
-                  break;
-
-                case cpu:
-                  for ( int particle_index = 0; particle_index < numParticles; particle_index++ )
-                  {
-                    CycleTrackingGuts( monteCarlo, particle_index, processingVault, processedVault );
-                  }
-                  break;
-                default:
-                  qs_assert(false);
-              } // end switch
+                CycleTrackingGuts( monteCarlo, particle_index, processingVault, processedVault );
+              }
             }
 
             particle_count += numParticles;

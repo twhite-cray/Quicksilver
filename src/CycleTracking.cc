@@ -21,18 +21,10 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int particle_index, ParticleVaul
     // set the particle.task to the index of the processed vault the particle will census into.
     mc_particle.task = 0;//processed_vault;
 
-    // loop over this particle until we cannot do anything more with it on this processor
-    CycleTrackingFunction( monteCarlo, mc_particle, particle_index, processingVault, processedVault );
-
-    //Make sure this particle is marked as completed
-    processingVault->invalidateParticle( particle_index );
-}
-
-void CycleTrackingFunction( MonteCarlo *monteCarlo, MC_Particle &mc_particle, int particle_index, ParticleVault* processingVault, ParticleVault* processedVault)
-{
     bool keepTrackingThisParticle = false;
     unsigned int tally_index =      (particle_index) % monteCarlo->_tallies->GetNumBalanceReplications();
     unsigned int flux_tally_index = (particle_index) % monteCarlo->_tallies->GetNumFluxReplications();
+    // loop over this particle until we cannot do anything more with it on this processor
     do
     {
         // Determine the outcome of a particle at the end of this segment such as:
@@ -109,5 +101,8 @@ void CycleTrackingFunction( MonteCarlo *monteCarlo, MC_Particle &mc_particle, in
         }
     
     } while ( keepTrackingThisParticle );
+
+    //Make sure this particle is marked as completed
+    processingVault->invalidateParticle( particle_index );
 }
 
