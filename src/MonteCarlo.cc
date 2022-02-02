@@ -20,7 +20,8 @@ using std::ceil;
 //----------------------------------------------------------------------------------------------------------------------
 MonteCarlo::MonteCarlo(const Parameters& params)
 : _params(params),
-  _nuclearData(NULL)
+  _nuclearData(NULL),
+  _messages(*this)
 {
    _nuclearData            = 0;
    _materialDatabase       = 0;
@@ -52,6 +53,7 @@ MonteCarlo::MonteCarlo(const Parameters& params)
     constexpr float fudge = 1.5;
     const long vault_size = fudge * num_particles_on_process;
     _particleVaultContainer = new ParticleVaultContainer(vault_size);
+    _messages.init();
 }
 
 //----------------------------------------------------------------------------------------------------------------------

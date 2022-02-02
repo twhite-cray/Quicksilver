@@ -27,9 +27,16 @@ struct MessageParticle {
 };
 
 struct Messages {
-  Messages();
+  Messages(MonteCarlo &mc);
   ~Messages();
-  void init(MonteCarlo &mc);
+  void init();
+  void completeRecvs();
+  void completeSends();
+  void startRecvs();
+  void startSends();
+  void addParticle(const MC_Base_Particle &part, int buffer); 
+
+  MonteCarlo &mc;
   int nMessages;
   int maxCount;
   int *counts;

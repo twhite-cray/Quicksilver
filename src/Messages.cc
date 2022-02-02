@@ -46,7 +46,8 @@ void MessageParticle::set(MC_Base_Particle &that)
   that.cell = cell;
 }
 
-Messages::Messages():
+Messages::Messages(MonteCarlo &mc_):
+  mc(mc_),
   nMessages(0),
   maxCount(0),
   counts(nullptr),
@@ -69,7 +70,7 @@ Messages::~Messages()
   delete [] sendReqs;
 }
 
-void Messages::init(MonteCarlo &mc)
+void Messages::init()
 {
   nMessages = mc.particle_buffer->num_buffers;
   maxCount = mc.particle_buffer->buffer_size;
@@ -91,3 +92,12 @@ void Messages::init(MonteCarlo &mc)
   CHECK(hipHostMalloc(&sendParts,msgBytes));
 }
 
+void Messages::addParticle(const MC_Base_Particle &part, const int buffer) {}
+
+void Messages::completeRecvs() {}
+
+void Messages::completeSends() {}
+
+void Messages::startRecvs() {}
+
+void Messages::startSends() {}

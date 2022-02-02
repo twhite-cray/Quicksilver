@@ -135,6 +135,7 @@ void cycleTracking(MonteCarlo *monteCarlo)
 
         while ( !done )
         {
+            monteCarlo->_messages.startRecvs();
             MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking_Kernel);
 
             ParticleVault *processingVault = my_particle_vault.getTaskProcessingVault();
@@ -196,18 +197,23 @@ void cycleTracking(MonteCarlo *monteCarlo)
 
               int buffer = monteCarlo->particle_buffer->Choose_Buffer(sendQueueT._neighbor );
               monteCarlo->particle_buffer->Buffer_Particle(mcb_particle, buffer );
+              monteCarlo->_messages.addParticle(mcb_particle,buffer);
             }
 
             monteCarlo->particle_buffer->Send_Particle_Buffers(); // post MPI sends
+            monteCarlo->_messages.startSends();
 
             processingVault->clear(); //remove the invalid particles
             sendQueue.clear();
 
             // Move particles in "extra" vault into the regular vaults.
             my_particle_vault.cleanExtraVault();
+            MPI_Barrier(MPI_COMM_WORLD);
 
             // receive any particles that have arrived from other ranks
+            monteCarlo->_messages.completeRecvs();
             monteCarlo->particle_buffer->Receive_Particle_Buffers();
+            monteCarlo->_messages.completeSends();
 
             MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking_MPI);
 

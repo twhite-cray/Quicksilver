@@ -4,6 +4,7 @@
 #include "Device.hh"
 #include "QS_Vector.hh"
 #include "MC_Domain.hh"
+#include "Messages.hh"
 #include "Parameters.hh"
 
 class MC_RNG_State;
@@ -42,6 +43,7 @@ public:
    double source_particle_weight;
 
    Device _device;
+   Messages _messages;
 
 private:
    // Disable copy constructor and assignment operator
