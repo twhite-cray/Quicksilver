@@ -31,19 +31,13 @@ class MC_Base_Particle
     static void Cycle_Setup();
     static void Update_Counts();
 
-    HOST_DEVICE_CUDA
     MC_Base_Particle();
-    HOST_DEVICE_CUDA
     explicit MC_Base_Particle(  const MC_Particle &particle);
-    HOST_DEVICE_CUDA
     MC_Base_Particle(  const MC_Base_Particle &particle);
 
-    HOST_DEVICE_CUDA
     MC_Base_Particle&  operator= ( const MC_Particle& );
 
-    HOST_DEVICE_CUDA
     int particle_id_number() const;
-    HOST_DEVICE_CUDA
     int invalidate();
 
     // serialize the vault
@@ -52,23 +46,17 @@ class MC_Base_Particle
                   MC_Data_Member_Operation::Enum mode);
 
     // return a location
-    HOST_DEVICE_CUDA
     MC_Location Get_Location() const;
 
     // copy contents to a string
     void Copy_Particle_Base_To_String(std::string &output_string) const;
 
     // aliases for the type of particle that we have
-    HOST_DEVICE_CUDA
     inline int type() const     { return species; }
-    HOST_DEVICE_CUDA
     inline int index() const    { return species; }
-    HOST_DEVICE_CUDA
     inline int is_valid() const { return (0 <= species); }
 
-    HOST_DEVICE_CUDA
     inline double Get_Energy() const                     { return kinetic_energy; }
-    HOST_DEVICE_CUDA
     inline MC_Vector *Get_Velocity() { return &velocity; }
 
 
@@ -103,7 +91,6 @@ class MC_Base_Particle
 //  Return a MC_Location given domain, cell, facet.
 //----------------------------------------------------------------------------------------------------------------------
 
-HOST_DEVICE_CUDA
 inline MC_Location MC_Base_Particle::Get_Location() const
 {
     return MC_Location(domain, cell, 0);
@@ -119,7 +106,6 @@ inline MC_Location MC_Base_Particle::Get_Location() const
 //
 // return: A value of 1 (true) is returned on success, 0 (false) on failure.
 //----------------------------------------------------------------------------------------------------------------------
-HOST_DEVICE_CUDA
 inline int MC_Base_Particle::invalidate()
 {
    if (is_valid())
@@ -137,7 +123,6 @@ inline int MC_Base_Particle::invalidate()
 //----------------------------------------------------------------------------------------------------------------------
 // Default constructor.
 //----------------------------------------------------------------------------------------------------------------------
-HOST_DEVICE_CUDA
 inline MC_Base_Particle::MC_Base_Particle( ) :
         coordinate(),
         velocity(),
@@ -163,7 +148,6 @@ inline MC_Base_Particle::MC_Base_Particle( ) :
 //----------------------------------------------------------------------------------------------------------------------
 // Constructor from a base particle type.
 //----------------------------------------------------------------------------------------------------------------------
-HOST_DEVICE_CUDA
 inline MC_Base_Particle::MC_Base_Particle(const MC_Base_Particle &particle)
 {
     coordinate          = particle.coordinate;
@@ -187,7 +171,6 @@ inline MC_Base_Particle::MC_Base_Particle(const MC_Base_Particle &particle)
 //----------------------------------------------------------------------------------------------------------------------
 // Constructor from a particle type.
 //----------------------------------------------------------------------------------------------------------------------
-HOST_DEVICE_CUDA
 inline MC_Base_Particle::MC_Base_Particle(const MC_Particle &particle)
 {
     coordinate          = particle.coordinate;
@@ -213,7 +196,6 @@ inline MC_Base_Particle::MC_Base_Particle(const MC_Particle &particle)
 // The assignment operator.
 // Copies a given (rhs) particle replacing this (lhs) particle..
 //----------------------------------------------------------------------------------------------------------------------
-HOST_DEVICE_CUDA
 inline MC_Base_Particle& MC_Base_Particle::operator= (const MC_Particle &particle)
 {
     coordinate = particle.coordinate;
@@ -240,7 +222,6 @@ inline MC_Base_Particle& MC_Base_Particle::operator= (const MC_Particle &particl
 //----------------------------------------------------------------------------------------------------------------------
 // MC_Particle Constructor.
 //----------------------------------------------------------------------------------------------------------------------
-HOST_DEVICE
 inline MC_Particle::MC_Particle()
    : coordinate(),
      velocity(),
@@ -269,13 +250,11 @@ inline MC_Particle::MC_Particle()
      normal_dot(0.0)
 {
 }
-HOST_DEVICE_END
 
 
 //----------------------------------------------------------------------------------------------------------------------
 // MC_Particle Constructor.
 //----------------------------------------------------------------------------------------------------------------------
-HOST_DEVICE
 inline MC_Particle::MC_Particle( const MC_Base_Particle &from_particle )
    : coordinate(from_particle.coordinate),
      velocity(from_particle.velocity),
@@ -320,13 +299,11 @@ inline MC_Particle::MC_Particle( const MC_Base_Particle &from_particle )
         qs_assert(false);
     }
 }
-HOST_DEVICE_END
 
 
 //----------------------------------------------------------------------------------------------------------------------
 //  Copy_From_Base copies a particle from a base into this version
 //----------------------------------------------------------------------------------------------------------------------
-HOST_DEVICE_CUDA
 inline void MC_Particle::Copy_From_Base( const MC_Base_Particle &from_particle)
 {
     this->coordinate          = from_particle.coordinate;

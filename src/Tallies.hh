@@ -316,19 +316,16 @@ class Tallies
     {
     }
 
-    HOST_DEVICE_CUDA
     int GetNumBalanceReplications()
     {
         return _num_balance_replications;
     }
 
-    HOST_DEVICE_CUDA
     int GetNumFluxReplications()
     {
         return _num_flux_replications;
     }
 
-    HOST_DEVICE_CUDA
     int GetNumCellTallyReplications()
     {
         return _num_cellTally_replications;
@@ -347,13 +344,11 @@ class Tallies
     void CycleFinalize(MonteCarlo *mcco);
     void PrintSummary(MonteCarlo *mcco);
 
-    HOST_DEVICE_CUDA
     void TallyScalarFlux(double value, int domain, int task, int cell, int group)
     {
         ATOMIC_ADD( _scalarFluxDomain[domain]._task[task]._cell[cell]._group[group], value );
     }
 
-    HOST_DEVICE_CUDA
     void TallyCellValue(double value, int domain, int task, int cell)
     {
         ATOMIC_ADD( _cellTallyDomain[domain]._task[task]._cell[cell], value );

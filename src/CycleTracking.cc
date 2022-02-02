@@ -11,7 +11,6 @@
 #include "macros.hh"
 #include "qs_assert.hh"
 
-HOST_DEVICE
 void CycleTrackingGuts( MonteCarlo *monteCarlo, int particle_index, ParticleVault *processingVault, ParticleVault *processedVault )
 {
     MC_Particle mc_particle;
@@ -28,9 +27,7 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int particle_index, ParticleVaul
     //Make sure this particle is marked as completed
     processingVault->invalidateParticle( particle_index );
 }
-HOST_DEVICE_END
 
-HOST_DEVICE
 void CycleTrackingFunction( MonteCarlo *monteCarlo, MC_Particle &mc_particle, int particle_index, ParticleVault* processingVault, ParticleVault* processedVault)
 {
     bool keepTrackingThisParticle = false;
@@ -113,5 +110,4 @@ void CycleTrackingFunction( MonteCarlo *monteCarlo, MC_Particle &mc_particle, in
     
     } while ( keepTrackingThisParticle );
 }
-HOST_DEVICE_END
 

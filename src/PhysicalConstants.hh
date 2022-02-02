@@ -2,7 +2,6 @@
 #define PHYSICAL_CONSTANTS_HH
 
 #include "DeclareMacro.hh"
-HOST_DEVICE_CLASS
 namespace PhysicalConstants
 {
 
@@ -16,7 +15,6 @@ const double _speedOfLight  = 2.99792458e+10;                // cm / s
  const double _hugeDouble           = 1.0e+75;
 //
 }
-HOST_DEVICE_END
 
 
 #endif

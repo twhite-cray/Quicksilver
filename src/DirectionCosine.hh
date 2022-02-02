@@ -5,7 +5,6 @@
 #include "portability.hh"
 #include "DeclareMacro.hh"
 
-HOST_DEVICE_CLASS
 class DirectionCosine
 {
 public:
@@ -13,13 +12,10 @@ public:
    double beta;
    double gamma;
 
-   HOST_DEVICE_CUDA
    DirectionCosine();
 
-   HOST_DEVICE_CUDA
    DirectionCosine(double alpha, double beta, double gamma);
 
-   HOST_DEVICE_CUDA
    DirectionCosine &operator=(const DirectionCosine &dc) 
    {
        alpha = dc.alpha;
@@ -31,30 +27,24 @@ public:
    void Sample_Isotropic(uint64_t *seed);
 
    // rotate a direction cosine given the sine/cosine of theta and phi
-   HOST_DEVICE_CUDA
    inline void Rotate3DVector( double sine_Theta,
                                double cosine_Theta,
                                double sine_Phi,
                                double cosine_Phi );
 
 };
-HOST_DEVICE_END
 
-HOST_DEVICE
 inline DirectionCosine::DirectionCosine()
    : alpha(0.0), beta(0.0), gamma(0.0)
 {
 }
-HOST_DEVICE_END
 
-HOST_DEVICE
 inline DirectionCosine::DirectionCosine(double a_alpha, double a_beta, double a_gamma)
    : alpha(a_alpha),
      beta(a_beta),
      gamma(a_gamma)
 {
 }
-HOST_DEVICE_END
 
 //----------------------------------------------------------------------------------------------------------------------
 //
@@ -119,7 +109,6 @@ HOST_DEVICE_END
 //        direction_cosine.beta =   cos_theta*sin_phi*Alpha + cos_phi*Beta + sin_theta*sin_phi*Gamma;
 //        direction_cosine.gamma = -sin_theta        *Alpha +                cos_theta        *Gamma;
 //----------------------------------------------------------------------------------------------------------------------
-HOST_DEVICE
 inline void DirectionCosine::Rotate3DVector(double sin_Theta, double cos_Theta, double sin_Phi, double cos_Phi)
 {
     // Calculate additional variables in the rotation matrix.
@@ -144,6 +133,5 @@ inline void DirectionCosine::Rotate3DVector(double sin_Theta, double cos_Theta, 
     this->beta  =  cos_theta*sin_phi*(sin_Theta*cos_Phi) + cos_phi*(sin_Theta*sin_Phi) + sin_theta*sin_phi*cos_Theta;
     this->gamma = -sin_theta        *(sin_Theta*cos_Phi) +                               cos_theta        *cos_Theta;
 }
-HOST_DEVICE_END
 
 #endif

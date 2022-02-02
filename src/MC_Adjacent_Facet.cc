@@ -6,7 +6,6 @@
 
 class MC_Particle;
 
-HOST_DEVICE
 
 Subfacet_Adjacency &MCT_Adjacent_Facet(const MC_Location &location, MC_Particle &mc_particle, MonteCarlo* monteCarlo)
 
@@ -18,4 +17,3 @@ Subfacet_Adjacency &MCT_Adjacent_Facet(const MC_Location &location, MC_Particle 
    return adjacency;
 }
 
-HOST_DEVICE_END

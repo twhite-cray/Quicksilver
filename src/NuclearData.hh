@@ -45,9 +45,7 @@ class NuclearDataReaction
                        const Polynomial& polynomial, double reationCrossSection);
    
 
-   HOST_DEVICE_CUDA
    double getCrossSection(unsigned int group);
-   HOST_DEVICE_CUDA
    void sampleCollision(double incidentEnergy, double material_mass, double* energyOut,
                         double* angleOut, int &nOut, uint64_t* seed, int max_production_size);
    
@@ -96,13 +94,9 @@ class NuclearData
                   double totalCrossSection,
                   double fissionWeight, double scatterWeight, double absorptionWeight);
 
-   HOST_DEVICE_CUDA
    int getEnergyGroup(double energy);
-   HOST_DEVICE_CUDA
    int getNumberReactions(unsigned int isotopeIndex);
-   HOST_DEVICE_CUDA
    double getTotalCrossSection(unsigned int isotopeIndex, unsigned int group);
-   HOST_DEVICE_CUDA
    double getReactionCrossSection(unsigned int reactIndex, unsigned int isotopeIndex, unsigned int group);
 
    int _numEnergyGroups;

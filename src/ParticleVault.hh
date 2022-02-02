@@ -15,7 +15,6 @@ public:
    bool empty() const {return _particles.empty();}
 
    // Get the size of the vault.
-   HOST_DEVICE_CUDA
    size_t size() const {return _particles.size();}
 
    // Reserve the size for the container of particles.
@@ -40,11 +39,9 @@ public:
    const MC_Base_Particle& operator[](size_t n) const {return _particles[n];}
 
    // Put a particle into the vault, down casting its class.
-   HOST_DEVICE_CUDA
    void pushParticle(MC_Particle &particle);
 
    // Put a base particle into the vault.
-   HOST_DEVICE_CUDA
    void pushBaseParticle(MC_Base_Particle &base_particle);
 
    // Get a base particle from the vault.
@@ -55,14 +52,11 @@ public:
 
    // Get a particle from the vault 
    bool getBaseParticleComm(MC_Base_Particle &particle, int index);
-   HOST_DEVICE_CUDA
    bool getParticle(MC_Particle &particle, int index);
    // Copy a particle back into the vault
-   HOST_DEVICE_CUDA
    bool putParticle(MC_Particle particle, int index);
 
    // invalidates the particle in the vault at an index
-   HOST_DEVICE_CUDA
    void invalidateParticle( int index );
 
 #if 0
@@ -83,7 +77,6 @@ private:
 };
 
 // -----------------------------------------------------------------------
-HOST_DEVICE_CUDA
 inline void ParticleVault::
 pushParticle(MC_Particle &particle)
 {
@@ -94,7 +87,6 @@ pushParticle(MC_Particle &particle)
 }
 
 // -----------------------------------------------------------------------
-HOST_DEVICE_CUDA
 inline void ParticleVault::
 pushBaseParticle(MC_Base_Particle &base_particle)
 {
@@ -156,7 +148,6 @@ getBaseParticleComm( MC_Base_Particle &particle, int index )
 }
 
 // -----------------------------------------------------------------------
-   HOST_DEVICE_CUDA
 inline bool ParticleVault::
 getParticle( MC_Particle &particle, int index )
 {
@@ -171,7 +162,6 @@ getParticle( MC_Particle &particle, int index )
 }
 
 // -----------------------------------------------------------------------
-   HOST_DEVICE_CUDA
 inline bool ParticleVault::
 putParticle(MC_Particle particle, int index)
 {
@@ -186,7 +176,6 @@ putParticle(MC_Particle particle, int index)
 }
 
 // -----------------------------------------------------------------------
-   HOST_DEVICE_CUDA
 inline void ParticleVault::
 invalidateParticle( int index )
 {
@@ -206,8 +195,6 @@ eraseSwapParticle(int index)
 }
 
 // -----------------------------------------------------------------------
-HOST_DEVICE
 void MC_Load_Particle(MonteCarlo *mcco, MC_Particle &mc_particle, ParticleVault *particleVault, int particle_index);
-HOST_DEVICE_END
 
 #endif

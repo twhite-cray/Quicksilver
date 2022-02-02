@@ -5,7 +5,6 @@
 
 namespace
 {
-HOST_DEVICE
    // Break a 64 bit state into 2 32 bit ints.
    void breakup_uint64( uint64_t uint64_in,
                         uint32_t& front_bits, uint32_t& back_bits )
@@ -13,7 +12,6 @@ HOST_DEVICE
       front_bits = static_cast<uint32_t>( uint64_in >> 32 );
       back_bits = static_cast<uint32_t>( uint64_in & 0xffffffff );
    }
-HOST_DEVICE_END
 }
 
 //---------------------------------------------------------------------------//
@@ -25,7 +23,6 @@ namespace
    // from Numerical Recipies in C, 2nd edition: psdes, p. 302.  This is
    // used to make 64 bit numbers for use as initial states for the 64
    // bit lcg random number generator.
-HOST_DEVICE
    void pseudo_des( uint32_t& lword, uint32_t& irword )
    {
       // This random number generator assumes that type uint32_t is a 32 bit int
@@ -50,7 +47,6 @@ HOST_DEVICE
          lword=iswap;
       }
    }
-HOST_DEVICE_END
 }
 
 //---------------------------------------------------------------------------//
@@ -58,7 +54,6 @@ HOST_DEVICE_END
 namespace
 {
 
-   HOST_DEVICE
    // Function used to reconstruct  a 64 bit from 2 32 bit ints.
    uint64_t reconstruct_uint64( uint32_t front_bits, uint32_t back_bits )
    {
@@ -75,14 +70,12 @@ namespace
       
       return reconstructed;
    }
-   HOST_DEVICE_END
 }
 
 //---------------------------------------------------------------------------//
 
 namespace
 {
-HOST_DEVICE
    // Function used to hash a 64 bit int to get an initial state.
    uint64_t hash_state( uint64_t initial_number )
    {
@@ -96,14 +89,12 @@ HOST_DEVICE
       // put the hashed parts together into 1 64 bit int
       return reconstruct_uint64( front_bits, back_bits );
    }
-HOST_DEVICE_END
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 //  This routine spawns a "child" random number seed from a "parent" random number seed.
 //----------------------------------------------------------------------------------------------------------------------
 
-HOST_DEVICE
 uint64_t rngSpawn_Random_Number_Seed(uint64_t *parent_seed)
 {
   uint64_t spawned_seed = hash_state(*parent_seed);
@@ -112,4 +103,3 @@ uint64_t rngSpawn_Random_Number_Seed(uint64_t *parent_seed)
   return spawned_seed;
 }
 
-HOST_DEVICE_END

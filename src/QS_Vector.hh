@@ -66,7 +66,6 @@ class qs_vector
       return *this;
    }
    
-   HOST_DEVICE_CUDA
    int get_memPolicy()
    {
 	return _memPolicy;
@@ -82,25 +81,21 @@ class qs_vector
    void Open() { _isOpen = true;  }
    void Close(){ _isOpen = false; }
 
-   HOST_DEVICE_CUDA
    const T& operator[]( int index ) const
    {
       return _data[index];
    }
 
-   HOST_DEVICE_CUDA
    T& operator[]( int index )
    {
       return _data[index];
    }
    
-   HOST_DEVICE_CUDA
    int capacity() const
    {
       return _capacity;
    }
 
-   HOST_DEVICE_CUDA
    int size() const
    {
       return _size;
@@ -175,7 +170,6 @@ class qs_vector
    }
 
    //Atomically retrieve an availible index then increment that index some amount
-   HOST_DEVICE_CUDA
    int atomic_Index_Inc( int inc )
    {
        int pos;

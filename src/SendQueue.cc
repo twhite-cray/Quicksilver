@@ -30,7 +30,6 @@ neighbor_size( int neighbor_ )
 }
 
 // -----------------------------------------------------------------------
-HOST_DEVICE
 void SendQueue::
 push( int neighbor_, int vault_index_ )
 {
@@ -39,7 +38,6 @@ push( int neighbor_, int vault_index_ )
     _data[indx]._neighbor    = neighbor_;
     _data[indx]._particleIndex = vault_index_;
 }
-HOST_DEVICE_END
 
 // -----------------------------------------------------------------------
 void SendQueue::

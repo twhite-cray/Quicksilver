@@ -7,7 +7,6 @@
 //  Copies a single particle from the particle-vault data structure into the active-particle data structure.
 //----------------------------------------------------------------------------------------------------------------------
 
-HOST_DEVICE
 void MC_Load_Particle(MonteCarlo *monteCarlo, MC_Particle &mc_particle, ParticleVault *particleVault, int particle_index)
 {
     //particleVault.popParticle(mc_particle);
@@ -27,5 +26,4 @@ void MC_Load_Particle(MonteCarlo *monteCarlo, MC_Particle &mc_particle, Particle
 //                    printf("file=%s line=%d\n",__FILE__,__LINE__);
 
 }
-HOST_DEVICE_END
 

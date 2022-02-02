@@ -32,13 +32,11 @@ ParticleVaultContainer::
 //------------getSendQueue--------------------------------------
 //Returns a pointer to the Send Queue
 //--------------------------------------------------------------
-HOST_DEVICE
 SendQueue* ParticleVaultContainer::
 getSendQueue()
 {
     return &(this->_sendQueue);
 }
-HOST_DEVICE_END
 
 //--------------------------------------------------------------
 //------------swapProcessingProcessedVaults---------------------
@@ -74,13 +72,11 @@ addProcessingParticle( MC_Base_Particle &particle )
 //------------addExtraParticle----------------------------------
 //adds a particle to the extra particle vaults (used in kernel)
 //--------------------------------------------------------------
-HOST_DEVICE
 void ParticleVaultContainer::
 addExtraParticle( MC_Particle &particle)
 {
     _extraVault.pushParticle( particle );
 }
-HOST_DEVICE_END
 
 //--------------------------------------------------------------
 //------------cleanExtraVault----------------------------------

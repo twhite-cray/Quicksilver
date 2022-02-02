@@ -16,34 +16,28 @@
 
 namespace
 {
-   HOST_DEVICE
    MC_Nearest_Facet MCT_Nearest_Facet_3D_G(
       MC_Particle *mc_particle,
       MC_Domain &domain,
       MC_Location &location,
       MC_Vector &coordinate,
       const DirectionCosine *direction_cosine);
-   HOST_DEVICE_END
 
-   HOST_DEVICE_CUDA
    double MCT_Cell_Volume_3D_G_vector_tetDet(const MC_Vector &v0_,
                                              const MC_Vector &v1_,
                                              const MC_Vector &v2_,
                                              const MC_Vector &v3);
 
-   HOST_DEVICE_CUDA
    void MCT_Nearest_Facet_3D_G_Move_Particle(
       MC_Domain &domain, // input: domain
       const MC_Location &location,
       MC_Vector &coordinate, // input/output: move this coordinate
       double move_factor);      // input: multiplication factor for move
 
-   HOST_DEVICE_CUDA
    MC_Nearest_Facet MCT_Nearest_Facet_Find_Nearest(
       int num_facets_per_cell,
       MC_Distance_To_Facet *distance_to_facet);
 
-   HOST_DEVICE_CUDA
    MC_Nearest_Facet MCT_Nearest_Facet_Find_Nearest(
       MC_Particle *mc_particle,
       MC_Domain *domain,
@@ -55,7 +49,6 @@ namespace
       MC_Distance_To_Facet *distance_to_facet,
       int &retry /* output */ );
 
-   HOST_DEVICE_CUDA
    void MCT_Facet_Points_3D_G(
       const MC_Domain    &domain,               // input
       int                 cell,                 // input
@@ -63,7 +56,6 @@ namespace
       int                 num_points_per_facet, // input
       int                *facet_points          /* output */);
 
-   HOST_DEVICE_CUDA
    double MCT_Nearest_Facet_3D_G_Distance_To_Segment(
       double plane_tolerance,
       double facet_normal_dot_direction_cosine,
@@ -83,7 +75,6 @@ namespace
 ///
 /// \return The minimum distance and facet number.
 
-HOST_DEVICE
 MC_Nearest_Facet MCT_Nearest_Facet(MC_Particle *mc_particle,
                                    MC_Location &location,
                                    MC_Vector &coordinate,
@@ -127,10 +118,8 @@ MC_Nearest_Facet MCT_Nearest_Facet(MC_Particle *mc_particle,
     return nearest_facet;
 }  // End MCT_Nearest_Facet
 
-HOST_DEVICE_END
 
 ///  Generates a random coordinate inside a polyhedral cell.
-   HOST_DEVICE_CUDA
 void MCT_Generate_Coordinate_3D_G(uint64_t *random_number_seed,
                                   int domain_num,
                                   int cell,
@@ -218,7 +207,6 @@ void MCT_Generate_Coordinate_3D_G(uint64_t *random_number_seed,
 
 
 ///  Returns a coordinate that represents the "center" of the cell.
-   HOST_DEVICE_CUDA
 MC_Vector MCT_Cell_Position_3D_G(const MC_Domain &domain,
                                  int cell_index)
 {
@@ -249,7 +237,6 @@ namespace
    ///  Fills in the facet_points array with the domain local point
    ///  numbers specified by the cell number and cell-local facet number
    ///  for a 3DG mesh.
-   HOST_DEVICE_CUDA
    void MCT_Facet_Points_3D_G(const MC_Domain    &domain,               // input
                               int                 cell,                 // input
                               int                 facet,                // input
@@ -267,7 +254,6 @@ namespace
    ///  Calculates the distance from the specified coordinates to the
    ///  input segment. This is used to track to the faces of a 3D_G
    ///  mesh.
-   HOST_DEVICE_CUDA
    double MCT_Nearest_Facet_3D_G_Distance_To_Segment(double plane_tolerance,
                                                      double facet_normal_dot_direction_cosine,
                                                      double A, double B, double C, double D,
@@ -388,7 +374,6 @@ namespace
 
 
 ///  Reflects the particle off of a reflection boundary.
-HOST_DEVICE
 void MCT_Reflect_Particle(MonteCarlo *monteCarlo, MC_Particle &particle)
 {
     DirectionCosine *direction_cosine = particle.Get_Direction_Cosine();
@@ -418,12 +403,10 @@ void MCT_Reflect_Particle(MonteCarlo *monteCarlo, MC_Particle &particle)
     particle.velocity.y = particle_speed * particle.direction_cosine.beta;
     particle.velocity.z = particle_speed * particle.direction_cosine.gamma;
 }
-HOST_DEVICE_END
 
 namespace
 {
    ///  Loop over all the facets, return the minimum distance.
-   HOST_DEVICE_CUDA
    MC_Nearest_Facet MCT_Nearest_Facet_Find_Nearest(int num_facets_per_cell,
                                                    MC_Distance_To_Facet *distance_to_facet)
    {
@@ -474,7 +457,6 @@ namespace
 namespace
 {
    ///  Loop over all the facets, return the minimum distance.
-   HOST_DEVICE_CUDA
    MC_Nearest_Facet MCT_Nearest_Facet_Find_Nearest(MC_Particle *mc_particle,
                                                    MC_Domain *domain,
                                                    MC_Location *location,
@@ -537,7 +519,6 @@ namespace
    ///  unstructured, hexahedral (Type 3D_G) domain, storing the minimum
    ///  distance and associated facet number.
 
-   HOST_DEVICE
    MC_Nearest_Facet MCT_Nearest_Facet_3D_G(
       MC_Particle *mc_particle,
       MC_Domain &domain,
@@ -611,7 +592,6 @@ namespace
       } // while (true)
    }  // End MCT_Nearest_Facet_3D_G
 
-   HOST_DEVICE_END
 
 } // anonymous namespace
 
@@ -620,7 +600,6 @@ namespace
   ///  \return 6 times the volume of the tet.
   ///
   ///  subtract v3 from v0, v1 and v2.  Then take the triple product of v0, v1 and v2.
-   HOST_DEVICE_CUDA
   double MCT_Cell_Volume_3D_G_vector_tetDet(const MC_Vector &v0_,
                                             const MC_Vector &v1_,
                                             const MC_Vector &v2_,
@@ -643,7 +622,6 @@ namespace
 namespace
 {
    ///  Move the input particle by a small amount toward the center of the cell.
-   HOST_DEVICE_CUDA
    void MCT_Nearest_Facet_3D_G_Move_Particle(MC_Domain &domain, // input: domain
                                              const MC_Location &location,
                                              MC_Vector &coordinate, // input/output: move this coordinate

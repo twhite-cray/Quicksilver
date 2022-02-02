@@ -49,7 +49,6 @@ void NuclearDataReaction::sampleCollision(
    qs_vector<double> &angleOut, uint64_t* seed)
 #endif
 
-HOST_DEVICE
 
 void NuclearDataReaction::sampleCollision(
    double incidentEnergy, double material_mass, double* energyOut,
@@ -87,7 +86,6 @@ void NuclearDataReaction::sampleCollision(
    }
 }
 
-HOST_DEVICE_END
 
 // Then call this for each reaction to set cross section values
 void NuclearDataSpecies::addReaction(
@@ -186,25 +184,20 @@ int NuclearData::addIsotope(
    return _isotopes.size() - 1;
 }
 
-HOST_DEVICE
 // Return the cross section for this energy group
 double NuclearDataReaction::getCrossSection(unsigned int group)
 {
    qs_assert(group < _crossSection.size());
    return _crossSection[group];
 }
-HOST_DEVICE_END
 
-HOST_DEVICE
 int NuclearData::getNumberReactions(unsigned int isotopeIndex)
 {
    qs_assert(isotopeIndex < _isotopes.size());
    return (int)_isotopes[isotopeIndex]._species[0]._reactions.size();
 }
-HOST_DEVICE_END
 
 // For this energy, return the group index
-HOST_DEVICE
 int NuclearData::getEnergyGroup(double energy)
 {
    int numEnergies = (int)_energies.size();
@@ -225,11 +218,9 @@ int NuclearData::getEnergyGroup(double energy)
 
    return low;
 }
-HOST_DEVICE_END
 
 // General routines to help access data lower down
 // Return the total cross section for this energy group
-HOST_DEVICE
 double NuclearData::getTotalCrossSection(unsigned int isotopeIndex, unsigned int group)
 {
    qs_assert(isotopeIndex < _isotopes.size());
@@ -241,10 +232,8 @@ double NuclearData::getTotalCrossSection(unsigned int isotopeIndex, unsigned int
    }
    return totalCrossSection;
 }
-HOST_DEVICE_END
 
 // Return the total cross section for this energy group
-HOST_DEVICE
 double NuclearData::getReactionCrossSection(
    unsigned int reactIndex, unsigned int isotopeIndex, unsigned int group)
 {
@@ -252,5 +241,4 @@ double NuclearData::getReactionCrossSection(
    qs_assert(reactIndex < _isotopes[isotopeIndex]._species[0]._reactions.size());
    return _isotopes[isotopeIndex]._species[0]._reactions[reactIndex].getCrossSection(group);
 }
-HOST_DEVICE_END
 

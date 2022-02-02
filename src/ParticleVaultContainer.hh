@@ -40,9 +40,7 @@ class ParticleVaultContainer
     ParticleVault *getTaskProcessedVault() { return &_processedVault; }
 
     //Returns a pointer to the Send Queue
-    HOST_DEVICE
     SendQueue* getSendQueue();
-    HOST_DEVICE_END
 
     //Counts Particles in all vaults
     uint64_t sizeProcessing() const { return _processingVault.size(); }
@@ -55,9 +53,7 @@ class ParticleVaultContainer
     //Adds a particle to the processing particle vault
     void addProcessingParticle( MC_Base_Particle &particle );
     //Adds a particle to the extra particle vault
-    HOST_DEVICE
     void addExtraParticle( MC_Particle &particle );
-    HOST_DEVICE_END
  
     //Pushes particles from Extra Vault onto the Processing 
     //Vault list

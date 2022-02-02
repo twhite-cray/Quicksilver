@@ -89,35 +89,27 @@ class MC_Particle
     double normal_dot;
 
 public:
-   HOST_DEVICE_CUDA
    MC_Particle();
 
-   HOST_DEVICE_CUDA
    MC_Particle( const MC_Base_Particle &from_particle );
 
-   HOST_DEVICE_CUDA
    void Copy_From_Base( const MC_Base_Particle &from_particle);
 
-   HOST_DEVICE_CUDA
    MC_Location Get_Location() const;
 
    // format a string with the contents of the particle
    void Copy_Particle_To_String(std::string &output_string) const;
 
    // move a particle a distance in the direction_cosine direction
-   HOST_DEVICE_CUDA
    void Move_Particle(const DirectionCosine & direction_cosine, const double distance);
 
-   HOST_DEVICE_CUDA
    void PrintParticle();
 
-   HOST_DEVICE_CUDA
    DirectionCosine *Get_Direction_Cosine()
    {
       return &this->direction_cosine;
    }
 
-   HOST_DEVICE_CUDA
    MC_Vector *Get_Velocity()
    {
       return &this->velocity;
@@ -127,7 +119,6 @@ public:
 //----------------------------------------------------------------------------------------------------------------------
 //  Return a MC_Location given domain, cell, facet.
 //----------------------------------------------------------------------------------------------------------------------
-   HOST_DEVICE_CUDA
 inline MC_Location MC_Particle::Get_Location() const
 {
     return MC_Location(domain, cell, facet);
@@ -136,7 +127,6 @@ inline MC_Location MC_Particle::Get_Location() const
 //----------------------------------------------------------------------------------------------------------------------
 //  Move the particle a straight-line distance along a specified cosine.
 //----------------------------------------------------------------------------------------------------------------------
-   HOST_DEVICE_CUDA
 inline void MC_Particle::Move_Particle( const DirectionCosine &my_direction_cosine,
                                       const double distance)
 {
@@ -148,7 +138,6 @@ inline void MC_Particle::Move_Particle( const DirectionCosine &my_direction_cosi
 //----------------------------------------------------------------------------------------------------------------------
 //  Print all of the particles components
 //----------------------------------------------------------------------------------------------------------------------
-HOST_DEVICE_CUDA
 inline void MC_Particle::PrintParticle()
 {
     printf( "coordiante:          %g\t%g\t%g\n", coordinate.x, coordinate.y, coordinate.z );

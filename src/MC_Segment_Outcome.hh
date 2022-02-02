@@ -32,8 +32,6 @@ struct MC_Collision_Event_Return
 };
 
 #include "DeclareMacro.hh"
-HOST_DEVICE
 MC_Segment_Outcome_type::Enum MC_Segment_Outcome(MonteCarlo* monteCarlo, MC_Particle &mc_particle, unsigned int &flux_tally_index);
-HOST_DEVICE_END
 
 #endif

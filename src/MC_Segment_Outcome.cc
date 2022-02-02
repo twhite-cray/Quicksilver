@@ -15,10 +15,8 @@
 #include "DeclareMacro.hh"
 
 
-HOST_DEVICE
 static inline unsigned int MC_Find_Min(const double *array,
                                        int     num_elements);
-HOST_DEVICE_END
 
 //--------------------------------------------------------------------------------------------------
 //  Routine MC_Segment_Outcome determines whether the next segment of the particle's trajectory will result in:
@@ -27,7 +25,6 @@ HOST_DEVICE_END
 //  (iii) census at the end of the time step.
 //--------------------------------------------------------------------------------------------------
 
-HOST_DEVICE 
 MC_Segment_Outcome_type::Enum MC_Segment_Outcome(MonteCarlo* monteCarlo, MC_Particle &mc_particle, unsigned int &flux_tally_index)
 {
     Device &device = monteCarlo->_device;
@@ -215,12 +212,10 @@ MC_Segment_Outcome_type::Enum MC_Segment_Outcome(MonteCarlo* monteCarlo, MC_Part
 
     return segment_outcome;
 }
-HOST_DEVICE_END
 
 
 
 
-HOST_DEVICE
 static inline unsigned int MC_Find_Min(const double *array,
                                        int     num_elements)
 {
@@ -238,4 +233,3 @@ static inline unsigned int MC_Find_Min(const double *array,
 
     return min_index;
 }
-HOST_DEVICE_END

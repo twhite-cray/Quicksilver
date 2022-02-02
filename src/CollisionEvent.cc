@@ -21,7 +21,6 @@
 //  Return true if the particle will continue.
 //----------------------------------------------------------------------------------------------------------------------
 
-HOST_DEVICE
 void updateTrajectory( double energy, double angle, MC_Particle& particle )
 {
     particle.kinetic_energy = energy;
@@ -43,9 +42,7 @@ void updateTrajectory( double energy, double angle, MC_Particle& particle )
     randomNumber = rngSample(&particle.random_number_seed);
     particle.num_mean_free_paths = -1.0*log(randomNumber);
 }
-HOST_DEVICE_END
 
-HOST_DEVICE
 
 bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle, unsigned int tally_index)
 {
@@ -147,5 +144,4 @@ bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle, unsigned i
    return nOut == 1;
 }
 
-HOST_DEVICE_END
 
