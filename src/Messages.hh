@@ -38,6 +38,7 @@ struct Messages {
 
   MonteCarlo &mc;
   int tag;
+  MPI_Datatype mpiParticle;
   int nMessages;
   int maxCount;
   int *counts;

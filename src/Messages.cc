@@ -81,6 +81,7 @@ void MessageParticle::set(MC_Base_Particle &that) const
 Messages::Messages(MonteCarlo &mc_):
   mc(mc_),
   tag(uniqueTag++),
+  mpiParticle(MPI_DATATYPE_NULL),
   nMessages(0),
   maxCount(0),
   counts(nullptr),
@@ -90,7 +91,10 @@ Messages::Messages(MonteCarlo &mc_):
   recvStats(nullptr),
   sendParts(nullptr),
   sendReqs(nullptr)
-{}
+{
+  MPI_Type_contiguous(sizeof(MessageParticle),MPI_BYTE,&mpiParticle);
+  MPI_Type_commit(&mpiParticle);
+}
 
 Messages::~Messages()
 {
@@ -103,6 +107,7 @@ Messages::~Messages()
   CHECK(hipHostFree(counts)); counts = nullptr;
   maxCount = 0;
   nMessages = 0;
+  MPI_Type_free(&mpiParticle);
 }
 
 void Messages::init()
@@ -159,20 +164,17 @@ void Messages::completeSends()
 
 void Messages::startRecvs()
 {
-  const int maxBytes = maxCount*sizeof(MessageParticle);
   for (int i =0, offset = 0; i < nMessages; i++, offset += maxCount) {
     assert(recvReqs[i] == MPI_REQUEST_NULL);
-    MPI_Irecv(recvParts+offset,maxBytes,MPI_BYTE,ranks[i],tag,MPI_COMM_WORLD,recvReqs+i);
+    MPI_Irecv(recvParts+offset,maxCount,mpiParticle,ranks[i],tag,MPI_COMM_WORLD,recvReqs+i);
   }
 }
 
 void Messages::startSends()
 {
-  const int maxBytes = maxCount*sizeof(MessageParticle);
   for (int i =0, offset = 0; i < nMessages; i++, offset += maxCount) {
     assert(sendReqs[i] == MPI_REQUEST_NULL);
-    const int bytes = counts[i]*sizeof(MessageParticle);
-    assert(bytes <= maxBytes);
-    MPI_Isend(sendParts+offset,bytes,MPI_BYTE,ranks[i],tag,MPI_COMM_WORLD,sendReqs+i);
+    assert(counts[i] <= maxCount);
+    MPI_Isend(sendParts+offset,counts[i],mpiParticle,ranks[i],tag,MPI_COMM_WORLD,sendReqs+i);
   }
 }
