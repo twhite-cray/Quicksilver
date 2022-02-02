@@ -261,6 +261,14 @@ void MC_Particle_Buffer::Unpack_Particle_Buffer(int buffer_index)
                         recv_buffer.num_particles, 0);
     }
 
+    {
+      int count = 0;
+      MPI_Get_count(mcco->_messages.recvStats+buffer_index,MPI_BYTE,&count);
+      const int unit = sizeof(MessageParticle);
+      assert(count%unit == 0);
+      assert(count/unit == recv_buffer.num_particles);
+    }
+
     // Unpack each particle and place into a partivault.
     for ( int particle_index = 0; particle_index < recv_buffer.num_particles; particle_index++)
     {
@@ -518,6 +526,10 @@ void MC_Particle_Buffer::Receive_Particle_Buffers()
             mpiIrecv(recv_buffer.int_data, recv_buffer.length, MPI_BYTE, recv_buffer.processor,
                      MC_Tag_Particle_Buffer,
                      mcco->processor_info->comm_mc_world, &recv_buffer.request_list);
+        } else {
+          int count = 1;
+          MPI_Get_count(mcco->_messages.recvStats+buffer_index,MPI_BYTE,&count);
+          assert(count == 0);
         }
     }
 }

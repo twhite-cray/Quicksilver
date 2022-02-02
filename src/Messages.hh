@@ -37,12 +37,14 @@ struct Messages {
   void addParticle(const MC_Base_Particle &part, int buffer); 
 
   MonteCarlo &mc;
+  int tag;
   int nMessages;
   int maxCount;
   int *counts;
   int *ranks;
   MessageParticle *recvParts;
   MPI_Request *recvReqs;
+  MPI_Status *recvStats;
   MessageParticle *sendParts;
   MPI_Request *sendReqs;
 };

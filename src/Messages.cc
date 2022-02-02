@@ -4,7 +4,7 @@
 #include "MC_Base_Particle.hh"
 #include "MC_Particle_Buffer.hh"
 
-static int constexpr tag = 33;
+static int uniqueTag = 33;
 
 MessageParticle &MessageParticle::operator=(const MC_Base_Particle &that)
 {
@@ -79,26 +79,29 @@ void MessageParticle::set(MC_Base_Particle &that) const
 
 Messages::Messages(MonteCarlo &mc_):
   mc(mc_),
+  tag(uniqueTag++),
   nMessages(0),
   maxCount(0),
   counts(nullptr),
   ranks(nullptr),
   recvParts(nullptr),
   recvReqs(nullptr),
+  recvStats(nullptr),
   sendParts(nullptr),
   sendReqs(nullptr)
 {}
 
 Messages::~Messages()
 {
-  nMessages = 0;
-  maxCount = 0;
-  CHECK(hipHostFree(counts)); counts = nullptr;
-  delete [] ranks;
-  CHECK(hipHostFree(recvParts)); recvParts = nullptr;
-  delete [] recvReqs;
-  CHECK(hipHostFree(sendParts)); sendParts = nullptr;
   delete [] sendReqs;
+  CHECK(hipHostFree(sendParts)); sendParts = nullptr;
+  delete [] recvStats;
+  delete [] recvReqs;
+  CHECK(hipHostFree(recvParts)); recvParts = nullptr;
+  delete [] ranks;
+  CHECK(hipHostFree(counts)); counts = nullptr;
+  maxCount = 0;
+  nMessages = 0;
 }
 
 void Messages::init()
@@ -118,6 +121,7 @@ void Messages::init()
   CHECK(hipHostMalloc(&counts,nMessages*sizeof(*counts)));
   ranks = new int[nMessages];
   recvReqs = new MPI_Request[nMessages];
+  recvStats = new MPI_Status[nMessages];
   sendReqs = new MPI_Request[nMessages];
   for (int i = 0; i < nMessages; i++) {
     ranks[i] = MPI_PROC_NULL;
@@ -143,7 +147,7 @@ void Messages::addParticle(const MC_Base_Particle &part, const int buffer)
 
 void Messages::completeRecvs()
 {
-  MPI_Waitall(nMessages,recvReqs,MPI_STATUSES_IGNORE);
+  MPI_Waitall(nMessages,recvReqs,recvStats);
 }
 
 void Messages::completeSends()
