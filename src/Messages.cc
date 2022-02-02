@@ -4,6 +4,8 @@
 #include "MC_Base_Particle.hh"
 #include "MC_Particle_Buffer.hh"
 
+static int constexpr tag = 33;
+
 MessageParticle &MessageParticle::operator=(const MC_Base_Particle &that)
 {
   coordinate.x = that.coordinate.x;
@@ -141,13 +143,31 @@ void Messages::addParticle(const MC_Base_Particle &part, const int buffer)
 
 void Messages::completeRecvs()
 {
+  MPI_Waitall(nMessages,recvReqs,MPI_STATUSES_IGNORE);
 }
 
 void Messages::completeSends()
 {
+  MPI_Waitall(nMessages,sendReqs,MPI_STATUSES_IGNORE);
   for (int i = 0; i < nMessages; i++) counts[i] = 0;
 }
 
-void Messages::startRecvs() {}
+void Messages::startRecvs()
+{
+  const int maxBytes = maxCount*sizeof(MessageParticle);
+  for (int i =0, offset = 0; i < nMessages; i++, offset += maxCount) {
+    assert(recvReqs[i] == MPI_REQUEST_NULL);
+    MPI_Irecv(recvParts+offset,maxBytes,MPI_BYTE,ranks[i],tag,MPI_COMM_WORLD,recvReqs+i);
+  }
+}
 
-void Messages::startSends() {}
+void Messages::startSends()
+{
+  const int maxBytes = maxCount*sizeof(MessageParticle);
+  for (int i =0, offset = 0; i < nMessages; i++, offset += maxCount) {
+    assert(sendReqs[i] == MPI_REQUEST_NULL);
+    const int bytes = counts[i]*sizeof(MessageParticle);
+    assert(bytes <= maxBytes);
+    MPI_Isend(sendParts+offset,bytes,MPI_BYTE,ranks[i],tag,MPI_COMM_WORLD,sendReqs+i);
+  }
+}
