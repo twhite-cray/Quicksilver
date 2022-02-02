@@ -281,7 +281,7 @@ void MC_Particle_Buffer::Unpack_Particle_Buffer(int buffer_index)
 
         assert(mcco->_messages.recvParts[offset+particle_index] == base_particle);
 
-        mcco->_particleVaultContainer->addProcessingParticle(base_particle);
+        //mcco->_particleVaultContainer->addProcessingParticle(base_particle);
     }
 }
 

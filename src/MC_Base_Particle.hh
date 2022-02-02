@@ -8,6 +8,7 @@
 #include "MC_Particle.hh"
 #include "MC_Location.hh"
 #include "DirectionCosine.hh"
+#include "Tallies.hh"
 
 
 struct MC_Data_Member_Operation

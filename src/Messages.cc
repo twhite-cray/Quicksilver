@@ -3,6 +3,7 @@
 #include "cudaUtils.hh"
 #include "MC_Base_Particle.hh"
 #include "MC_Particle_Buffer.hh"
+#include "ParticleVaultContainer.hh"
 
 static int uniqueTag = 33;
 
@@ -153,7 +154,17 @@ void Messages::addParticle(const MC_Base_Particle &part, const int buffer)
 
 void Messages::completeRecvs()
 {
+  MC_Base_Particle p;
   MPI_Waitall(nMessages,recvReqs,recvStats);
+  for (int i = 0, offset = 0; i < nMessages; i++, offset += maxCount) {
+    int count = 0;
+    MPI_Get_count(recvStats+i,mpiParticle,&count);
+    assert(count < maxCount);
+    for (int j = 0; j < count; j++) {
+      recvParts[offset+j].set(p);
+      mc._particleVaultContainer->addProcessingParticle(p);
+    }
+  }
 }
 
 void Messages::completeSends()
