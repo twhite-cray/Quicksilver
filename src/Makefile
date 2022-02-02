@@ -82,11 +82,6 @@
 #                   Define this for runs with OPENMP_TARGET but when you do not
 #                   want to target GPU devices only the CPU
 #
-# -DEXPONENTIAL_TALLY
-#                   Define this to run Cycle Tracking with an exponential
-#                   cell-based tally, in order to partially mimic photon
-#                   transport problems.
-#  
 # ------------------------------------------------------------------------------
 
 SHELL = /bin/bash

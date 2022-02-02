@@ -36,9 +36,6 @@ void CycleTrackingFunction( MonteCarlo *monteCarlo, MC_Particle &mc_particle, in
     bool keepTrackingThisParticle = false;
     unsigned int tally_index =      (particle_index) % monteCarlo->_tallies->GetNumBalanceReplications();
     unsigned int flux_tally_index = (particle_index) % monteCarlo->_tallies->GetNumFluxReplications();
-#ifdef EXPONENTIAL_TALLY
-    unsigned int cell_tally_index = (particle_index) % monteCarlo->_tallies->GetNumCellTallyReplications();
-#endif
     do
     {
         // Determine the outcome of a particle at the end of this segment such as:
@@ -47,9 +44,6 @@ void CycleTrackingFunction( MonteCarlo *monteCarlo, MC_Particle &mc_particle, in
         //   (1) Cross a facet of the current cell,
         //   (2) Reach the end of the time step and enter census,
         //
-#ifdef EXPONENTIAL_TALLY
-        monteCarlo->_tallies->TallyCellValue( exp(rngSample(&mc_particle.random_number_seed)) , mc_particle.domain, cell_tally_index, mc_particle.cell);
-#endif   
         MC_Segment_Outcome_type::Enum segment_outcome = MC_Segment_Outcome(monteCarlo, mc_particle, flux_tally_index);
 
         ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[tally_index]._numSegments);
