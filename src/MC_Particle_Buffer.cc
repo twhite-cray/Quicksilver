@@ -269,6 +269,8 @@ void MC_Particle_Buffer::Unpack_Particle_Buffer(int buffer_index)
       assert(count/unit == recv_buffer.num_particles);
     }
 
+    const int offset = buffer_index*(mcco->_messages.maxCount);
+
     // Unpack each particle and place into a partivault.
     for ( int particle_index = 0; particle_index < recv_buffer.num_particles; particle_index++)
     {
@@ -276,6 +278,8 @@ void MC_Particle_Buffer::Unpack_Particle_Buffer(int buffer_index)
                                 int_index, float_index, char_index, MC_Data_Member_Operation::Unpack);
 
         base_particle.last_event = MC_Tally_Event::Facet_Crossing_Communication;
+
+        assert(mcco->_messages.recvParts[offset+particle_index] == base_particle);
 
         mcco->_particleVaultContainer->addProcessingParticle(base_particle);
     }

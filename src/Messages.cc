@@ -46,6 +46,7 @@ bool MessageParticle::operator==(const MC_Base_Particle &that) const
       (numSegments == that.num_segments) &&
       (randomNumberSeed == that.random_number_seed) &&
       (identifier == that.identifier) &&
+      (that.last_event == MC_Tally_Event::Facet_Crossing_Communication) &&
       (numCollisions == that.num_collisions) &&
       (breed == that.breed) &&
       (species == that.species) &&
