@@ -6,9 +6,9 @@ class MC_Base_Particle;
 class MonteCarlo;
 
 struct MessageParticle {
-  MessageParticle(const MC_Base_Particle &that);
-  MessageParticle(const MessageParticle &that) = default;
-  void set(MC_Base_Particle &that);
+  MessageParticle &operator=(const MC_Base_Particle &that);
+  bool operator==(const MC_Base_Particle &that) const;
+  void set(MC_Base_Particle &that) const;
   double3 coordinate;
   double3 velocity;
   double kineticEnergy;

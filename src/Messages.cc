@@ -4,25 +4,54 @@
 #include "MC_Base_Particle.hh"
 #include "MC_Particle_Buffer.hh"
 
-MessageParticle::MessageParticle(const MC_Base_Particle &that):
-  coordinate{that.coordinate.x,that.coordinate.y,that.coordinate.z},
-  velocity{that.velocity.x,that.velocity.y,that.velocity.z},
-  kineticEnergy(that.kinetic_energy),
-  weight(that.weight),
-  timeToCensus(that.time_to_census),
-  age(that.age),
-  numMeanFreePaths(that.num_mean_free_paths),
-  numSegments(that.num_segments),
-  randomNumberSeed(that.random_number_seed),
-  identifier(that.identifier),
-  numCollisions(that.num_collisions),
-  breed(that.breed),
-  species(that.species),
-  domain(that.domain),
-  cell(that.cell)
-{}
+MessageParticle &MessageParticle::operator=(const MC_Base_Particle &that)
+{
+  coordinate.x = that.coordinate.x;
+  coordinate.y = that.coordinate.y;
+  coordinate.z = that.coordinate.z;
+  velocity.x = that.velocity.x;
+  velocity.y = that.velocity.y;
+  velocity.z = that.velocity.z;
+  kineticEnergy = that.kinetic_energy;
+  weight = that.weight;
+  timeToCensus = that.time_to_census;
+  age = that.age;
+  numMeanFreePaths = that.num_mean_free_paths;
+  numSegments = that.num_segments;
+  randomNumberSeed = that.random_number_seed;
+  identifier = that.identifier;
+  numCollisions = that.num_collisions;
+  breed = that.breed;
+  species = that.species;
+  domain = that.domain;
+  cell = that.cell;
+  return *this;
+}
 
-void MessageParticle::set(MC_Base_Particle &that)
+bool MessageParticle::operator==(const MC_Base_Particle &that) const
+{
+  return ((coordinate.x == that.coordinate.x) &&
+      (coordinate.y == that.coordinate.y) &&
+      (coordinate.z == that.coordinate.z) &&
+      (velocity.x == that.velocity.x) &&
+      (velocity.y == that.velocity.y) &&
+      (velocity.z == that.velocity.z) &&
+      (kineticEnergy == that.kinetic_energy) &&
+      (weight == that.weight) &&
+      (timeToCensus == that.time_to_census) &&
+      (age == that.age) &&
+      (numMeanFreePaths == that.num_mean_free_paths) &&
+      (numSegments == that.num_segments) &&
+      (randomNumberSeed == that.random_number_seed) &&
+      (identifier == that.identifier) &&
+      (numCollisions == that.num_collisions) &&
+      (breed == that.breed) &&
+      (species == that.species) &&
+      (domain == that.domain) &&
+      (cell == that.cell));
+}
+
+void MessageParticle::set(MC_Base_Particle &that) const
 {
   that.coordinate.x = coordinate.x;
   that.coordinate.y = coordinate.y;
@@ -72,6 +101,16 @@ Messages::~Messages()
 
 void Messages::init()
 {
+  if (nMessages) {
+    assert(maxCount == mc.particle_buffer->buffer_size);
+    assert(nMessages == mc.particle_buffer->processor_buffer_map.size());
+    for (const auto &pair : mc.particle_buffer->processor_buffer_map) {
+      assert(pair.second < nMessages);
+      assert(ranks[pair.second] == pair.first);
+    }
+    return;
+  }
+
   nMessages = mc.particle_buffer->num_buffers;
   maxCount = mc.particle_buffer->buffer_size;
   CHECK(hipHostMalloc(&counts,nMessages*sizeof(*counts)));
@@ -92,11 +131,22 @@ void Messages::init()
   CHECK(hipHostMalloc(&sendParts,msgBytes));
 }
 
-void Messages::addParticle(const MC_Base_Particle &part, const int buffer) {}
+void Messages::addParticle(const MC_Base_Particle &part, const int buffer)
+{
+  assert(buffer < nMessages);
+  const int i = counts[buffer]++;
+  assert(i < maxCount);
+  sendParts[buffer*maxCount+i] = part;
+}
 
-void Messages::completeRecvs() {}
+void Messages::completeRecvs()
+{
+}
 
-void Messages::completeSends() {}
+void Messages::completeSends()
+{
+  for (int i = 0; i < nMessages; i++) counts[i] = 0;
+}
 
 void Messages::startRecvs() {}
 

@@ -453,6 +453,7 @@ void MC_Particle_Buffer::Send_Particle_Buffers( )
 void MC_Particle_Buffer::Send_Particle_Buffer(int buffer)
 {
     particle_buffer_base_type &send_buffer = this->task[0].send_buffer[buffer];
+    assert(send_buffer.num_particles == mcco->_messages.counts[buffer]);
 
     if( send_buffer.num_particles > 0 )
     {
@@ -468,6 +469,7 @@ void MC_Particle_Buffer::Send_Particle_Buffer(int buffer)
         }
 
 
+        assert(send_buffer.processor == mcco->_messages.ranks[buffer]);
         mpiIsend(send_buffer.int_data, send_buffer.length, MPI_BYTE, send_buffer.processor,
                  MC_Tag_Particle_Buffer, mcco->processor_info->comm_mc_world,
                  &send_buffer.request_list);

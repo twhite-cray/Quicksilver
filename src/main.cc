@@ -102,6 +102,7 @@ void cycleInit( bool loadBalance )
     mcco->_tallies->_balanceTask[0]._start = mcco->_particleVaultContainer->sizeProcessing();
 
     mcco->particle_buffer->Initialize();
+    mcco->_messages.init();
 
     MC_SourceNow(mcco);
    
