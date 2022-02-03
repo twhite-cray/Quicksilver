@@ -491,12 +491,17 @@ namespace
          {
            distance_to_facet.distance = PhysicalConstants::_hugeDouble;
 
-           MC_General_Plane &plane = domain.mesh._cellGeometry[location.cell]._facet[facet_index];
+           MC_General_Plane &plane0 = domain.mesh._cellGeometry[location.cell]._facet[facet_index];
+           double4 &plane = ddomain.cellStates[location.cell].facets[facet_index];
+           assert(plane0.A == plane.x);
+           assert(plane0.B == plane.y);
+           assert(plane0.C == plane.z);
+           assert(plane0.D == plane.w);
 
            double facet_normal_dot_direction_cosine =
-             (plane.A * direction_cosine->alpha +
-              plane.B * direction_cosine->beta +
-              plane.C * direction_cosine->gamma);
+             (plane.x * direction_cosine->alpha +
+              plane.y * direction_cosine->beta +
+              plane.z * direction_cosine->gamma);
 
            // Consider only those facets whose outer normals have
            // a positive dot product with the direction cosine.
@@ -512,7 +517,7 @@ namespace
 
            double t = MCT_Nearest_Facet_3D_G_Distance_To_Segment(
                plane_tolerance,
-               facet_normal_dot_direction_cosine, plane.A, plane.B, plane.C, plane.D,
+               facet_normal_dot_direction_cosine, plane.x, plane.y, plane.z, plane.w,
                *facet_coords[0], *facet_coords[1], *facet_coords[2],
                coordinate, direction_cosine, false);
 
