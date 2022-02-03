@@ -11,9 +11,11 @@
 #include "macros.hh"
 #include "qs_assert.hh"
 
-void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault *processingVault, ParticleVault *processedVault )
+void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault *processingVault, ParticleVault *processedVault , Device &device)
 {
     MC_Particle mc_particle;
+    DeviceParticle p;
+
     unsigned tally_index = 0;
     unsigned flux_tally_index = 0;
 
@@ -23,6 +25,8 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault 
 
         if (previous != particle_index) {
           MC_Load_Particle(monteCarlo, mc_particle, processingVault, particle_index);
+          p = device.processing[particle_index];
+          assert(p.identifier == mc_particle.identifier);
           mc_particle.task = 0;
           tally_index =      (particle_index) % monteCarlo->_tallies->GetNumBalanceReplications();
           flux_tally_index = (particle_index) % monteCarlo->_tallies->GetNumFluxReplications();

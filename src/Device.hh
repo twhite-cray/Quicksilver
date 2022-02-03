@@ -2,6 +2,7 @@
 #include "MaterialDatabase.hh"
 #include "MC_Cell_State.hh"
 
+class MC_Base_Particle;
 class MonteCarlo;
 
 struct DeviceCellState {
@@ -44,14 +45,31 @@ struct DeviceNuclearDataIsotope {
   DeviceReaction *reactions;
 };
 
+struct DeviceParticle {
+
+  DeviceParticle &operator=(const MC_Base_Particle &that);
+  uint64_t identifier;
+};
+
 struct Device {
-  Device(): domains(nullptr), mats(nullptr), isotopes(nullptr) {}
+  Device():
+    domains(nullptr),
+    mats(nullptr),
+    isotopes(nullptr),
+    processingSize(nullptr),
+    processing(nullptr),
+    processed(nullptr)
+  {}
   Device(const Device &) = default;
   void init(MonteCarlo &mc);
   void cycleInit(MonteCarlo &mc);
+
   DeviceDomain *domains;
   DeviceMaterial *mats;
   DeviceNuclearDataIsotope *isotopes;
-};
 
+  int *processingSize;
+  DeviceParticle *processing;
+  DeviceParticle *processed;
+};
 

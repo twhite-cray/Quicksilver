@@ -121,6 +121,8 @@ void cycleTracking(MonteCarlo *monteCarlo)
     MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking);
 
     bool done = false;
+    Device &device = monteCarlo->_device;
+    Messages &messages = monteCarlo->_messages;
 
     ParticleVaultContainer &my_particle_vault = *(monteCarlo->_particleVaultContainer);
 
@@ -130,18 +132,20 @@ void cycleTracking(MonteCarlo *monteCarlo)
 
         while ( !done )
         {
-            monteCarlo->_messages.startRecvs();
+            messages.startRecvs();
             MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking_Kernel);
 
             ParticleVault *processingVault = my_particle_vault.getTaskProcessingVault();
             ParticleVault *processedVault =  my_particle_vault.getTaskProcessedVault();
 
             int numParticles = processingVault->size();
+            *device.processingSize = numParticles;
+            for (int i = 0; i < numParticles; i++) device.processing[i] = (*processingVault)[i];
 
             if ( numParticles != 0 )
             {
-              NVTX_Range trackingKernel("cycleTracking_TrackingKernel"); // range ends at end of scope
-              CycleTrackingGuts( monteCarlo, numParticles, processingVault, processedVault );
+              NVTX_Range trackingKernel("cycleTracking_TrackingKernel"); 
+              CycleTrackingGuts( monteCarlo, numParticles, processingVault, processedVault, device );
             }
 
             particle_count += numParticles;
@@ -150,13 +154,9 @@ void cycleTracking(MonteCarlo *monteCarlo)
 
             MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking_MPI);
 
-            // Next, communicate particles that have crossed onto
-            // other MPI ranks.
             NVTX_Range cleanAndComm("cycleTracking_clean_and_comm");
 
             SendQueue &sendQueue = *(my_particle_vault.getSendQueue());
-
-            //Move particles from send queue to the send buffers
             for ( int index = 0; index < sendQueue.size(); index++ )
             {
               sendQueueTuple& sendQueueT = sendQueue.getTuple( index );
@@ -165,11 +165,10 @@ void cycleTracking(MonteCarlo *monteCarlo)
               processingVault->getBaseParticleComm( mcb_particle, sendQueueT._particleIndex );
 
               int buffer = monteCarlo->particle_buffer->Choose_Buffer(sendQueueT._neighbor );
-              monteCarlo->_messages.addParticle(mcb_particle,buffer);
+              messages.addParticle(mcb_particle,buffer);
             }
 
-            monteCarlo->_messages.startSends();
-
+            messages.startSends();
             processingVault->clear(); //remove the invalid particles
             sendQueue.clear();
 
@@ -178,8 +177,8 @@ void cycleTracking(MonteCarlo *monteCarlo)
             MPI_Barrier(MPI_COMM_WORLD);
 
             // receive any particles that have arrived from other ranks
-            monteCarlo->_messages.completeRecvs();
-            monteCarlo->_messages.completeSends();
+            messages.completeRecvs();
+            messages.completeSends();
 
             MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking_MPI);
 

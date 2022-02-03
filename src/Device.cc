@@ -1,8 +1,16 @@
 #include "Device.hh"
 
 #include "cudaUtils.hh"
+#include "MC_Base_Particle.hh"
 #include "MonteCarlo.hh"
 #include "NuclearData.hh"
+#include "ParticleVaultContainer.hh"
+
+DeviceParticle &DeviceParticle::operator=(const MC_Base_Particle &that)
+{
+  identifier = that.identifier;
+  return *this;
+}
 
 void Device::init(MonteCarlo &mc)
 {
@@ -83,6 +91,18 @@ void Device::init(MonteCarlo &mc)
       }
       isotopes[i].reactions[0].crossSections[k] = sum;
     }
+  }
+
+  CHECK(hipHostMalloc(&processingSize,sizeof(int)));
+  *processingSize = 0;
+
+  {
+    const long bytes = sizeof(DeviceParticle)*mc._particleVaultContainer->getVaultSize();
+    assert(bytes);
+    CHECK(hipHostMalloc(&processing,bytes));
+    memset(processing,0,bytes);
+    CHECK(hipHostMalloc(&processed,bytes));
+    memset(processed,0,bytes);
   }
 }
 
