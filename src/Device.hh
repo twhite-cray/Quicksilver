@@ -6,6 +6,7 @@ class MC_Base_Particle;
 class MonteCarlo;
 
 struct DeviceCellState {
+  static constexpr int numFacets = 24;
   DeviceCellState &operator=(const MC_Cell_State &that)
   {
     cellNumberDensity = that._cellNumberDensity;
@@ -13,6 +14,7 @@ struct DeviceCellState {
     return *this;
   }
   double *totals;
+  double4 facets[numFacets];
   double cellNumberDensity;
   int material;
 };

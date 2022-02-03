@@ -13,12 +13,14 @@
 #include "MC_RNG_State.hh"
 #include "PhysicalConstants.hh"
 #include "DeclareMacro.hh"
+#include "Device.hh"
 
 namespace
 {
    MC_Nearest_Facet MCT_Nearest_Facet_3D_G(
       MC_Particle *mc_particle,
       MC_Domain &domain,
+      DeviceDomain &ddomain,
       MC_Location &location,
       MC_Vector &coordinate,
       const DirectionCosine *direction_cosine);
@@ -33,21 +35,6 @@ namespace
       const MC_Location &location,
       MC_Vector &coordinate, // input/output: move this coordinate
       double move_factor);      // input: multiplication factor for move
-
-   MC_Nearest_Facet MCT_Nearest_Facet_Find_Nearest(
-      int num_facets_per_cell,
-      MC_Distance_To_Facet *distance_to_facet);
-
-   MC_Nearest_Facet MCT_Nearest_Facet_Find_Nearest(
-      MC_Particle *mc_particle,
-      MC_Domain *domain,
-      MC_Location *location,
-      MC_Vector &coordinate,
-      int &iteration, // input/output
-      double &move_factor, // input/output
-      int num_facets_per_cell,
-      MC_Distance_To_Facet *distance_to_facet,
-      int &retry /* output */ );
 
    void MCT_Facet_Points_3D_G(
       const MC_Domain    &domain,               // input
@@ -93,9 +80,10 @@ MC_Nearest_Facet MCT_Nearest_Facet(MC_Particle *mc_particle,
 //                          location.region, location.domain, location.cell, output_string.c_str());
     }
     MC_Domain &domain = monteCarlo->domain[location.domain];
+    DeviceDomain &ddomain = monteCarlo->_device.domains[location.domain];
 
     MC_Nearest_Facet nearest_facet =
-       MCT_Nearest_Facet_3D_G(mc_particle, domain, location, coordinate, direction_cosine);
+       MCT_Nearest_Facet_3D_G(mc_particle, domain, ddomain, location, coordinate, direction_cosine);
 
     if (nearest_facet.distance_to_facet < 0) { nearest_facet.distance_to_facet = 0; }
 
@@ -406,68 +394,16 @@ void MCT_Reflect_Particle(MonteCarlo *monteCarlo, MC_Particle &particle)
 
 namespace
 {
-   ///  Loop over all the facets, return the minimum distance.
-   MC_Nearest_Facet MCT_Nearest_Facet_Find_Nearest(int num_facets_per_cell,
-                                                   MC_Distance_To_Facet *distance_to_facet)
-   {
-      MC_Nearest_Facet nearest_facet;
-
-      // largest negative distance (smallest magnitude, but negative)
-      MC_Nearest_Facet nearest_negative_facet;
-      nearest_negative_facet.distance_to_facet = -PhysicalConstants::_hugeDouble;
-
-      // Determine the facet that is closest to the specified coordinates.
-      for (int facet_index = 0; facet_index < num_facets_per_cell; facet_index++)
-      {
-         if ( distance_to_facet[facet_index].distance > 0.0 )
-         {
-            if ( distance_to_facet[facet_index].distance <= nearest_facet.distance_to_facet )
-            {
-               nearest_facet.distance_to_facet = distance_to_facet[facet_index].distance;
-               nearest_facet.facet             = facet_index;
-            }
-         }
-         else // zero or negative distance
-         {
-            if ( distance_to_facet[facet_index].distance > nearest_negative_facet.distance_to_facet )
-            {
-               // smallest in magnitude, but negative
-               nearest_negative_facet.distance_to_facet = distance_to_facet[facet_index].distance;
-               nearest_negative_facet.facet             = facet_index;
-            }
-         }
-      }
-
-
-      if ( nearest_facet.distance_to_facet == PhysicalConstants::_hugeDouble )
-      {
-         if ( nearest_negative_facet.distance_to_facet != -PhysicalConstants::_hugeDouble )
-         {
-            // no positive solution, so allow a negative solution, that had really small magnitude.
-            nearest_facet.distance_to_facet = nearest_negative_facet.distance_to_facet;
-            nearest_facet.facet             = nearest_negative_facet.facet;
-         }
-      }
-
-      return nearest_facet;
-   }
-}
-
-
-namespace
-{
-   ///  Loop over all the facets, return the minimum distance.
-   MC_Nearest_Facet MCT_Nearest_Facet_Find_Nearest(MC_Particle *mc_particle,
+   void MCT_Nearest_Facet_Find_Nearest(MC_Particle *mc_particle,
                                                    MC_Domain *domain,
                                                    MC_Location *location,
                                                    MC_Vector &coordinate,
                                                    int &iteration, // input/output
                                                    double &move_factor, // input/output
                                                    int num_facets_per_cell,
-                                                   MC_Distance_To_Facet *distance_to_facet,
+                                                   MC_Nearest_Facet &nearest_facet,
                                                    int &retry /* output */ )
    {
-      MC_Nearest_Facet nearest_facet = MCT_Nearest_Facet_Find_Nearest(num_facets_per_cell, distance_to_facet);
 
       const int max_allowed_segments = 10000000;
 
@@ -505,7 +441,6 @@ namespace
 
          }
       }
-      return nearest_facet;
    }
 }
 
@@ -522,6 +457,7 @@ namespace
    MC_Nearest_Facet MCT_Nearest_Facet_3D_G(
       MC_Particle *mc_particle,
       MC_Domain &domain,
+      DeviceDomain &ddomain,
       MC_Location &location,
       MC_Vector &coordinate,
       const DirectionCosine *direction_cosine)
@@ -533,6 +469,7 @@ namespace
 
       // Initialize some data for the unstructured, hexahedral mesh.
       int num_facets_per_cell = domain.mesh._cellConnectivity[location.cell].num_facets;
+      assert(num_facets_per_cell == DeviceCellState::numFacets);
 
       while (true) // will break out when distance is found
       {
@@ -542,49 +479,80 @@ namespace
                                          coordinate.y*coordinate.y +
                                          coordinate.z*coordinate.z);
 
-         MC_Distance_To_Facet distance_to_facet[24];
+         MC_Nearest_Facet nearest_facet;
+
+         // largest negative distance (smallest magnitude, but negative)
+         MC_Nearest_Facet nearest_negative_facet;
+         nearest_negative_facet.distance_to_facet = -PhysicalConstants::_hugeDouble;
+
+         MC_Distance_To_Facet distance_to_facet;
 
          for (int facet_index = 0; facet_index < num_facets_per_cell; facet_index++)
          {
-//to-do        mcco->distance_to_facet->task[my_task_num].facet[facet_index].distance = PhysicalConstants::_hugeDouble;
-            distance_to_facet[facet_index].distance = PhysicalConstants::_hugeDouble;
+           distance_to_facet.distance = PhysicalConstants::_hugeDouble;
 
-            MC_General_Plane &plane = domain.mesh._cellGeometry[location.cell]._facet[facet_index];
+           MC_General_Plane &plane = domain.mesh._cellGeometry[location.cell]._facet[facet_index];
 
-            double facet_normal_dot_direction_cosine =
-               (plane.A * direction_cosine->alpha +
-                plane.B * direction_cosine->beta +
-                plane.C * direction_cosine->gamma);
+           double facet_normal_dot_direction_cosine =
+             (plane.A * direction_cosine->alpha +
+              plane.B * direction_cosine->beta +
+              plane.C * direction_cosine->gamma);
 
-            // Consider only those facets whose outer normals have
-            // a positive dot product with the direction cosine.
-            // I.e. the particle is LEAVING the cell.
-            if (facet_normal_dot_direction_cosine <= 0.0) { continue; }
+           // Consider only those facets whose outer normals have
+           // a positive dot product with the direction cosine.
+           // I.e. the particle is LEAVING the cell.
+           if (facet_normal_dot_direction_cosine <= 0.0) { continue; }
 
-            /* profiling with gprof showed that putting a call to MC_Facet_Coordinates_3D_G
-               slowed down the code by about 10%, so we get the facet coords "by hand." */
-            int *point = domain.mesh._cellConnectivity[location.cell]._facet[facet_index].point;
-            facet_coords[0] = &domain.mesh._node[point[0]];
-            facet_coords[1] = &domain.mesh._node[point[1]];
-            facet_coords[2] = &domain.mesh._node[point[2]];
+           /* profiling with gprof showed that putting a call to MC_Facet_Coordinates_3D_G
+              slowed down the code by about 10%, so we get the facet coords "by hand." */
+           int *point = domain.mesh._cellConnectivity[location.cell]._facet[facet_index].point;
+           facet_coords[0] = &domain.mesh._node[point[0]];
+           facet_coords[1] = &domain.mesh._node[point[1]];
+           facet_coords[2] = &domain.mesh._node[point[2]];
 
-            double t = MCT_Nearest_Facet_3D_G_Distance_To_Segment(
+           double t = MCT_Nearest_Facet_3D_G_Distance_To_Segment(
                plane_tolerance,
                facet_normal_dot_direction_cosine, plane.A, plane.B, plane.C, plane.D,
                *facet_coords[0], *facet_coords[1], *facet_coords[2],
                coordinate, direction_cosine, false);
 
-//to-do        mcco->distance_to_facet->task[my_task_num].facet[facet_index].distance = t;
-            distance_to_facet[facet_index].distance = t;
-         } // for facet_index
+           distance_to_facet.distance = t;
+
+           if ( distance_to_facet.distance > 0.0 )
+           {
+             if ( distance_to_facet.distance <= nearest_facet.distance_to_facet )
+             {
+               nearest_facet.distance_to_facet = distance_to_facet.distance;
+               nearest_facet.facet             = facet_index;
+             }
+           }
+           else // zero or negative distance
+           {
+             if ( distance_to_facet.distance > nearest_negative_facet.distance_to_facet )
+             {
+               // smallest in magnitude, but negative
+               nearest_negative_facet.distance_to_facet = distance_to_facet.distance;
+               nearest_negative_facet.facet             = facet_index;
+             }
+           }
+         }
+
+         if ( nearest_facet.distance_to_facet == PhysicalConstants::_hugeDouble )
+         {
+           if ( nearest_negative_facet.distance_to_facet != -PhysicalConstants::_hugeDouble )
+           {
+             // no positive solution, so allow a negative solution, that had really small magnitude.
+             nearest_facet.distance_to_facet = nearest_negative_facet.distance_to_facet;
+             nearest_facet.facet             = nearest_negative_facet.facet;
+           }
+         }
 
          int retry = 0;
 
-         MC_Nearest_Facet nearest_facet = MCT_Nearest_Facet_Find_Nearest(
+         MCT_Nearest_Facet_Find_Nearest(
             mc_particle, &domain, &location, coordinate,
             iteration, move_factor, num_facets_per_cell,
-//to-do       mcco->distance_to_facet->task[my_task_num].facet,
-            distance_to_facet,
+            nearest_facet,
             retry);
 
 
