@@ -16,6 +16,7 @@ struct DeviceCellState {
   double *totals;
   double4 facets[numFacets];
   double cellNumberDensity;
+  int3 points[numFacets];
   int material;
 };
 

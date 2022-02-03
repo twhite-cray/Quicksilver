@@ -492,16 +492,16 @@ namespace
            distance_to_facet.distance = PhysicalConstants::_hugeDouble;
 
            MC_General_Plane &plane0 = domain.mesh._cellGeometry[location.cell]._facet[facet_index];
-           double4 &plane = ddomain.cellStates[location.cell].facets[facet_index];
-           assert(plane0.A == plane.x);
-           assert(plane0.B == plane.y);
-           assert(plane0.C == plane.z);
-           assert(plane0.D == plane.w);
+           const double4 &dplane = ddomain.cellStates[location.cell].facets[facet_index];
+           assert(plane0.A == dplane.x);
+           assert(plane0.B == dplane.y);
+           assert(plane0.C == dplane.z);
+           assert(plane0.D == dplane.w);
 
            double facet_normal_dot_direction_cosine =
-             (plane.x * direction_cosine->alpha +
-              plane.y * direction_cosine->beta +
-              plane.z * direction_cosine->gamma);
+             (dplane.x * direction_cosine->alpha +
+              dplane.y * direction_cosine->beta +
+              dplane.z * direction_cosine->gamma);
 
            // Consider only those facets whose outer normals have
            // a positive dot product with the direction cosine.
@@ -511,13 +511,17 @@ namespace
            /* profiling with gprof showed that putting a call to MC_Facet_Coordinates_3D_G
               slowed down the code by about 10%, so we get the facet coords "by hand." */
            int *point = domain.mesh._cellConnectivity[location.cell]._facet[facet_index].point;
-           facet_coords[0] = &domain.mesh._node[point[0]];
-           facet_coords[1] = &domain.mesh._node[point[1]];
-           facet_coords[2] = &domain.mesh._node[point[2]];
+           const int3 &dpoint = ddomain.cellStates[location.cell].points[facet_index];
+           assert(dpoint.x == point[0]);
+           assert(dpoint.y == point[1]);
+           assert(dpoint.z == point[2]);
+           facet_coords[0] = &domain.mesh._node[dpoint.x];
+           facet_coords[1] = &domain.mesh._node[dpoint.y];
+           facet_coords[2] = &domain.mesh._node[dpoint.z];
 
            double t = MCT_Nearest_Facet_3D_G_Distance_To_Segment(
                plane_tolerance,
-               facet_normal_dot_direction_cosine, plane.x, plane.y, plane.z, plane.w,
+               facet_normal_dot_direction_cosine, dplane.x, dplane.y, dplane.z, dplane.w,
                *facet_coords[0], *facet_coords[1], *facet_coords[2],
                coordinate, direction_cosine, false);
 
