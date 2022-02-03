@@ -4,6 +4,7 @@
 #include "portability.hh"
 #include "DeclareMacro.hh"
 
+struct Device;
 struct DeviceDomain;
 class MC_Particle;
 class MC_Domain;
@@ -23,7 +24,7 @@ MC_Nearest_Facet MCT_Nearest_Facet(
    double distance_threshold,
    double current_best_distance,
    bool new_segment, 
-   MonteCarlo* monteCarlo);
+   const Device &device);
 
 
 void MCT_Generate_Coordinate_3D_G(

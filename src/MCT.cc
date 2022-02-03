@@ -19,8 +19,7 @@ namespace
 {
    MC_Nearest_Facet MCT_Nearest_Facet_3D_G(
       MC_Particle *mc_particle,
-      MC_Domain &domain,
-      DeviceDomain &ddomain,
+      const DeviceDomain &ddomain,
       MC_Location &location,
       MC_Vector &coordinate,
       const DirectionCosine *direction_cosine);
@@ -31,8 +30,7 @@ namespace
                                              const MC_Vector &v3);
 
    void MCT_Nearest_Facet_3D_G_Move_Particle(
-      MC_Domain &domain, // input: domain
-      DeviceDomain &ddomain,
+      const DeviceDomain &ddomain,
       const MC_Location &location,
       MC_Vector &coordinate, // input/output: move this coordinate
       double move_factor);      // input: multiplication factor for move
@@ -70,21 +68,16 @@ MC_Nearest_Facet MCT_Nearest_Facet(MC_Particle *mc_particle,
                                    double distance_threshold,
                                    double current_best_distance,
                                    bool new_segment,
-                                   MonteCarlo* monteCarlo )
+                                   const Device &device )
 {
     if (location.domain < 0 || location.cell < 0)
     {
        qs_assert(false);
-//         std::string output_string;
-//         mc_particle->Copy_Particle_To_String(output_string);
-//         MC_Fatal_Jump( "Bad location value. region: %d domain: %d, cell: %d.\nParticle record\n%s\n",
-//                          location.region, location.domain, location.cell, output_string.c_str());
     }
-    MC_Domain &domain = monteCarlo->domain[location.domain];
-    DeviceDomain &ddomain = monteCarlo->_device.domains[location.domain];
+    const DeviceDomain &ddomain = device.domains[location.domain];
 
     MC_Nearest_Facet nearest_facet =
-       MCT_Nearest_Facet_3D_G(mc_particle, domain, ddomain, location, coordinate, direction_cosine);
+       MCT_Nearest_Facet_3D_G(mc_particle, ddomain, location, coordinate, direction_cosine);
 
     if (nearest_facet.distance_to_facet < 0) { nearest_facet.distance_to_facet = 0; }
 
@@ -116,10 +109,9 @@ void MCT_Generate_Coordinate_3D_G(uint64_t *random_number_seed,
                                   MonteCarlo* monteCarlo )
 {
     const MC_Domain &domain = monteCarlo->domain[domain_num];
-    DeviceDomain &ddomain = monteCarlo->_device.domains[domain_num];
 
     // Determine the cell-center nodal point coordinates.
-    MC_Vector center = MCT_Cell_Position_3D_G(ddomain, cell);
+    MC_Vector center = MCT_Cell_Position_3D_G(domain, cell);
 
     int num_facets = domain.mesh._cellConnectivity[cell].num_facets;
     if (num_facets == 0)
@@ -421,8 +413,7 @@ void MCT_Reflect_Particle(MonteCarlo *monteCarlo, MC_Particle &particle)
 namespace
 {
    void MCT_Nearest_Facet_Find_Nearest(MC_Particle *mc_particle,
-                                                   MC_Domain *domain,
-                                                   DeviceDomain &ddomain,
+                                                   const DeviceDomain &ddomain,
                                                    MC_Location *location,
                                                    MC_Vector &coordinate,
                                                    int &iteration, // input/output
@@ -443,7 +434,7 @@ namespace
          {
             // Could not find a solution, so move the particle towards the center of the cell
             // and try again.
-            MCT_Nearest_Facet_3D_G_Move_Particle(*domain, ddomain, *location, coordinate, move_factor);
+            MCT_Nearest_Facet_3D_G_Move_Particle(ddomain, *location, coordinate, move_factor);
 
             iteration++;
             move_factor *= 2.0;
@@ -483,20 +474,16 @@ namespace
 
    MC_Nearest_Facet MCT_Nearest_Facet_3D_G(
       MC_Particle *mc_particle,
-      MC_Domain &domain,
-      DeviceDomain &ddomain,
+      const DeviceDomain &ddomain,
       MC_Location &location,
       MC_Vector &coordinate,
       const DirectionCosine *direction_cosine)
    {
-      // int my_task_num = mc_particle == NULL ? 0 : mc_particle->task;
-      MC_Vector *facet_coords[3];
       int                    iteration = 0;
       double                 move_factor = 0.5 * PhysicalConstants::_smallDouble;
 
       // Initialize some data for the unstructured, hexahedral mesh.
-      int num_facets_per_cell = domain.mesh._cellConnectivity[location.cell].num_facets;
-      assert(num_facets_per_cell == DeviceCellState::numFacets);
+      static constexpr int num_facets_per_cell = DeviceCellState::numFacets;
 
       while (true) // will break out when distance is found
       {
@@ -518,12 +505,7 @@ namespace
          {
            distance_to_facet.distance = PhysicalConstants::_hugeDouble;
 
-           MC_General_Plane &plane0 = domain.mesh._cellGeometry[location.cell]._facet[facet_index];
            const double4 &dplane = ddomain.cellStates[location.cell].facets[facet_index];
-           assert(plane0.A == dplane.x);
-           assert(plane0.B == dplane.y);
-           assert(plane0.C == dplane.z);
-           assert(plane0.D == dplane.w);
 
            double facet_normal_dot_direction_cosine =
              (dplane.x * direction_cosine->alpha +
@@ -537,21 +519,11 @@ namespace
 
            /* profiling with gprof showed that putting a call to MC_Facet_Coordinates_3D_G
               slowed down the code by about 10%, so we get the facet coords "by hand." */
-           int *point = domain.mesh._cellConnectivity[location.cell]._facet[facet_index].point;
            const int3 &dpoint = ddomain.cellStates[location.cell].facetPoints[facet_index];
-           assert(dpoint.x == point[0]);
-           assert(dpoint.y == point[1]);
-           assert(dpoint.z == point[2]);
-           facet_coords[0] = &domain.mesh._node[dpoint.x];
-           facet_coords[1] = &domain.mesh._node[dpoint.y];
-           facet_coords[2] = &domain.mesh._node[dpoint.z];
 
-           double3 &nodeX = ddomain.nodes[dpoint.x];
-           double3 &nodeY = ddomain.nodes[dpoint.y];
-           double3 &nodeZ = ddomain.nodes[dpoint.z];
-           assert(*facet_coords[0] == nodeX);
-           assert(*facet_coords[1] == nodeY);
-           assert(*facet_coords[2] == nodeZ);
+           const double3 &nodeX = ddomain.nodes[dpoint.x];
+           const double3 &nodeY = ddomain.nodes[dpoint.y];
+           const double3 &nodeZ = ddomain.nodes[dpoint.z];
 
            double t = MCT_Nearest_Facet_3D_G_Distance_To_Segment(
                plane_tolerance,
@@ -593,7 +565,7 @@ namespace
          int retry = 0;
 
          MCT_Nearest_Facet_Find_Nearest(
-            mc_particle, &domain, ddomain, &location, coordinate,
+            mc_particle, ddomain, &location, coordinate,
             iteration, move_factor, num_facets_per_cell,
             nearest_facet,
             retry);
@@ -633,8 +605,7 @@ namespace
 namespace
 {
    ///  Move the input particle by a small amount toward the center of the cell.
-   void MCT_Nearest_Facet_3D_G_Move_Particle(MC_Domain &domain, // input: domain
-                                             DeviceDomain &ddomain,
+   void MCT_Nearest_Facet_3D_G_Move_Particle(const DeviceDomain &ddomain,
                                              const MC_Location &location,
                                              MC_Vector &coordinate, // input/output: move this coordinate
                                              double move_factor)      // input: multiplication factor for move

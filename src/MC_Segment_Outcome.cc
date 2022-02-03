@@ -103,7 +103,7 @@ MC_Segment_Outcome_type::Enum MC_Segment_Outcome(MonteCarlo* monteCarlo, MC_Part
     // Calculate the minimum distance to each facet of the cell.
     MC_Nearest_Facet nearest_facet;
         nearest_facet = MCT_Nearest_Facet(&mc_particle, location, mc_particle.coordinate,
-                                  direction_cosine, distance_threshold, current_best_distance, new_segment, monteCarlo);
+                                  direction_cosine, distance_threshold, current_best_distance, new_segment, device);
 
     mc_particle.normal_dot = nearest_facet.dot_product;
 
