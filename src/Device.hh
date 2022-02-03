@@ -7,6 +7,7 @@ class MonteCarlo;
 
 struct DeviceCellState {
   static constexpr int numFacets = 24;
+  static constexpr int numQuadPoints = 14;
   DeviceCellState &operator=(const MC_Cell_State &that)
   {
     cellNumberDensity = that._cellNumberDensity;
@@ -16,7 +17,8 @@ struct DeviceCellState {
   double *totals;
   double4 facets[numFacets];
   double cellNumberDensity;
-  int3 points[numFacets];
+  int3 facetPoints[numFacets];
+  int quadPoints[numQuadPoints];
   int material;
 };
 

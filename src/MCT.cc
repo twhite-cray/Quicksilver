@@ -32,6 +32,7 @@ namespace
 
    void MCT_Nearest_Facet_3D_G_Move_Particle(
       MC_Domain &domain, // input: domain
+      DeviceDomain &ddomain,
       const MC_Location &location,
       MC_Vector &coordinate, // input/output: move this coordinate
       double move_factor);      // input: multiplication factor for move
@@ -47,9 +48,9 @@ namespace
       double plane_tolerance,
       double facet_normal_dot_direction_cosine,
       double A, double B, double C, double D,
-      const MC_Vector &facet_coords0,
-      const MC_Vector &facet_coords1,
-      const MC_Vector &facet_coords2,
+      const double3 &facet_coords0,
+      const double3 &facet_coords1,
+      const double3 &facet_coords2,
       const MC_Vector &coordinate,
       const DirectionCosine *direction_cosine,
       bool allow_enter);
@@ -115,9 +116,10 @@ void MCT_Generate_Coordinate_3D_G(uint64_t *random_number_seed,
                                   MonteCarlo* monteCarlo )
 {
     const MC_Domain &domain = monteCarlo->domain[domain_num];
+    DeviceDomain &ddomain = monteCarlo->_device.domains[domain_num];
 
     // Determine the cell-center nodal point coordinates.
-    MC_Vector center = MCT_Cell_Position_3D_G(domain, cell);
+    MC_Vector center = MCT_Cell_Position_3D_G(domain, ddomain, cell);
 
     int num_facets = domain.mesh._cellConnectivity[cell].num_facets;
     if (num_facets == 0)
@@ -219,6 +221,35 @@ MC_Vector MCT_Cell_Position_3D_G(const MC_Domain &domain,
    return coordinate;
 }
 
+MC_Vector MCT_Cell_Position_3D_G(const MC_Domain &domain,
+                                 const DeviceDomain &ddomain,
+                                 int cell_index)
+{
+   MC_Vector coordinate;
+
+   int num_points = domain.mesh._cellConnectivity[cell_index].num_points;
+   assert(num_points == DeviceCellState::numQuadPoints);
+
+   for ( int point_index = 0; point_index < num_points; point_index ++ )
+   {
+      int point = domain.mesh._cellConnectivity[cell_index]._point[point_index];
+      assert(point == ddomain.cellStates[cell_index].quadPoints[point_index]);
+
+      assert(domain.mesh._node[point] == ddomain.nodes[point]);
+
+      coordinate.x += domain.mesh._node[point].x;
+      coordinate.y += domain.mesh._node[point].y;
+      coordinate.z += domain.mesh._node[point].z;
+   }
+
+   double one_over_num_points = 1.0/((double)num_points);
+   coordinate.x *= one_over_num_points;
+   coordinate.y *= one_over_num_points;
+   coordinate.z *= one_over_num_points;
+
+   return coordinate;
+}
+
 
 namespace
 {
@@ -245,9 +276,9 @@ namespace
    double MCT_Nearest_Facet_3D_G_Distance_To_Segment(double plane_tolerance,
                                                      double facet_normal_dot_direction_cosine,
                                                      double A, double B, double C, double D,
-                                                     const MC_Vector &facet_coords0,
-                                                     const MC_Vector &facet_coords1,
-                                                     const MC_Vector &facet_coords2,
+                                                     const double3 &facet_coords0,
+                                                     const double3 &facet_coords1,
+                                                     const double3 &facet_coords2,
                                                      const MC_Vector &coordinate,
                                                      const DirectionCosine *direction_cosine,
                                                      bool allow_enter)
@@ -396,6 +427,7 @@ namespace
 {
    void MCT_Nearest_Facet_Find_Nearest(MC_Particle *mc_particle,
                                                    MC_Domain *domain,
+                                                   DeviceDomain &ddomain,
                                                    MC_Location *location,
                                                    MC_Vector &coordinate,
                                                    int &iteration, // input/output
@@ -416,7 +448,7 @@ namespace
          {
             // Could not find a solution, so move the particle towards the center of the cell
             // and try again.
-            MCT_Nearest_Facet_3D_G_Move_Particle(*domain, *location, coordinate, move_factor);
+            MCT_Nearest_Facet_3D_G_Move_Particle(*domain, ddomain, *location, coordinate, move_factor);
 
             iteration++;
             move_factor *= 2.0;
@@ -511,7 +543,7 @@ namespace
            /* profiling with gprof showed that putting a call to MC_Facet_Coordinates_3D_G
               slowed down the code by about 10%, so we get the facet coords "by hand." */
            int *point = domain.mesh._cellConnectivity[location.cell]._facet[facet_index].point;
-           const int3 &dpoint = ddomain.cellStates[location.cell].points[facet_index];
+           const int3 &dpoint = ddomain.cellStates[location.cell].facetPoints[facet_index];
            assert(dpoint.x == point[0]);
            assert(dpoint.y == point[1]);
            assert(dpoint.z == point[2]);
@@ -529,7 +561,7 @@ namespace
            double t = MCT_Nearest_Facet_3D_G_Distance_To_Segment(
                plane_tolerance,
                facet_normal_dot_direction_cosine, dplane.x, dplane.y, dplane.z, dplane.w,
-               *facet_coords[0], *facet_coords[1], *facet_coords[2],
+               nodeX, nodeY, nodeZ,
                coordinate, direction_cosine, false);
 
            distance_to_facet.distance = t;
@@ -566,7 +598,7 @@ namespace
          int retry = 0;
 
          MCT_Nearest_Facet_Find_Nearest(
-            mc_particle, &domain, &location, coordinate,
+            mc_particle, &domain, ddomain, &location, coordinate,
             iteration, move_factor, num_facets_per_cell,
             nearest_facet,
             retry);
@@ -607,11 +639,12 @@ namespace
 {
    ///  Move the input particle by a small amount toward the center of the cell.
    void MCT_Nearest_Facet_3D_G_Move_Particle(MC_Domain &domain, // input: domain
+                                             DeviceDomain &ddomain,
                                              const MC_Location &location,
                                              MC_Vector &coordinate, // input/output: move this coordinate
                                              double move_factor)      // input: multiplication factor for move
    {
-      MC_Vector move_to = MCT_Cell_Position_3D_G(domain, location.cell);
+      MC_Vector move_to = MCT_Cell_Position_3D_G(domain, ddomain, location.cell);
 
       coordinate.x += move_factor * ( move_to.x - coordinate.x );
       coordinate.y += move_factor * ( move_to.y - coordinate.y );

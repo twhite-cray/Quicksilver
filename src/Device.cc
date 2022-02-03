@@ -45,7 +45,10 @@ void Device::init(MonteCarlo &mc)
         const MC_General_Plane &plane = mc.domain[i].mesh._cellGeometry[j]._facet[k];
         css[j].facets[k] = double4{plane.A,plane.B,plane.C,plane.D};
         const int *const p = mc.domain[i].mesh._cellConnectivity[j]._facet[k].point;
-        css[j].points[k] = int3{p[0],p[1],p[2]};
+        css[j].facetPoints[k] = int3{p[0],p[1],p[2]};
+      }
+      for (int k = 0; k < DeviceCellState::numQuadPoints; k++) {
+        css[j].quadPoints[k] = mc.domain[i].mesh._cellConnectivity[j]._point[k];
       }
     }
     css += csSize;

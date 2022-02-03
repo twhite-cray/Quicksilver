@@ -4,6 +4,7 @@
 #include "portability.hh"
 #include "DeclareMacro.hh"
 
+struct DeviceDomain;
 class MC_Particle;
 class MC_Domain;
 class MC_Location;
@@ -31,6 +32,11 @@ void MCT_Generate_Coordinate_3D_G(
    int cell,
    MC_Vector &coordinate,
    MonteCarlo* monteCarlo);
+
+MC_Vector MCT_Cell_Position_3D_G(
+   const MC_Domain   &domain,
+   const DeviceDomain &ddomain,
+   int cell_index);
 
 MC_Vector MCT_Cell_Position_3D_G(
    const MC_Domain   &domain,
