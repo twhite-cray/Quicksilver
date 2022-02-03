@@ -75,6 +75,7 @@ struct Device {
   DeviceDomain *domains;
   DeviceMaterial *mats;
   DeviceNuclearDataIsotope *isotopes;
+  long *numSegments;
 
   int *processingSize;
   DeviceParticle *processing;

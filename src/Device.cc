@@ -67,13 +67,13 @@ void Device::init(MonteCarlo &mc)
 
   assert(mats == nullptr);
   const int matSize = mc._materialDatabase->_mat.size();
-  CHECK(hipHostMalloc(&mats,matSize*sizeof(DeviceMaterial)));
+  CHECK(hipHostMalloc(&mats,matSize*sizeof(*mats)));
   
   int isoSizeSum = 0;
   for (int i = 0; i < matSize; i++) isoSizeSum += mc._materialDatabase->_mat[i]._iso.size();
 
   DeviceIsotope *isos = nullptr;
-  CHECK(hipHostMalloc(&isos,isoSizeSum*sizeof(DeviceIsotope)));
+  CHECK(hipHostMalloc(&isos,isoSizeSum*sizeof(*isos)));
   for (int i = 0; i < matSize; i++) {
     mats[i].isos = isos;
     const int isoSize = mc._materialDatabase->_mat[i]._iso.size();
@@ -83,7 +83,7 @@ void Device::init(MonteCarlo &mc)
   }
 
   const int ndiSize = mc._nuclearData->_isotopes.size();
-  CHECK(hipHostMalloc(&isotopes,ndiSize*sizeof(DeviceNuclearDataIsotope)));
+  CHECK(hipHostMalloc(&isotopes,ndiSize*sizeof(*isotopes)));
   const int rSize = mc._nuclearData->_isotopes[0]._species[0]._reactions.size()+1;
   assert(groupSize == mc._nuclearData->_isotopes[0]._species[0]._reactions[0]._crossSection.size());
   for (const auto &isotope : mc._nuclearData->_isotopes) {
@@ -96,9 +96,9 @@ void Device::init(MonteCarlo &mc)
   }
 
   DeviceReaction *rs = nullptr;
-  CHECK(hipHostMalloc(&rs,ndiSize*rSize*sizeof(DeviceReaction)));
+  CHECK(hipHostMalloc(&rs,ndiSize*rSize*sizeof(*rs)));
   double *xs = nullptr;
-  CHECK(hipHostMalloc(&xs,ndiSize*rSize*groupSize*sizeof(double)));
+  CHECK(hipHostMalloc(&xs,ndiSize*rSize*groupSize*sizeof(*xs)));
   for (int i = 0; i < ndiSize; i++) {
     isotopes[i].reactions = rs;
     for (int j = 0; j < rSize; j++) {
@@ -120,11 +120,13 @@ void Device::init(MonteCarlo &mc)
     }
   }
 
-  CHECK(hipHostMalloc(&processingSize,sizeof(int)));
+  CHECK(hipHostMalloc(&numSegments,sizeof(*numSegments)));
+
+  CHECK(hipHostMalloc(&processingSize,sizeof(*processingSize)));
   *processingSize = 0;
 
   {
-    const long bytes = sizeof(DeviceParticle)*mc._particleVaultContainer->getVaultSize();
+    const long bytes = sizeof(*processing)*mc._particleVaultContainer->getVaultSize();
     assert(bytes);
     CHECK(hipHostMalloc(&processing,bytes));
     memset(processing,0,bytes);
@@ -142,6 +144,7 @@ void Device::cycleInit(MonteCarlo &mc)
   const int bytes = cellSizeSum*groupSize*sizeof(double);
   memset(domains->cells->totals,0,bytes);
   memset(domains->cells->groupTallies,0,bytes);
+  *numSegments = 0;
 }
   
 void Device::cycleFinalize(MonteCarlo &mc)
@@ -156,6 +159,7 @@ void Device::cycleFinalize(MonteCarlo &mc)
       }
     }
   }
+  mc._tallies->_balanceTask[0]._numSegments = *numSegments;
 }
 
 
