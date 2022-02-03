@@ -15,6 +15,7 @@ struct DeviceCellState {
     return *this;
   }
   double *totals;
+  double *groupTallies;
   double4 facets[numFacets];
   double cellNumberDensity;
   int3 facetPoints[numFacets];
@@ -69,6 +70,7 @@ struct Device {
   Device(const Device &) = default;
   void init(MonteCarlo &mc);
   void cycleInit(MonteCarlo &mc);
+  void cycleFinalize(MonteCarlo &mc);
 
   DeviceDomain *domains;
   DeviceMaterial *mats;

@@ -317,11 +317,6 @@ class Tallies
     void CycleFinalize(MonteCarlo *mcco);
     void PrintSummary(MonteCarlo *mcco);
 
-    void TallyScalarFlux(double value, int domain, int cell, int group)
-    {
-        ATOMIC_ADD( _scalarFluxDomain[domain]._task[0]._cell[cell]._group[group], value );
-    }
-
     void TallyCellValue(double value, int domain, int cell)
     {
         ATOMIC_ADD( _cellTallyDomain[domain]._task[0]._cell[cell], value );

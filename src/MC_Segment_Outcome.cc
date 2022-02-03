@@ -207,8 +207,8 @@ MC_Segment_Outcome_type::Enum MC_Segment_Outcome(MonteCarlo* monteCarlo, MC_Part
     }
 
     // Accumulate the particle's contribution to the scalar flux.
-    monteCarlo->_tallies->TallyScalarFlux(mc_particle.segment_path_length * mc_particle.weight, mc_particle.domain,
-                                    mc_particle.cell, mc_particle.energy_group);
+    const double value = mc_particle.segment_path_length * mc_particle.weight;
+    ATOMIC_ADD(device.domains[mc_particle.domain].cellStates[mc_particle.cell].groupTallies[mc_particle.energy_group], value);
 
     return segment_outcome;
 }

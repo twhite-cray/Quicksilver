@@ -30,7 +30,9 @@ void Device::init(MonteCarlo &mc)
   DeviceCellState *css = nullptr;
   CHECK(hipHostMalloc(&css,csSizeSum*sizeof(*css)));
   double *totals = nullptr;
-  CHECK(hipHostMalloc(&totals,csSizeSum*gSize*sizeof(double)));
+  CHECK(hipHostMalloc(&totals,csSizeSum*gSize*sizeof(*totals)));
+  double *groupTallies = nullptr;
+  CHECK(hipHostMalloc(&groupTallies,csSizeSum*gSize*sizeof(*groupTallies)));
   double3 *nodes = nullptr;
   CHECK(hipHostMalloc(&nodes,nodeSizeSum*sizeof(*nodes)));
   for (int i = 0; i < domainSize; i++) {
@@ -40,6 +42,8 @@ void Device::init(MonteCarlo &mc)
       css[j] = mc.domain[i].cell_state[j];
       css[j].totals = totals;
       totals += gSize;
+      css[j].groupTallies = groupTallies;
+      groupTallies += gSize;
       assert(DeviceCellState::numFacets == mc.domain[i].mesh._cellConnectivity[j].num_facets);
       for (int k = 0; k < DeviceCellState::numFacets; k++) {
         const MC_General_Plane &plane = mc.domain[i].mesh._cellGeometry[j]._facet[k];
@@ -136,6 +140,21 @@ void Device::cycleInit(MonteCarlo &mc)
   int csSizeSum = 0;
   for (int i = 0; i < domainSize; i++) csSizeSum += mc.domain[i].cell_state.size();
   memset(domains->cellStates->totals,0,csSizeSum*gSize*sizeof(double));
+  memset(domains->cellStates->groupTallies,0,csSizeSum*gSize*sizeof(double));
 }
   
+void Device::cycleFinalize(MonteCarlo &mc)
+{
+  const int gSize = mc._nuclearData->_numEnergyGroups;
+  const int domainSize = mc.domain.size();
+  for (int i = 0; i < domainSize; i++) {
+    const int csSize = mc.domain[i].cell_state.size();
+    for (int j = 0; j < csSize; j++) {
+      for (int k = 0; k < gSize; k++) {
+        mc._tallies->_scalarFluxDomain[i]._task[0]._cell[j]._group[k] = domains[i].cellStates[j].groupTallies[k];
+      }
+    }
+  }
+}
+
 
