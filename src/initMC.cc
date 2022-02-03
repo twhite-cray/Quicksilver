@@ -288,12 +288,7 @@ namespace
 {
    void initTallies(MonteCarlo* monteCarlo, const Parameters& params)
    {
-      monteCarlo->_tallies->InitializeTallies(
-         monteCarlo,  
-         params.simulationParams.balanceTallyReplications,
-         params.simulationParams.fluxTallyReplications,
-         params.simulationParams.cellTallyReplications
-      );
+      monteCarlo->_tallies->InitializeTallies( monteCarlo );
    }
 }
 

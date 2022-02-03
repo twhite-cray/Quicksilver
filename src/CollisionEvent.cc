@@ -44,7 +44,7 @@ void updateTrajectory( double energy, double angle, MC_Particle& particle )
 }
 
 
-bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle, unsigned int tally_index)
+bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle)
 {
    const MC_Cell_State &cell = monteCarlo->domain[mc_particle.domain].cell_state[mc_particle.cell];
 
@@ -97,20 +97,20 @@ bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle, unsigned i
    //--------------------------------------------------------------------------------------------------------------
 
    // Set the reaction for this particle.
-   ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[tally_index]._collision );
+   ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[0]._collision );
    NuclearDataReaction::Enum reactionType = monteCarlo->_nuclearData->_isotopes[selectedUniqueNumber]._species[0].\
            _reactions[selectedReact]._reactionType;
    switch (reactionType)
    {
       case NuclearDataReaction::Scatter:
-         ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[tally_index]._scatter);
+         ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[0]._scatter);
          break;
       case NuclearDataReaction::Absorption:
-         ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[tally_index]._absorb);
+         ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[0]._absorb);
          break;
       case NuclearDataReaction::Fission:
-         ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[tally_index]._fission);
-         ATOMIC_ADD( monteCarlo->_tallies->_balanceTask[tally_index]._produce, nOut);
+         ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[0]._fission);
+         ATOMIC_ADD( monteCarlo->_tallies->_balanceTask[0]._produce, nOut);
          break;
       case NuclearDataReaction::Undefined:
          printf("reactionType invalid\n");

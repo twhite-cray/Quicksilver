@@ -125,9 +125,6 @@ struct SimulationParameters
      eMax(20),
      nGroups(230), 
      lowWeightCutoff(0.001),
-     balanceTallyReplications(1),
-     fluxTallyReplications(1),
-     cellTallyReplications(1),
      coralBenchmark(0)
    {};
 
@@ -156,9 +153,6 @@ struct SimulationParameters
    double eMax;                  //!< max energy of cross section
    int nGroups;                  //!< number of groups for cross sections
    double lowWeightCutoff;       //!< low weight roulette cutoff
-   int balanceTallyReplications; //!< Number of replications for the balance tallies
-   int fluxTallyReplications;    //!< Number of replications for the scalar flux tally
-   int cellTallyReplications;    //!< Number of replications for the scalar cell tally
    int coralBenchmark;           //!< enable correctness check for Coral2 benchmark
 };
 

@@ -41,7 +41,7 @@ void mcp_test_done_class::Get_Local_Gains_And_Losses(MonteCarlo *monteCarlo, int
 {
     uint64_t gains = 0, losses = 0;
 
-    Balance &bal = monteCarlo->_tallies->_balanceTask[0]; // SumTasks has been called, so just use index 0
+    Balance &bal = monteCarlo->_tallies->_balanceTask[0];
 
     gains   = bal._start  + bal._source + bal._produce + bal._split;
     losses  = bal._absorb + bal._census + bal._escape  + bal._rr;
@@ -177,8 +177,6 @@ bool MC_Particle_Buffer::Test_Done_New()
     MC_VERIFY_THREAD_ZERO
 
     MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking_Test_Done);
-
-    mcco->_tallies->SumTasks();
 
     bool answer = this->Allreduce_ParticleCounts();
 

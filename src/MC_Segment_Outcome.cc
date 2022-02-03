@@ -25,7 +25,7 @@ static inline unsigned int MC_Find_Min(const double *array,
 //  (iii) census at the end of the time step.
 //--------------------------------------------------------------------------------------------------
 
-MC_Segment_Outcome_type::Enum MC_Segment_Outcome(MonteCarlo* monteCarlo, MC_Particle &mc_particle, unsigned int &flux_tally_index)
+MC_Segment_Outcome_type::Enum MC_Segment_Outcome(MonteCarlo* monteCarlo, MC_Particle &mc_particle)
 {
     Device &device = monteCarlo->_device;
     // initialize distances to large number
@@ -208,7 +208,7 @@ MC_Segment_Outcome_type::Enum MC_Segment_Outcome(MonteCarlo* monteCarlo, MC_Part
 
     // Accumulate the particle's contribution to the scalar flux.
     monteCarlo->_tallies->TallyScalarFlux(mc_particle.segment_path_length * mc_particle.weight, mc_particle.domain,
-                                    flux_tally_index, mc_particle.cell, mc_particle.energy_group);
+                                    mc_particle.cell, mc_particle.energy_group);
 
     return segment_outcome;
 }

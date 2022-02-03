@@ -223,18 +223,15 @@ class CellTallyDomain
 
    CellTallyDomain() : _task() {}
 
-   CellTallyDomain(MC_Domain* domain, int cellTally_replications)
+   CellTallyDomain(MC_Domain* domain)
    {
       // Assume OMP_NUM_THREADS tasks
       if( _task.capacity() == 0 )
       {
-        _task.reserve(cellTally_replications, VAR_MEM);
+        _task.reserve(1, VAR_MEM);
       }
       _task.Open();
-      for (int task_index = 0; task_index < cellTally_replications; task_index++)
-      {
-          _task.push_back(CellTallyTask(domain));
-      }
+      _task.push_back(CellTallyTask(domain));
       _task.Close();
    }
 
@@ -248,18 +245,15 @@ class ScalarFluxDomain
 
    ScalarFluxDomain() : _task() {}
 
-   ScalarFluxDomain(MC_Domain* domain, int numGroups, int flux_replications)
+   ScalarFluxDomain(MC_Domain* domain, int numGroups)
    {
       // Assume OMP_NUM_THREADS tasks
       if( _task.capacity() == 0 )
       {
-        _task.reserve(flux_replications, VAR_MEM);
+        _task.reserve(1, VAR_MEM);
       }
       _task.Open();
-      for (int task_index = 0; task_index < flux_replications; task_index++)
-      {
-          _task.push_back(ScalarFluxTask(domain, numGroups));
-      }
+      _task.push_back(ScalarFluxTask(domain, numGroups));
       _task.Close();
    }
 
@@ -308,59 +302,32 @@ class Tallies
     Fluence                     _fluence;
     EnergySpectrum              _spectrum;
     
-    Tallies( int balRep, int fluxRep, int cellRep, std::string spectrumName, int spectrumSize )
+    Tallies( std::string spectrumName, int spectrumSize )
       : _balanceCumulative(), _balanceTask(),
-        _scalarFluxDomain(), _spectrum(spectrumName, spectrumSize),
-        _num_balance_replications(balRep), 
-        _num_flux_replications(fluxRep), _num_cellTally_replications(cellRep)
+        _scalarFluxDomain(), _spectrum(spectrumName, spectrumSize)
     {
-    }
-
-    int GetNumBalanceReplications()
-    {
-        return _num_balance_replications;
-    }
-
-    int GetNumFluxReplications()
-    {
-        return _num_flux_replications;
-    }
-
-    int GetNumCellTallyReplications()
-    {
-        return _num_cellTally_replications;
     }
 
     ~Tallies() {}
 
-    void InitializeTallies( MonteCarlo *monteCarlo, 
-                            int balance_replications, 
-                            int flux_replications, 
-                            int cell_replications);
+    void InitializeTallies( MonteCarlo *monteCarlo ); 
 
     void CycleInitialize(MonteCarlo* monteCarlo);
 
-    void SumTasks();
     void CycleFinalize(MonteCarlo *mcco);
     void PrintSummary(MonteCarlo *mcco);
 
-    void TallyScalarFlux(double value, int domain, int task, int cell, int group)
+    void TallyScalarFlux(double value, int domain, int cell, int group)
     {
-        ATOMIC_ADD( _scalarFluxDomain[domain]._task[task]._cell[cell]._group[group], value );
+        ATOMIC_ADD( _scalarFluxDomain[domain]._task[0]._cell[cell]._group[group], value );
     }
 
-    void TallyCellValue(double value, int domain, int task, int cell)
+    void TallyCellValue(double value, int domain, int cell)
     {
-        ATOMIC_ADD( _cellTallyDomain[domain]._task[task]._cell[cell], value );
+        ATOMIC_ADD( _cellTallyDomain[domain]._task[0]._cell[cell], value );
     }
 
     double ScalarFluxSum(MonteCarlo *mcco);
-
-  private:
-    int _num_balance_replications;
-    int _num_flux_replications;
-    int _num_cellTally_replications;
-
 };
 
 #endif

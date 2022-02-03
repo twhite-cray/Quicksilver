@@ -16,9 +16,6 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault 
     MC_Particle mc_particle;
     DeviceParticle p;
 
-    unsigned tally_index = 0;
-    unsigned flux_tally_index = 0;
-
     int previous = -1;
     int particle_index = 0;
     while (particle_index < numParticles) {
@@ -28,8 +25,6 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault 
           p = device.processing[particle_index];
           assert(p.identifier == mc_particle.identifier);
           mc_particle.task = 0;
-          tally_index =      (particle_index) % monteCarlo->_tallies->GetNumBalanceReplications();
-          flux_tally_index = (particle_index) % monteCarlo->_tallies->GetNumFluxReplications();
           previous = particle_index;
         }
 
@@ -39,9 +34,9 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault 
         //   (1) Cross a facet of the current cell,
         //   (2) Reach the end of the time step and enter census,
         //
-        MC_Segment_Outcome_type::Enum segment_outcome = MC_Segment_Outcome(monteCarlo, mc_particle, flux_tally_index);
+        MC_Segment_Outcome_type::Enum segment_outcome = MC_Segment_Outcome(monteCarlo, mc_particle);
 
-        ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[tally_index]._numSegments);
+        ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[0]._numSegments);
 
         mc_particle.num_segments += 1.;  /* Track the number of segments this particle has
                                             undergone this cycle on all processes. */
@@ -51,7 +46,7 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault 
             // The particle undergoes a collision event producing:
             //   (0) Other-than-one same-species secondary particle, or
             //   (1) Exactly one same-species secondary particle.
-            if (CollisionEvent(monteCarlo, mc_particle, tally_index ) != MC_Collision_Event_Return::Continue_Tracking) processingVault->invalidateParticle( particle_index++ );
+            if (CollisionEvent(monteCarlo, mc_particle) != MC_Collision_Event_Return::Continue_Tracking) processingVault->invalidateParticle( particle_index++ );
             }
             break;
     
@@ -64,7 +59,7 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault 
                 {}
                 else if (facet_crossing_type == MC_Tally_Event::Facet_Crossing_Escape)
                 {
-                    ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[tally_index]._escape);
+                    ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[0]._escape);
                     mc_particle.last_event = MC_Tally_Event::Facet_Crossing_Escape;
                     mc_particle.species = -1;
                     processingVault->invalidateParticle( particle_index++ );
@@ -86,7 +81,7 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault 
             {
                 // The particle has reached the end of the time step.
                 processedVault->pushParticle(mc_particle);
-                ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[tally_index]._census);
+                ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[0]._census);
                 processingVault->invalidateParticle( particle_index++ );
                 break;
             }

@@ -142,9 +142,6 @@ ostream& operator<<(ostream& out, const SimulationParameters& pp)
    out << "   eMin: " << pp.eMin << "\n";
    out << "   nGroups: " << pp.nGroups << "\n";
    out << "   lowWeightCutoff: " << pp.lowWeightCutoff << "\n";
-   out << "   bTally: " << pp.balanceTallyReplications << "\n";
-   out << "   fTally: " << pp.fluxTallyReplications << "\n";
-   out << "   cTally: " << pp.cellTallyReplications << "\n";
    out << "   coralBenchmark: " << pp.coralBenchmark << "\n";
    out << "   crossSectionsOut:" << pp.crossSectionsOut << "\n";
    out << endl;
@@ -246,9 +243,6 @@ namespace
       addArg("xDom",             'I', 1, 'i', &(sp.xDom),        0,      "number of MPI ranks in x");
       addArg("yDom",             'J', 1, 'i', &(sp.yDom),        0,      "number of MPI ranks in y");
       addArg("zDom",             'K', 1, 'i', &(sp.zDom),        0,      "number of MPI ranks in z");
-      addArg("bTally",           'B', 1, 'i', &(sp.balanceTallyReplications), 0, "number of balance tally replications");
-      addArg("fTally",           'F', 1, 'i', &(sp.fluxTallyReplications),    0, "number of scalar flux tally replications");
-      addArg("cTally",           'C', 1, 'i', &(sp.cellTallyReplications),    0, "number of scalar cell tally replications");
 
       processArgs(argc, argv);
 
@@ -404,9 +398,6 @@ namespace
       input.getValue<double>("eMin",        sp.eMin);
       input.getValue<int>   ("nGroups",     sp.nGroups);
       input.getValue<double>("lowWeightCutoff",sp.lowWeightCutoff);
-      input.getValue<int>("bTally",sp.balanceTallyReplications);
-      input.getValue<int>("fTally",sp.fluxTallyReplications);
-      input.getValue<int>("cTally",sp.cellTallyReplications);
       input.getValue<int>("coralBenchmark",sp.coralBenchmark);
 
    }

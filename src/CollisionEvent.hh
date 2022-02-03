@@ -5,7 +5,7 @@ class MonteCarlo;
 class MC_Particle;
 
 #include "DeclareMacro.hh"
-bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle, unsigned int tally_index );
+bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle);
 
 
 #endif

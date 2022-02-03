@@ -26,9 +26,7 @@ MonteCarlo::MonteCarlo(const Parameters& params)
    _nuclearData            = 0;
    _materialDatabase       = 0;
 
-   _tallies                = new Tallies( params.simulationParams.balanceTallyReplications, 
-       params.simulationParams.fluxTallyReplications,
-       params.simulationParams.cellTallyReplications,
+   _tallies                = new Tallies( 
        params.simulationParams.energySpectrum,
        params.simulationParams.nGroups);
    processor_info          = new MC_Processor_Info();
