@@ -34,7 +34,6 @@ void MCT_Generate_Coordinate_3D_G(
    MonteCarlo* monteCarlo);
 
 MC_Vector MCT_Cell_Position_3D_G(
-   const MC_Domain   &domain,
    const DeviceDomain &ddomain,
    int cell_index);
 

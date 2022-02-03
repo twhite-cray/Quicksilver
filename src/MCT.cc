@@ -119,7 +119,7 @@ void MCT_Generate_Coordinate_3D_G(uint64_t *random_number_seed,
     DeviceDomain &ddomain = monteCarlo->_device.domains[domain_num];
 
     // Determine the cell-center nodal point coordinates.
-    MC_Vector center = MCT_Cell_Position_3D_G(domain, ddomain, cell);
+    MC_Vector center = MCT_Cell_Position_3D_G(ddomain, cell);
 
     int num_facets = domain.mesh._cellConnectivity[cell].num_facets;
     if (num_facets == 0)
@@ -221,28 +221,23 @@ MC_Vector MCT_Cell_Position_3D_G(const MC_Domain &domain,
    return coordinate;
 }
 
-MC_Vector MCT_Cell_Position_3D_G(const MC_Domain &domain,
-                                 const DeviceDomain &ddomain,
+MC_Vector MCT_Cell_Position_3D_G(const DeviceDomain &ddomain,
                                  int cell_index)
 {
    MC_Vector coordinate;
 
-   int num_points = domain.mesh._cellConnectivity[cell_index].num_points;
-   assert(num_points == DeviceCellState::numQuadPoints);
+   static constexpr int num_points = DeviceCellState::numQuadPoints;
 
    for ( int point_index = 0; point_index < num_points; point_index ++ )
    {
-      int point = domain.mesh._cellConnectivity[cell_index]._point[point_index];
-      assert(point == ddomain.cellStates[cell_index].quadPoints[point_index]);
+      const int point = ddomain.cellStates[cell_index].quadPoints[point_index];
 
-      assert(domain.mesh._node[point] == ddomain.nodes[point]);
-
-      coordinate.x += domain.mesh._node[point].x;
-      coordinate.y += domain.mesh._node[point].y;
-      coordinate.z += domain.mesh._node[point].z;
+      coordinate.x += ddomain.nodes[point].x;
+      coordinate.y += ddomain.nodes[point].y;
+      coordinate.z += ddomain.nodes[point].z;
    }
 
-   double one_over_num_points = 1.0/((double)num_points);
+   static constexpr double one_over_num_points = 1.0/((double)num_points);
    coordinate.x *= one_over_num_points;
    coordinate.y *= one_over_num_points;
    coordinate.z *= one_over_num_points;
@@ -644,7 +639,7 @@ namespace
                                              MC_Vector &coordinate, // input/output: move this coordinate
                                              double move_factor)      // input: multiplication factor for move
    {
-      MC_Vector move_to = MCT_Cell_Position_3D_G(domain, ddomain, location.cell);
+      MC_Vector move_to = MCT_Cell_Position_3D_G(ddomain, location.cell);
 
       coordinate.x += move_factor * ( move_to.x - coordinate.x );
       coordinate.y += move_factor * ( move_to.y - coordinate.y );
