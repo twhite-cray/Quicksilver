@@ -141,11 +141,7 @@ void cycleTracking(MonteCarlo *monteCarlo)
             if ( numParticles != 0 )
             {
               NVTX_Range trackingKernel("cycleTracking_TrackingKernel"); // range ends at end of scope
-
-              for ( int particle_index = 0; particle_index < numParticles; particle_index++ )
-              {
-                CycleTrackingGuts( monteCarlo, particle_index, processingVault, processedVault );
-              }
+              CycleTrackingGuts( monteCarlo, numParticles, processingVault, processedVault );
             }
 
             particle_count += numParticles;

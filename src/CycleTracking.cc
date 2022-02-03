@@ -11,22 +11,24 @@
 #include "macros.hh"
 #include "qs_assert.hh"
 
-void CycleTrackingGuts( MonteCarlo *monteCarlo, int particle_index, ParticleVault *processingVault, ParticleVault *processedVault )
+void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault *processingVault, ParticleVault *processedVault )
 {
     MC_Particle mc_particle;
+    unsigned tally_index = 0;
+    unsigned flux_tally_index = 0;
 
-    // Copy a single particle from the particle vault into mc_particle
-    MC_Load_Particle(monteCarlo, mc_particle, processingVault, particle_index);
+    int previous = -1;
+    int particle_index = 0;
+    while (particle_index < numParticles) {
 
-    // set the particle.task to the index of the processed vault the particle will census into.
-    mc_particle.task = 0;//processed_vault;
+        if (previous != particle_index) {
+          MC_Load_Particle(monteCarlo, mc_particle, processingVault, particle_index);
+          mc_particle.task = 0;
+          tally_index =      (particle_index) % monteCarlo->_tallies->GetNumBalanceReplications();
+          flux_tally_index = (particle_index) % monteCarlo->_tallies->GetNumFluxReplications();
+          previous = particle_index;
+        }
 
-    bool keepTrackingThisParticle = false;
-    unsigned int tally_index =      (particle_index) % monteCarlo->_tallies->GetNumBalanceReplications();
-    unsigned int flux_tally_index = (particle_index) % monteCarlo->_tallies->GetNumFluxReplications();
-    // loop over this particle until we cannot do anything more with it on this processor
-    do
-    {
         // Determine the outcome of a particle at the end of this segment such as:
         //
         //   (0) Undergo a collision within the current cell,
@@ -45,14 +47,7 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int particle_index, ParticleVaul
             // The particle undergoes a collision event producing:
             //   (0) Other-than-one same-species secondary particle, or
             //   (1) Exactly one same-species secondary particle.
-            if (CollisionEvent(monteCarlo, mc_particle, tally_index ) == MC_Collision_Event_Return::Continue_Tracking)
-            {
-                keepTrackingThisParticle = true;
-            }
-            else
-            {
-                keepTrackingThisParticle = false;
-            }
+            if (CollisionEvent(monteCarlo, mc_particle, tally_index ) != MC_Collision_Event_Return::Continue_Tracking) processingVault->invalidateParticle( particle_index++ );
             }
             break;
     
@@ -62,26 +57,23 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int particle_index, ParticleVaul
                 MC_Tally_Event::Enum facet_crossing_type = MC_Facet_Crossing_Event(mc_particle, monteCarlo, particle_index, processingVault);
 
                 if (facet_crossing_type == MC_Tally_Event::Facet_Crossing_Transit_Exit)
-                {
-                    keepTrackingThisParticle = true;  // Transit Event
-                }
+                {}
                 else if (facet_crossing_type == MC_Tally_Event::Facet_Crossing_Escape)
                 {
                     ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[tally_index]._escape);
                     mc_particle.last_event = MC_Tally_Event::Facet_Crossing_Escape;
                     mc_particle.species = -1;
-                    keepTrackingThisParticle = false;
+                    processingVault->invalidateParticle( particle_index++ );
                 }
                 else if (facet_crossing_type == MC_Tally_Event::Facet_Crossing_Reflection)
                 {
                     MCT_Reflect_Particle(monteCarlo, mc_particle);
-                    keepTrackingThisParticle = true;
                 }
                 else
                 {
                     // Enters an adjacent cell in an off-processor domain.
                     //mc_particle.species = -1;
-                    keepTrackingThisParticle = false;
+                    processingVault->invalidateParticle( particle_index++ );
                 }
             }
             break;
@@ -91,7 +83,7 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int particle_index, ParticleVaul
                 // The particle has reached the end of the time step.
                 processedVault->pushParticle(mc_particle);
                 ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[tally_index]._census);
-                keepTrackingThisParticle = false;
+                processingVault->invalidateParticle( particle_index++ );
                 break;
             }
             
@@ -99,10 +91,6 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int particle_index, ParticleVaul
            qs_assert(false);
            break;  // should this be an error
         }
-    
-    } while ( keepTrackingThisParticle );
-
-    //Make sure this particle is marked as completed
-    processingVault->invalidateParticle( particle_index );
+    }
 }
 
