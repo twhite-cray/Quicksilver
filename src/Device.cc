@@ -16,17 +16,23 @@ void Device::init(MonteCarlo &mc)
 {
   assert(domains == nullptr);
   const int domainSize = mc.domain.size();
-  CHECK(hipHostMalloc(&domains,domainSize*sizeof(DeviceDomain)));
+  CHECK(hipHostMalloc(&domains,domainSize*sizeof(*domains)));
 
   const int gSize = mc._nuclearData->_numEnergyGroups;
 
   int csSizeSum = 0;
-  for (int i = 0; i < domainSize; i++) csSizeSum += mc.domain[i].cell_state.size();
+  int nodeSizeSum = 0;
+  for (int i = 0; i < domainSize; i++) {
+    csSizeSum += mc.domain[i].cell_state.size();
+    nodeSizeSum += mc.domain[i].mesh._node.size();
+  }
   
   DeviceCellState *css = nullptr;
-  CHECK(hipHostMalloc(&css,csSizeSum*sizeof(DeviceCellState)));
+  CHECK(hipHostMalloc(&css,csSizeSum*sizeof(*css)));
   double *totals = nullptr;
   CHECK(hipHostMalloc(&totals,csSizeSum*gSize*sizeof(double)));
+  double3 *nodes = nullptr;
+  CHECK(hipHostMalloc(&nodes,nodeSizeSum*sizeof(*nodes)));
   for (int i = 0; i < domainSize; i++) {
     domains[i].cellStates = css;
     const int csSize = mc.domain[i].cell_state.size();
@@ -43,6 +49,13 @@ void Device::init(MonteCarlo &mc)
       }
     }
     css += csSize;
+    domains[i].nodes = nodes;
+    const int nodeSize = mc.domain[i].mesh._node.size();
+    for (int j = 0; j < nodeSize; j++) {
+      const MC_Vector &node = mc.domain[i].mesh._node[j];
+      nodes[j] = double3{node.x,node.y,node.z};
+    }
+    nodes += nodeSize;
   }
 
   assert(mats == nullptr);

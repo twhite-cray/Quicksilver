@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include "DeclareMacro.hh"
+#include "cudaUtils.hh"
 
 class MC_Vector
 {
@@ -26,6 +27,11 @@ class MC_Vector
    }
 
    bool operator==( const MC_Vector& tmp )
+   {
+      return tmp.x == x && tmp.y == y && tmp.z == z;
+   }
+
+   bool operator==( const double3 &tmp ) const
    {
       return tmp.x == x && tmp.y == y && tmp.z == z;
    }

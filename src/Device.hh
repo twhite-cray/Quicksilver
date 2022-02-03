@@ -22,6 +22,7 @@ struct DeviceCellState {
 
 struct DeviceDomain {
   DeviceCellState *cellStates;
+  double3 *nodes;
 };
 
 struct DeviceIsotope {

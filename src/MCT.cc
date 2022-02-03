@@ -519,6 +519,13 @@ namespace
            facet_coords[1] = &domain.mesh._node[dpoint.y];
            facet_coords[2] = &domain.mesh._node[dpoint.z];
 
+           double3 &nodeX = ddomain.nodes[dpoint.x];
+           double3 &nodeY = ddomain.nodes[dpoint.y];
+           double3 &nodeZ = ddomain.nodes[dpoint.z];
+           assert(*facet_coords[0] == nodeX);
+           assert(*facet_coords[1] == nodeY);
+           assert(*facet_coords[2] == nodeZ);
+
            double t = MCT_Nearest_Facet_3D_G_Distance_To_Segment(
                plane_tolerance,
                facet_normal_dot_direction_cosine, dplane.x, dplane.y, dplane.z, dplane.w,
