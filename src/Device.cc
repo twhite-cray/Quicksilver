@@ -18,44 +18,44 @@ void Device::init(MonteCarlo &mc)
   const int domainSize = mc.domain.size();
   CHECK(hipHostMalloc(&domains,domainSize*sizeof(*domains)));
 
-  const int gSize = mc._nuclearData->_numEnergyGroups;
+  const int groupSize = mc._nuclearData->_numEnergyGroups;
 
-  int csSizeSum = 0;
+  int cellSizeSum = 0;
   int nodeSizeSum = 0;
   for (int i = 0; i < domainSize; i++) {
-    csSizeSum += mc.domain[i].cell_state.size();
+    cellSizeSum += mc.domain[i].cell_state.size();
     nodeSizeSum += mc.domain[i].mesh._node.size();
   }
   
-  DeviceCellState *css = nullptr;
-  CHECK(hipHostMalloc(&css,csSizeSum*sizeof(*css)));
+  DeviceCell *cells = nullptr;
+  CHECK(hipHostMalloc(&cells,cellSizeSum*sizeof(*cells)));
   double *totals = nullptr;
-  CHECK(hipHostMalloc(&totals,csSizeSum*gSize*sizeof(*totals)));
+  CHECK(hipHostMalloc(&totals,cellSizeSum*groupSize*sizeof(*totals)));
   double *groupTallies = nullptr;
-  CHECK(hipHostMalloc(&groupTallies,csSizeSum*gSize*sizeof(*groupTallies)));
+  CHECK(hipHostMalloc(&groupTallies,cellSizeSum*groupSize*sizeof(*groupTallies)));
   double3 *nodes = nullptr;
   CHECK(hipHostMalloc(&nodes,nodeSizeSum*sizeof(*nodes)));
   for (int i = 0; i < domainSize; i++) {
-    domains[i].cellStates = css;
-    const int csSize = mc.domain[i].cell_state.size();
-    for (int j = 0; j < csSize; j++) {
-      css[j] = mc.domain[i].cell_state[j];
-      css[j].totals = totals;
-      totals += gSize;
-      css[j].groupTallies = groupTallies;
-      groupTallies += gSize;
-      assert(DeviceCellState::numFacets == mc.domain[i].mesh._cellConnectivity[j].num_facets);
-      for (int k = 0; k < DeviceCellState::numFacets; k++) {
+    domains[i].cells = cells;
+    const int cellSize = mc.domain[i].cell_state.size();
+    for (int j = 0; j < cellSize; j++) {
+      cells[j] = mc.domain[i].cell_state[j];
+      cells[j].totals = totals;
+      totals += groupSize;
+      cells[j].groupTallies = groupTallies;
+      groupTallies += groupSize;
+      assert(DeviceCell::numFacets == mc.domain[i].mesh._cellConnectivity[j].num_facets);
+      for (int k = 0; k < DeviceCell::numFacets; k++) {
         const MC_General_Plane &plane = mc.domain[i].mesh._cellGeometry[j]._facet[k];
-        css[j].facets[k] = double4{plane.A,plane.B,plane.C,plane.D};
+        cells[j].facets[k] = double4{plane.A,plane.B,plane.C,plane.D};
         const int *const p = mc.domain[i].mesh._cellConnectivity[j]._facet[k].point;
-        css[j].facetPoints[k] = int3{p[0],p[1],p[2]};
+        cells[j].facetPoints[k] = int3{p[0],p[1],p[2]};
       }
-      for (int k = 0; k < DeviceCellState::numQuadPoints; k++) {
-        css[j].quadPoints[k] = mc.domain[i].mesh._cellConnectivity[j]._point[k];
+      for (int k = 0; k < DeviceCell::numQuadPoints; k++) {
+        cells[j].quadPoints[k] = mc.domain[i].mesh._cellConnectivity[j]._point[k];
       }
     }
-    css += csSize;
+    cells += cellSize;
     domains[i].nodes = nodes;
     const int nodeSize = mc.domain[i].mesh._node.size();
     for (int j = 0; j < nodeSize; j++) {
@@ -85,12 +85,12 @@ void Device::init(MonteCarlo &mc)
   const int ndiSize = mc._nuclearData->_isotopes.size();
   CHECK(hipHostMalloc(&isotopes,ndiSize*sizeof(DeviceNuclearDataIsotope)));
   const int rSize = mc._nuclearData->_isotopes[0]._species[0]._reactions.size()+1;
-  assert(gSize == mc._nuclearData->_isotopes[0]._species[0]._reactions[0]._crossSection.size());
+  assert(groupSize == mc._nuclearData->_isotopes[0]._species[0]._reactions[0]._crossSection.size());
   for (const auto &isotope : mc._nuclearData->_isotopes) {
     for (const auto &species : isotope._species) {
       assert(rSize == species._reactions.size()+1);
       for (const auto &reaction: species._reactions) {
-        assert(gSize == reaction._crossSection.size());
+        assert(groupSize == reaction._crossSection.size());
       }
     }
   }
@@ -98,18 +98,18 @@ void Device::init(MonteCarlo &mc)
   DeviceReaction *rs = nullptr;
   CHECK(hipHostMalloc(&rs,ndiSize*rSize*sizeof(DeviceReaction)));
   double *xs = nullptr;
-  CHECK(hipHostMalloc(&xs,ndiSize*rSize*gSize*sizeof(double)));
+  CHECK(hipHostMalloc(&xs,ndiSize*rSize*groupSize*sizeof(double)));
   for (int i = 0; i < ndiSize; i++) {
     isotopes[i].reactions = rs;
     for (int j = 0; j < rSize; j++) {
       isotopes[i].reactions[j].crossSections = xs;
-      xs += gSize;
+      xs += groupSize;
     }
     rs += rSize;
   }
 
   for (int i = 0; i < ndiSize; i++) {
-    for (int k = 0; k < gSize; k++) {
+    for (int k = 0; k < groupSize; k++) {
       double sum = 0;
       for (int j = 1; j < rSize; j++) {
         const double xs = mc._nuclearData->_isotopes[i]._species[0]._reactions[j-1]._crossSection[k];
@@ -135,23 +135,24 @@ void Device::init(MonteCarlo &mc)
 
 void Device::cycleInit(MonteCarlo &mc)
 {
-  const int gSize = mc._nuclearData->_numEnergyGroups;
+  const int groupSize = mc._nuclearData->_numEnergyGroups;
   const int domainSize = mc.domain.size();
-  int csSizeSum = 0;
-  for (int i = 0; i < domainSize; i++) csSizeSum += mc.domain[i].cell_state.size();
-  memset(domains->cellStates->totals,0,csSizeSum*gSize*sizeof(double));
-  memset(domains->cellStates->groupTallies,0,csSizeSum*gSize*sizeof(double));
+  int cellSizeSum = 0;
+  for (int i = 0; i < domainSize; i++) cellSizeSum += mc.domain[i].cell_state.size();
+  const int bytes = cellSizeSum*groupSize*sizeof(double);
+  memset(domains->cells->totals,0,bytes);
+  memset(domains->cells->groupTallies,0,bytes);
 }
   
 void Device::cycleFinalize(MonteCarlo &mc)
 {
-  const int gSize = mc._nuclearData->_numEnergyGroups;
+  const int groupSize = mc._nuclearData->_numEnergyGroups;
   const int domainSize = mc.domain.size();
   for (int i = 0; i < domainSize; i++) {
-    const int csSize = mc.domain[i].cell_state.size();
-    for (int j = 0; j < csSize; j++) {
-      for (int k = 0; k < gSize; k++) {
-        mc._tallies->_scalarFluxDomain[i]._task[0]._cell[j]._group[k] = domains[i].cellStates[j].groupTallies[k];
+    const int cellSize = mc.domain[i].cell_state.size();
+    for (int j = 0; j < cellSize; j++) {
+      for (int k = 0; k < groupSize; k++) {
+        mc._tallies->_scalarFluxDomain[i]._task[0]._cell[j]._group[k] = domains[i].cells[j].groupTallies[k];
       }
     }
   }

@@ -218,11 +218,11 @@ MC_Vector MCT_Cell_Position_3D_G(const DeviceDomain &ddomain,
 {
    MC_Vector coordinate;
 
-   static constexpr int num_points = DeviceCellState::numQuadPoints;
+   static constexpr int num_points = DeviceCell::numQuadPoints;
 
    for ( int point_index = 0; point_index < num_points; point_index ++ )
    {
-      const int point = ddomain.cellStates[cell_index].quadPoints[point_index];
+      const int point = ddomain.cells[cell_index].quadPoints[point_index];
 
       coordinate.x += ddomain.nodes[point].x;
       coordinate.y += ddomain.nodes[point].y;
@@ -483,7 +483,7 @@ namespace
       double                 move_factor = 0.5 * PhysicalConstants::_smallDouble;
 
       // Initialize some data for the unstructured, hexahedral mesh.
-      static constexpr int num_facets_per_cell = DeviceCellState::numFacets;
+      static constexpr int num_facets_per_cell = DeviceCell::numFacets;
 
       while (true) // will break out when distance is found
       {
@@ -505,7 +505,7 @@ namespace
          {
            distance_to_facet.distance = PhysicalConstants::_hugeDouble;
 
-           const double4 &dplane = ddomain.cellStates[location.cell].facets[facet_index];
+           const double4 &dplane = ddomain.cells[location.cell].facets[facet_index];
 
            double facet_normal_dot_direction_cosine =
              (dplane.x * direction_cosine->alpha +
@@ -519,7 +519,7 @@ namespace
 
            /* profiling with gprof showed that putting a call to MC_Facet_Coordinates_3D_G
               slowed down the code by about 10%, so we get the facet coords "by hand." */
-           const int3 &dpoint = ddomain.cellStates[location.cell].facetPoints[facet_index];
+           const int3 &dpoint = ddomain.cells[location.cell].facetPoints[facet_index];
 
            const double3 &nodeX = ddomain.nodes[dpoint.x];
            const double3 &nodeY = ddomain.nodes[dpoint.y];

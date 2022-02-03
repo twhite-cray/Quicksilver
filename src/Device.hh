@@ -5,10 +5,10 @@
 class MC_Base_Particle;
 class MonteCarlo;
 
-struct DeviceCellState {
+struct DeviceCell {
   static constexpr int numFacets = 24;
   static constexpr int numQuadPoints = 14;
-  DeviceCellState &operator=(const MC_Cell_State &that)
+  DeviceCell &operator=(const MC_Cell_State &that)
   {
     cellNumberDensity = that._cellNumberDensity;
     material = that._material;
@@ -24,7 +24,7 @@ struct DeviceCellState {
 };
 
 struct DeviceDomain {
-  DeviceCellState *cellStates;
+  DeviceCell *cells;
   double3 *nodes;
 };
 

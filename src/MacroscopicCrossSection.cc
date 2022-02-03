@@ -19,9 +19,9 @@ double macroscopicCrossSection(const Device &device, int reactionIndex, int doma
    // This is a statement that we treat materials as if all of their
    // isotopes are present in equal amounts
 
-   const DeviceCellState &cellState = device.domains[domainIndex].cellStates[cellIndex];
-   const double cellNumberDensity = cellState.cellNumberDensity;
-   const int globalMatIndex = cellState.material;
+   const DeviceCell &cell = device.domains[domainIndex].cells[cellIndex];
+   const double cellNumberDensity = cell.cellNumberDensity;
+   const int globalMatIndex = cell.material;
 
    const DeviceIsotope &iso = device.mats[globalMatIndex].isos[isoIndex];
    const double atomFraction = iso.atomFraction;
@@ -47,16 +47,16 @@ double macroscopicCrossSection(const Device &device, int reactionIndex, int doma
 double weightedMacroscopicCrossSection(Device &device, int taskIndex, int domainIndex,
                                        int cellIndex, int energyGroup)
 {
-   const double xs = device.domains[domainIndex].cellStates[cellIndex].totals[energyGroup];
+   const double xs = device.domains[domainIndex].cells[cellIndex].totals[energyGroup];
    if (xs > 0.0) return xs;
 
-   const int globalMatIndex = device.domains[domainIndex].cellStates[cellIndex].material;
+   const int globalMatIndex = device.domains[domainIndex].cells[cellIndex].material;
    const int nIsotopes = device.mats[globalMatIndex].isoSize;
    double sum = 0.0;
    for (int isoIndex = 0; isoIndex < nIsotopes; isoIndex++)
    {
       sum += macroscopicCrossSection(device, -1, domainIndex, cellIndex, isoIndex, energyGroup);
    }
-   device.domains[domainIndex].cellStates[cellIndex].totals[energyGroup] = sum;
+   device.domains[domainIndex].cells[cellIndex].totals[energyGroup] = sum;
    return sum;
 }
