@@ -34,7 +34,7 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault 
         //   (1) Cross a facet of the current cell,
         //   (2) Reach the end of the time step and enter census,
         //
-        MC_Segment_Outcome_type::Enum segment_outcome = MC_Segment_Outcome(monteCarlo, mc_particle);
+        MC_Segment_Outcome_type::Enum segment_outcome = MC_Segment_Outcome(device, mc_particle);
 
         ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[0]._numSegments);
 

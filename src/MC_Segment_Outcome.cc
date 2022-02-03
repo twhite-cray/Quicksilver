@@ -25,9 +25,8 @@ static inline unsigned int MC_Find_Min(const double *array,
 //  (iii) census at the end of the time step.
 //--------------------------------------------------------------------------------------------------
 
-MC_Segment_Outcome_type::Enum MC_Segment_Outcome(MonteCarlo* monteCarlo, MC_Particle &mc_particle)
+MC_Segment_Outcome_type::Enum MC_Segment_Outcome(Device &device, MC_Particle &mc_particle)
 {
-    Device &device = monteCarlo->_device;
     // initialize distances to large number
     int number_of_events = 3;
     double distance[3];

@@ -3,7 +3,7 @@
 
 class MC_Particle;
 class MC_Vector;
-class MonteCarlo;
+struct Device;
 
 
 struct MC_Segment_Outcome_type
@@ -32,6 +32,6 @@ struct MC_Collision_Event_Return
 };
 
 #include "DeclareMacro.hh"
-MC_Segment_Outcome_type::Enum MC_Segment_Outcome(MonteCarlo* monteCarlo, MC_Particle &mc_particle);
+MC_Segment_Outcome_type::Enum MC_Segment_Outcome(Device &device, MC_Particle &mc_particle);
 
 #endif
