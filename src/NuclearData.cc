@@ -41,14 +41,6 @@ NuclearDataReaction::NuclearDataReaction(
       _crossSection[ii] *= scale;
 }
 
-//This has problems as written for GPU code so replaced vectors with arrays
-#if 0
-// Sample the collision
-void NuclearDataReaction::sampleCollision(
-   double incidentEnergy, qs_vector<double> &energyOut,
-   qs_vector<double> &angleOut, uint64_t* seed)
-#endif
-
 
 void NuclearDataReaction::sampleCollision(
    double incidentEnergy, double material_mass, double* energyOut,

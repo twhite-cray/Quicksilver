@@ -41,6 +41,7 @@ struct DeviceIsotope {
 
 struct DeviceMaterial {
   DeviceIsotope *isos;
+  double mass;
   int isoSize;
 };
 

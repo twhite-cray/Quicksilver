@@ -74,6 +74,7 @@ void Device::init(MonteCarlo &mc)
     mats[i].isoSize = isoSize;
     for (int j = 0; j < isoSize; j++) isos[j] = mc._materialDatabase->_mat[i]._iso[j];
     isos += isoSize;
+    mats[i].mass = mc._materialDatabase->_mat[i]._mass;
   }
 
   const int ndiSize = mc._nuclearData->_isotopes.size();

@@ -72,7 +72,7 @@ bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle)
       assert(numReacts == device.reactionSize);
       for (int reactIndex = 0; reactIndex < numReacts; reactIndex++)
       {
-         currentCrossSection -= macroscopicCrossSection(monteCarlo->_device, reactIndex, mc_particle.domain, mc_particle.cell,
+         currentCrossSection -= macroscopicCrossSection(device, reactIndex, mc_particle.domain, mc_particle.cell,
                    isoIndex, mc_particle.energy_group);
          if (currentCrossSection < 0)
          {
@@ -92,6 +92,7 @@ bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle)
    double angleOut[MAX_PRODUCTION_SIZE];
    int nOut = 0;
    double mat_mass = monteCarlo->_materialDatabase->_mat[globalMatIndex]._mass;
+   assert(mat_mass == device.mats[globalMatIndex].mass);
 
    monteCarlo->_nuclearData->_isotopes[selectedUniqueNumber]._species[0]._reactions[selectedReact].sampleCollision(
       mc_particle.kinetic_energy, mat_mass, &energyOut[0], &angleOut[0], nOut, &(mc_particle.random_number_seed), MAX_PRODUCTION_SIZE );
