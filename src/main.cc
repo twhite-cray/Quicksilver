@@ -148,6 +148,8 @@ void cycleTracking(MonteCarlo *monteCarlo)
               CycleTrackingGuts( monteCarlo, numParticles, processingVault, processedVault, device );
             }
 
+            for (int i = 0; i < numParticles; i++) assert(device.processing[i] == (*processingVault)[i]);
+
             particle_count += numParticles;
 
             MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking_Kernel);

@@ -53,9 +53,11 @@ struct DeviceNuclearDataIsotope {
 };
 
 struct DeviceParticle {
-
   DeviceParticle &operator=(const MC_Base_Particle &that);
+  bool operator==(const MC_Base_Particle &that) const;
+
   uint64_t identifier;
+  int species;
 };
 
 struct Device {

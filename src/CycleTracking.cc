@@ -46,7 +46,10 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault 
             // The particle undergoes a collision event producing:
             //   (0) Other-than-one same-species secondary particle, or
             //   (1) Exactly one same-species secondary particle.
-            if (CollisionEvent(monteCarlo, mc_particle) != MC_Collision_Event_Return::Continue_Tracking) processingVault->invalidateParticle( particle_index++ );
+              if (CollisionEvent(monteCarlo, mc_particle) != MC_Collision_Event_Return::Continue_Tracking) {
+                processingVault->invalidateParticle( particle_index );
+                device.processing[particle_index++].species = -1;
+              }
             }
             break;
     
@@ -62,7 +65,8 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault 
                     ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[0]._escape);
                     mc_particle.last_event = MC_Tally_Event::Facet_Crossing_Escape;
                     mc_particle.species = -1;
-                    processingVault->invalidateParticle( particle_index++ );
+                    processingVault->invalidateParticle( particle_index );
+                    device.processing[particle_index++].species = -1;
                 }
                 else if (facet_crossing_type == MC_Tally_Event::Facet_Crossing_Reflection)
                 {
@@ -71,8 +75,8 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault 
                 else
                 {
                     // Enters an adjacent cell in an off-processor domain.
-                    //mc_particle.species = -1;
-                    processingVault->invalidateParticle( particle_index++ );
+                    processingVault->invalidateParticle( particle_index );
+                    device.processing[particle_index++].species = -1;
                 }
             }
             break;
@@ -82,7 +86,8 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault 
                 // The particle has reached the end of the time step.
                 processedVault->pushParticle(mc_particle);
                 ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[0]._census);
-                processingVault->invalidateParticle( particle_index++ );
+                processingVault->invalidateParticle( particle_index );
+                device.processing[particle_index++].species = -1;
                 break;
             }
             

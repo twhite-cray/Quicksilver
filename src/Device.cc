@@ -6,12 +6,6 @@
 #include "NuclearData.hh"
 #include "ParticleVaultContainer.hh"
 
-DeviceParticle &DeviceParticle::operator=(const MC_Base_Particle &that)
-{
-  identifier = that.identifier;
-  return *this;
-}
-
 void Device::init(MonteCarlo &mc)
 {
   assert(domains == nullptr);
@@ -162,4 +156,18 @@ void Device::cycleFinalize(MonteCarlo &mc)
   mc._tallies->_balanceTask[0]._numSegments = *numSegments;
 }
 
+DeviceParticle &DeviceParticle::operator=(const MC_Base_Particle &that)
+{
+  identifier = that.identifier;
+  species = that.species;
+  return *this;
+}
+
+bool DeviceParticle::operator==(const MC_Base_Particle &that) const
+{
+  return (
+      (identifier == that.identifier) &&
+      (species == that.species)
+      );
+}
 
