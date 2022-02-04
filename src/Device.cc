@@ -104,7 +104,12 @@ void Device::init(MonteCarlo &mc)
     rs += rSizeP1;
   }
 
+  nuBar = mc._nuclearData->_isotopes[0]._species[0]._reactions[0]._nuBar;
   for (int i = 0; i < ndiSize; i++) {
+    for (int j = 1; j < rSizeP1; j++) {
+      isotopes[i].reactions[j].type = mc._nuclearData->_isotopes[i]._species[0]._reactions[j-1]._reactionType;
+      assert(nuBar == mc._nuclearData->_isotopes[i]._species[0]._reactions[j-1]._nuBar);
+    }
     for (int k = 0; k < groupSize; k++) {
       double sum = 0;
       for (int j = 1; j < rSizeP1; j++) {

@@ -17,7 +17,7 @@ uint64_t rngSpawn_Random_Number_Seed(uint64_t *parent_seed);
 //  Sample returns the pseudo-random number produced by a call to a random
 //  number generator.
 //----------------------------------------------------------------------------------------------------------------------
-inline double rngSample(uint64_t *seed)
+inline double rngSample(uint64_t *__restrict__ const seed)
 {
    // Reset the state from the previous value.
    *seed = 2862933555777941757ULL*(*seed) + 3037000493ULL;

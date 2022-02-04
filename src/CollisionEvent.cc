@@ -94,8 +94,20 @@ bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle)
    double mat_mass = monteCarlo->_materialDatabase->_mat[globalMatIndex]._mass;
    assert(mat_mass == device.mats[globalMatIndex].mass);
 
+   assert(monteCarlo->_nuclearData->_isotopes[selectedUniqueNumber]._species[0]._reactions[selectedReact]._nuBar == device.nuBar);
+   assert(monteCarlo->_nuclearData->_isotopes[selectedUniqueNumber]._species[0]._reactions[selectedReact]._reactionType == device.isotopes[selectedUniqueNumber].reactions[selectedReact+1].type);
+   uint64_t seed = mc_particle.random_number_seed;
+   double eo[MAX_PRODUCTION_SIZE];
+   double ao[MAX_PRODUCTION_SIZE];
+   int no = 0;
+   device.collide(device.isotopes[selectedUniqueNumber].reactions[selectedReact+1].type, mc_particle.kinetic_energy, mat_mass, eo, ao, no, seed);
    monteCarlo->_nuclearData->_isotopes[selectedUniqueNumber]._species[0]._reactions[selectedReact].sampleCollision(
       mc_particle.kinetic_energy, mat_mass, &energyOut[0], &angleOut[0], nOut, &(mc_particle.random_number_seed), MAX_PRODUCTION_SIZE );
+   assert(no == nOut);
+   for (int i = 0; i < no; i++) {
+     assert(eo[i] == energyOut[i]);
+     assert(ao[i] == angleOut[i]);
+   }
 
    //--------------------------------------------------------------------------------------------------------------
    //  Post-Collision Phase 1:

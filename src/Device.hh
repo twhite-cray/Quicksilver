@@ -1,6 +1,8 @@
 #pragma once
 #include "MaterialDatabase.hh"
 #include "MC_Cell_State.hh"
+#include "MC_RNG_State.hh"
+#include "NuclearData.hh"
 
 class MC_Base_Particle;
 class MonteCarlo;
@@ -47,6 +49,7 @@ struct DeviceMaterial {
 
 struct DeviceReaction {
   double *crossSections;
+  NuclearDataReaction::Enum type;
 };
 
 struct DeviceNuclearDataIsotope {
@@ -62,6 +65,7 @@ struct DeviceParticle {
 };
 
 struct Device {
+
   Device():
     domains(nullptr),
     mats(nullptr),
@@ -70,10 +74,38 @@ struct Device {
     processing(nullptr),
     processed(nullptr)
   {}
+
   Device(const Device &) = default;
   void init(MonteCarlo &mc);
   void cycleInit(MonteCarlo &mc);
   void cycleFinalize(MonteCarlo &mc);
+
+  void collide(const NuclearDataReaction::Enum type, const double energyIn, const double mass, double *__restrict__ const energyOut, double *__restrict__ const angleOut, int &nOut, uint64_t &seed) const
+  {
+    switch(type) {
+      case NuclearDataReaction::Scatter:
+        {
+          nOut = 1;
+          energyOut[0] = energyIn*(1.0-(rngSample(&seed)*(1.0/mass)));
+          angleOut[0] = rngSample(&seed)*2.0-1.0;
+        }
+        break;
+      case NuclearDataReaction::Absorption:
+        break;
+      case NuclearDataReaction::Fission:
+        {
+          nOut = int(nuBar+rngSample(&seed));
+          for (int i = 0; i < nOut; i++) {
+            const double ran = rngSample(&seed)/2.0+0.5;
+            energyOut[i] = 20.0*ran*ran;
+            angleOut[i] = rngSample(&seed)*2.0-1.0;
+          }
+        }
+        break;
+      case NuclearDataReaction::Undefined:
+        abort();
+    }
+  }
 
   DeviceDomain *domains;
   DeviceMaterial *mats;
@@ -83,6 +115,7 @@ struct Device {
   int *processingSize;
   DeviceParticle *processing;
   DeviceParticle *processed;
+  double nuBar;
   int reactionSize;
 };
 
