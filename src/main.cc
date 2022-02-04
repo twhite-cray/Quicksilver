@@ -208,6 +208,8 @@ void cycleFinalize()
 {
     MC_FASTTIMER_START(MC_Fast_Timer::cycleFinalize);
 
+    mcco->_device.cycleFinalize(*mcco);
+
     mcco->_tallies->_balanceTask[0]._end = mcco->_particleVaultContainer->sizeProcessed();
 
     // Update the cumulative tally data.

@@ -153,7 +153,7 @@ void Device::cycleFinalize(MonteCarlo &mc)
       }
     }
   }
-  mc._tallies->_balanceTask[0]._numSegments = *numSegments;
+  mc._tallies->_balanceTask[0]._numSegments = (*numSegments);
 }
 
 DeviceParticle &DeviceParticle::operator=(const MC_Base_Particle &that)
