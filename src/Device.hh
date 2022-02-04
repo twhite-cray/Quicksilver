@@ -82,5 +82,6 @@ struct Device {
   int *processingSize;
   DeviceParticle *processing;
   DeviceParticle *processed;
+  int reactionSize;
 };
 

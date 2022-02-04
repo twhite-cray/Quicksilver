@@ -78,11 +78,12 @@ void Device::init(MonteCarlo &mc)
 
   const int ndiSize = mc._nuclearData->_isotopes.size();
   CHECK(hipHostMalloc(&isotopes,ndiSize*sizeof(*isotopes)));
-  const int rSize = mc._nuclearData->_isotopes[0]._species[0]._reactions.size()+1;
+  reactionSize = mc._nuclearData->_isotopes[0]._species[0]._reactions.size();
+  const int rSizeP1 = reactionSize+1;
   assert(groupSize == mc._nuclearData->_isotopes[0]._species[0]._reactions[0]._crossSection.size());
   for (const auto &isotope : mc._nuclearData->_isotopes) {
     for (const auto &species : isotope._species) {
-      assert(rSize == species._reactions.size()+1);
+      assert(rSizeP1 == species._reactions.size()+1);
       for (const auto &reaction: species._reactions) {
         assert(groupSize == reaction._crossSection.size());
       }
@@ -90,22 +91,22 @@ void Device::init(MonteCarlo &mc)
   }
 
   DeviceReaction *rs = nullptr;
-  CHECK(hipHostMalloc(&rs,ndiSize*rSize*sizeof(*rs)));
+  CHECK(hipHostMalloc(&rs,ndiSize*rSizeP1*sizeof(*rs)));
   double *xs = nullptr;
-  CHECK(hipHostMalloc(&xs,ndiSize*rSize*groupSize*sizeof(*xs)));
+  CHECK(hipHostMalloc(&xs,ndiSize*rSizeP1*groupSize*sizeof(*xs)));
   for (int i = 0; i < ndiSize; i++) {
     isotopes[i].reactions = rs;
-    for (int j = 0; j < rSize; j++) {
+    for (int j = 0; j < rSizeP1; j++) {
       isotopes[i].reactions[j].crossSections = xs;
       xs += groupSize;
     }
-    rs += rSize;
+    rs += rSizeP1;
   }
 
   for (int i = 0; i < ndiSize; i++) {
     for (int k = 0; k < groupSize; k++) {
       double sum = 0;
-      for (int j = 1; j < rSize; j++) {
+      for (int j = 1; j < rSizeP1; j++) {
         const double xs = mc._nuclearData->_isotopes[i]._species[0]._reactions[j-1]._crossSection[k];
         sum += xs;
         isotopes[i].reactions[j].crossSections[k] = xs;

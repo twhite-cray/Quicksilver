@@ -46,9 +46,11 @@ void updateTrajectory( double energy, double angle, MC_Particle& particle )
 
 bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle)
 {
+   Device &device = monteCarlo->_device;
    const MC_Cell_State &cell = monteCarlo->domain[mc_particle.domain].cell_state[mc_particle.cell];
 
-   int globalMatIndex = cell._material;
+   const int globalMatIndex = device.domains[mc_particle.domain].cells[mc_particle.cell].material;
+   assert(globalMatIndex == cell._material);
 
    //------------------------------------------------------------------------------------------------------------------
    //    Pick the isotope and reaction.
@@ -60,11 +62,14 @@ bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle)
    int selectedUniqueNumber = -1;
    int selectedReact = -1;
    int numIsos = (int)monteCarlo->_materialDatabase->_mat[globalMatIndex]._iso.size();
+   assert(numIsos == device.mats[globalMatIndex].isoSize);
    
    for (int isoIndex = 0; isoIndex < numIsos && currentCrossSection >= 0; isoIndex++)
    {
       int uniqueNumber = monteCarlo->_materialDatabase->_mat[globalMatIndex]._iso[isoIndex]._gid;
+      assert(uniqueNumber == device.mats[globalMatIndex].isos[isoIndex].gid);
       int numReacts = monteCarlo->_nuclearData->getNumberReactions(uniqueNumber);
+      assert(numReacts == device.reactionSize);
       for (int reactIndex = 0; reactIndex < numReacts; reactIndex++)
       {
          currentCrossSection -= macroscopicCrossSection(monteCarlo->_device, reactIndex, mc_particle.domain, mc_particle.cell,
