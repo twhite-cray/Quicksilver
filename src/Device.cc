@@ -134,6 +134,13 @@ void Device::init(MonteCarlo &mc)
     CHECK(hipHostMalloc(&processed,bytes));
     memset(processed,0,bytes);
   }
+
+  {
+    logLow = log(mc._nuclearData->_energies[0]);
+    numGroups = mc._nuclearData->_numEnergyGroups;
+    const double delta = (log(mc._nuclearData->_energies[numGroups])-logLow)/double(numGroups);
+    divDelta = 1.0/delta;
+  }
 }
 
 void Device::cycleInit(MonteCarlo &mc)

@@ -95,14 +95,15 @@ bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle)
    assert(mat_mass == device.mats[globalMatIndex].mass);
 
    assert(monteCarlo->_nuclearData->_isotopes[selectedUniqueNumber]._species[0]._reactions[selectedReact]._nuBar == device.nuBar);
-   assert(monteCarlo->_nuclearData->_isotopes[selectedUniqueNumber]._species[0]._reactions[selectedReact]._reactionType == device.isotopes[selectedUniqueNumber].reactions[selectedReact+1].type);
+   const NuclearDataReaction::Enum reactionType = device.isotopes[selectedUniqueNumber].reactions[selectedReact+1].type;
+   assert(monteCarlo->_nuclearData->_isotopes[selectedUniqueNumber]._species[0]._reactions[selectedReact]._reactionType == reactionType);
    uint64_t seed = mc_particle.random_number_seed;
    double eo[MAX_PRODUCTION_SIZE];
    double ao[MAX_PRODUCTION_SIZE];
    int no = 0;
-   device.collide(device.isotopes[selectedUniqueNumber].reactions[selectedReact+1].type, mc_particle.kinetic_energy, mat_mass, eo, ao, no, seed);
+   device.collide(reactionType, mc_particle.kinetic_energy, mat_mass, energyOut, angleOut, nOut, mc_particle.random_number_seed);
    monteCarlo->_nuclearData->_isotopes[selectedUniqueNumber]._species[0]._reactions[selectedReact].sampleCollision(
-      mc_particle.kinetic_energy, mat_mass, &energyOut[0], &angleOut[0], nOut, &(mc_particle.random_number_seed), MAX_PRODUCTION_SIZE );
+      mc_particle.kinetic_energy, mat_mass, eo, ao, no, &seed, MAX_PRODUCTION_SIZE );
    assert(no == nOut);
    for (int i = 0; i < no; i++) {
      assert(eo[i] == energyOut[i]);
@@ -116,8 +117,8 @@ bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle)
 
    // Set the reaction for this particle.
    ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[0]._collision );
-   NuclearDataReaction::Enum reactionType = monteCarlo->_nuclearData->_isotopes[selectedUniqueNumber]._species[0].\
-           _reactions[selectedReact]._reactionType;
+   assert(reactionType == monteCarlo->_nuclearData->_isotopes[selectedUniqueNumber]._species[0].\
+           _reactions[selectedReact]._reactionType);
    switch (reactionType)
    {
       case NuclearDataReaction::Scatter:
@@ -158,6 +159,7 @@ bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle)
 
    //If we are still tracking this particle the update its energy group
    mc_particle.energy_group = monteCarlo->_nuclearData->getEnergyGroup(mc_particle.kinetic_energy);
+   assert(mc_particle.energy_group == device.getEnergyGroup(mc_particle.kinetic_energy));
 
    return nOut == 1;
 }

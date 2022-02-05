@@ -100,7 +100,7 @@ NuclearData::NuclearData(int numGroups, double energyLow, double energyHigh) : _
    _energies[numGroups] = energyHigh;
    double logLow = log(energyLow);
    double logHigh = log(energyHigh);
-   double delta = (logHigh - logLow) / (numGroups + 1.0);
+   double delta = (logHigh - logLow) / double(numGroups);
    for (int energyIndex = 1; energyIndex < numGroups; energyIndex++)
    {
       double logValue = logLow + delta *energyIndex;

@@ -107,6 +107,12 @@ struct Device {
     }
   }
 
+  int getEnergyGroup(const double e)
+  {
+    const int i = int((log(e)-logLow)*divDelta);
+    return std::max(0,std::min(numGroups,i));
+  }
+
   DeviceDomain *domains;
   DeviceMaterial *mats;
   DeviceNuclearDataIsotope *isotopes;
@@ -115,7 +121,11 @@ struct Device {
   int *processingSize;
   DeviceParticle *processing;
   DeviceParticle *processed;
+
   double nuBar;
+  double logLow;
+  double divDelta;
+  int numGroups;
   int reactionSize;
 };
 
