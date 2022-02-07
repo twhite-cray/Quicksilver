@@ -124,17 +124,20 @@ bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle)
    {
       case NuclearDataReaction::Scatter:
          ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[0]._scatter);
+         ATOMIC_UPDATE( device.tallies[Device::Tallies::SCATTER] );
          break;
       case NuclearDataReaction::Absorption:
          ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[0]._absorb);
+         ATOMIC_UPDATE( device.tallies[Device::Tallies::ABSORB] );
          break;
       case NuclearDataReaction::Fission:
          ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[0]._fission);
+         ATOMIC_UPDATE( device.tallies[Device::Tallies::FISSION] );
          ATOMIC_ADD( monteCarlo->_tallies->_balanceTask[0]._produce, nOut);
+         ATOMIC_ADD( device.tallies[Device::Tallies::PRODUCE], nOut);
          break;
       case NuclearDataReaction::Undefined:
-         printf("reactionType invalid\n");
-         qs_assert(false);
+         abort();
    }
 
    if( nOut == 0 ) return false;

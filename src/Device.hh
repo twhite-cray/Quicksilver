@@ -118,7 +118,7 @@ struct Device {
   DeviceMaterial *mats;
   DeviceNuclearDataIsotope *isotopes;
 
-  enum Tallies { ABSORB, COLLISION, FISSION, SEGMENTS, SCATTER, SIZE };
+  enum Tallies { ABSORB, COLLISION, FISSION, PRODUCE, SEGMENTS, SCATTER, SIZE };
   long *tallies;
 
   int *processingSize;

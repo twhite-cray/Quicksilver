@@ -169,6 +169,10 @@ void Device::cycleFinalize(MonteCarlo &mc)
   }
   mc._tallies->_balanceTask[0]._numSegments = tallies[Tallies::SEGMENTS];
   assert(mc._tallies->_balanceTask[0]._collision == tallies[Tallies::COLLISION]);
+  assert(mc._tallies->_balanceTask[0]._scatter == tallies[Tallies::SCATTER]);
+  assert(mc._tallies->_balanceTask[0]._absorb == tallies[Tallies::ABSORB]);
+  assert(mc._tallies->_balanceTask[0]._fission == tallies[Tallies::FISSION]);
+  assert(mc._tallies->_balanceTask[0]._produce == tallies[Tallies::PRODUCE]);
 }
 
 DeviceParticle &DeviceParticle::operator=(const MC_Base_Particle &that)
