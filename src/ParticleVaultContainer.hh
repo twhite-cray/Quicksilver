@@ -69,6 +69,8 @@ class ParticleVaultContainer
     //for any particles that hit (TRANSIT_OFF_PROCESSOR) 
     SendQueue _sendQueue;
 
+  public:
+
     ParticleVault _processingVault;
     ParticleVault _processedVault;
     ParticleVault _extraVault;

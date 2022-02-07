@@ -133,6 +133,8 @@ void Device::init(MonteCarlo &mc)
     memset(processing,0,bytes);
     CHECK(hipHostMalloc(&processed,bytes));
     memset(processed,0,bytes);
+    CHECK(hipHostMalloc(&extras,bytes));
+    memset(extras,0,bytes);
   }
 
   {
@@ -180,6 +182,11 @@ DeviceParticle &DeviceParticle::operator=(const MC_Base_Particle &that)
   identifier = that.identifier;
   species = that.species;
   return *this;
+}
+
+DeviceParticle &DeviceParticle::operator=(const MC_Particle &that)
+{
+  return *this = MC_Base_Particle(that);
 }
 
 bool DeviceParticle::operator==(const MC_Base_Particle &that) const

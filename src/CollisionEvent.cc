@@ -145,6 +145,7 @@ bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle)
         secondaryParticle.identifier = secondaryParticle.random_number_seed;
         updateTrajectory( energyOut[secondaryIndex], angleOut[secondaryIndex], secondaryParticle );
         monteCarlo->_particleVaultContainer->addExtraParticle(secondaryParticle);
+        device.extras[device.particleSizes[Device::EXTRAS]++] = secondaryParticle;
    }
 
    updateTrajectory( energyOut[0], angleOut[0], mc_particle);
@@ -153,8 +154,10 @@ bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle)
    // particle to the "extras" that we will handle later.  This avoids the 
    // possibility of a particle doing multiple fission reactions in a single
    // kernel invocation and overflowing the extra storage with secondary particles.
-   if ( nOut > 1 ) 
+   if ( nOut > 1 ) {
        monteCarlo->_particleVaultContainer->addExtraParticle(mc_particle);
+       device.extras[device.particleSizes[Device::EXTRAS]++] = mc_particle;
+   }
 
    //If we are still tracking this particle the update its energy group
    mc_particle.energy_group = monteCarlo->_nuclearData->getEnergyGroup(mc_particle.kinetic_energy);

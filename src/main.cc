@@ -125,6 +125,10 @@ void cycleTracking(MonteCarlo *monteCarlo)
     Messages &messages = monteCarlo->_messages;
 
     ParticleVaultContainer &my_particle_vault = *(monteCarlo->_particleVaultContainer);
+    ParticleVault *processingVault = my_particle_vault.getTaskProcessingVault();
+    ParticleVault *processedVault =  my_particle_vault.getTaskProcessedVault();
+    ParticleVault &extraVault = monteCarlo->_particleVaultContainer->_extraVault;
+    assert(processedVault->size() == 0);
 
     do
     {
@@ -134,9 +138,6 @@ void cycleTracking(MonteCarlo *monteCarlo)
         {
             messages.startRecvs();
             MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking_Kernel);
-
-            ParticleVault *processingVault = my_particle_vault.getTaskProcessingVault();
-            ParticleVault *processedVault =  my_particle_vault.getTaskProcessedVault();
 
             int numParticles = processingVault->size();
             device.particleSizes[Device::PROCESSING] = numParticles;
@@ -151,6 +152,9 @@ void cycleTracking(MonteCarlo *monteCarlo)
             for (int i = 0; i < numParticles; i++) assert(device.processing[i] == (*processingVault)[i]);
 
             particle_count += numParticles;
+
+            assert(extraVault.size() == device.particleSizes[Device::EXTRAS]);
+            for (int i = 0; i < extraVault.size(); i++) assert(device.extras[i] == extraVault[i]);
 
             MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking_Kernel);
 
@@ -176,6 +180,7 @@ void cycleTracking(MonteCarlo *monteCarlo)
 
             // Move particles in "extra" vault into the regular vaults.
             my_particle_vault.cleanExtraVault();
+            device.particleSizes[Device::EXTRAS] = 0;
             MPI_Barrier(MPI_COMM_WORLD);
 
             // receive any particles that have arrived from other ranks

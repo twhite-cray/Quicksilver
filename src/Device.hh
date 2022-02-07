@@ -5,6 +5,7 @@
 #include "NuclearData.hh"
 
 class MC_Base_Particle;
+class MC_Particle;
 class MonteCarlo;
 
 struct DeviceCell {
@@ -58,6 +59,7 @@ struct DeviceNuclearDataIsotope {
 
 struct DeviceParticle {
   DeviceParticle &operator=(const MC_Base_Particle &that);
+  DeviceParticle &operator=(const MC_Particle &that);
   bool operator==(const MC_Base_Particle &that) const;
 
   uint64_t identifier;
