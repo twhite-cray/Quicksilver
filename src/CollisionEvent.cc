@@ -117,6 +117,7 @@ bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle)
 
    // Set the reaction for this particle.
    ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[0]._collision );
+   ATOMIC_UPDATE( device.tallies[Device::Tallies::COLLISION] );
    assert(reactionType == monteCarlo->_nuclearData->_isotopes[selectedUniqueNumber]._species[0].\
            _reactions[selectedReact]._reactionType);
    switch (reactionType)

@@ -64,6 +64,7 @@ struct DeviceParticle {
   int species;
 };
 
+
 struct Device {
 
   Device():
@@ -116,7 +117,9 @@ struct Device {
   DeviceDomain *domains;
   DeviceMaterial *mats;
   DeviceNuclearDataIsotope *isotopes;
-  long *numSegments;
+
+  enum Tallies { ABSORB, COLLISION, FISSION, SEGMENTS, SCATTER, SIZE };
+  long *tallies;
 
   int *processingSize;
   DeviceParticle *processing;

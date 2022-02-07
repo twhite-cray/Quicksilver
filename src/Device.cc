@@ -121,10 +121,10 @@ void Device::init(MonteCarlo &mc)
     }
   }
 
-  CHECK(hipHostMalloc(&numSegments,sizeof(*numSegments)));
-
   CHECK(hipHostMalloc(&processingSize,sizeof(*processingSize)));
   *processingSize = 0;
+
+  CHECK(hipHostMalloc(&tallies,Tallies::SIZE*sizeof(*tallies)));
 
   {
     const long bytes = sizeof(*processing)*mc._particleVaultContainer->getVaultSize();
@@ -152,7 +152,7 @@ void Device::cycleInit(MonteCarlo &mc)
   const int bytes = cellSizeSum*groupSize*sizeof(double);
   memset(domains->cells->totals,0,bytes);
   memset(domains->cells->groupTallies,0,bytes);
-  *numSegments = 0;
+  memset(tallies,0,Tallies::SIZE*sizeof(*tallies));
 }
   
 void Device::cycleFinalize(MonteCarlo &mc)
@@ -167,7 +167,8 @@ void Device::cycleFinalize(MonteCarlo &mc)
       }
     }
   }
-  mc._tallies->_balanceTask[0]._numSegments = (*numSegments);
+  mc._tallies->_balanceTask[0]._numSegments = tallies[Tallies::SEGMENTS];
+  assert(mc._tallies->_balanceTask[0]._collision == tallies[Tallies::COLLISION]);
 }
 
 DeviceParticle &DeviceParticle::operator=(const MC_Base_Particle &that)
