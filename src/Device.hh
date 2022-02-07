@@ -71,9 +71,16 @@ struct Device {
     domains(nullptr),
     mats(nullptr),
     isotopes(nullptr),
-    processingSize(nullptr),
+    tallies(nullptr),
+    particleSizes(nullptr),
     processing(nullptr),
-    processed(nullptr)
+    processed(nullptr),
+    extras(nullptr),
+    nuBar(0),
+    logLow(0),
+    divDelta(0),
+    numGroups(0),
+    reactionSize(0)
   {}
 
   Device(const Device &) = default;
@@ -118,12 +125,14 @@ struct Device {
   DeviceMaterial *mats;
   DeviceNuclearDataIsotope *isotopes;
 
-  enum Tallies { ABSORB, COLLISION, FISSION, PRODUCE, SEGMENTS, SCATTER, SIZE };
+  enum Tallies { ABSORB, COLLISION, FISSION, PRODUCE, SEGMENTS, SCATTER, TALLIES_SIZE };
   long *tallies;
 
-  int *processingSize;
+  enum ParticleSizes { PROCESSING, PROCESSED, EXTRAS, PARTICLE_SIZES_SIZE };
+  int *particleSizes;
   DeviceParticle *processing;
   DeviceParticle *processed;
+  DeviceParticle *extras;
 
   double nuBar;
   double logLow;

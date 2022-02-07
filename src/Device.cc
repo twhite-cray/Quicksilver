@@ -121,10 +121,10 @@ void Device::init(MonteCarlo &mc)
     }
   }
 
-  CHECK(hipHostMalloc(&processingSize,sizeof(*processingSize)));
-  *processingSize = 0;
+  CHECK(hipHostMalloc(&particleSizes,PARTICLE_SIZES_SIZE*sizeof(*particleSizes)));
+  memset(particleSizes,0,PARTICLE_SIZES_SIZE*sizeof(*particleSizes));
 
-  CHECK(hipHostMalloc(&tallies,Tallies::SIZE*sizeof(*tallies)));
+  CHECK(hipHostMalloc(&tallies,TALLIES_SIZE*sizeof(*tallies)));
 
   {
     const long bytes = sizeof(*processing)*mc._particleVaultContainer->getVaultSize();
@@ -152,7 +152,7 @@ void Device::cycleInit(MonteCarlo &mc)
   const int bytes = cellSizeSum*groupSize*sizeof(double);
   memset(domains->cells->totals,0,bytes);
   memset(domains->cells->groupTallies,0,bytes);
-  memset(tallies,0,Tallies::SIZE*sizeof(*tallies));
+  memset(tallies,0,TALLIES_SIZE*sizeof(*tallies));
 }
   
 void Device::cycleFinalize(MonteCarlo &mc)

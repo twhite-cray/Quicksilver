@@ -36,7 +36,7 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault 
         //
         MC_Segment_Outcome_type::Enum segment_outcome = MC_Segment_Outcome(device, mc_particle);
 
-        ATOMIC_UPDATE( device.tallies[Device::Tallies::SEGMENTS] );
+        ATOMIC_UPDATE( device.tallies[Device::SEGMENTS] );
 
         mc_particle.num_segments += 1.;  /* Track the number of segments this particle has
                                             undergone this cycle on all processes. */
