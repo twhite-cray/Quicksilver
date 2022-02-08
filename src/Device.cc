@@ -45,6 +45,11 @@ void Device::init(MonteCarlo &mc)
         facet.plane = double4{plane.A,plane.B,plane.C,plane.D};
         const int *const p = mc.domain[i].mesh._cellConnectivity[j]._facet[k].point;
         facet.point = int3{p[0],p[1],p[2]};
+        const Subfacet_Adjacency &adjacency = mc.domain[i].mesh._cellConnectivity[j]._facet[k].subfacet;
+        facet.adjacentCell = adjacency.adjacent.cell;
+        facet.adjacentDomain = adjacency.adjacent.domain;
+        facet.adjacentFacet = adjacency.adjacent.facet;
+        facet.event = adjacency.event;
       }
       for (int k = 0; k < DeviceCell::numQuadPoints; k++) {
         cells[j].quadPoints[k] = mc.domain[i].mesh._cellConnectivity[j]._point[k];

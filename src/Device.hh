@@ -1,6 +1,7 @@
 #pragma once
 #include "MaterialDatabase.hh"
 #include "MC_Cell_State.hh"
+#include "MC_Facet_Adjacency.hh"
 #include "MC_RNG_State.hh"
 #include "NuclearData.hh"
 
@@ -11,6 +12,10 @@ class MonteCarlo;
 struct DeviceFacet {
   double4 plane;
   int3 point;
+  int adjacentCell;
+  int adjacentDomain;
+  int adjacentFacet;
+  MC_Subfacet_Adjacency_Event::Enum event;
 };
 
 struct DeviceCell {

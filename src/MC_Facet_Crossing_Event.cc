@@ -27,6 +27,12 @@ MC_Tally_Event::Enum MC_Facet_Crossing_Event(MC_Particle &mc_particle, MonteCarl
 
     Subfacet_Adjacency &facet_adjacency = MCT_Adjacent_Facet(location, mc_particle, monteCarlo);
 
+    const DeviceFacet &facet = monteCarlo->_device.domains[location.domain].cells[location.cell].facets[location.facet];
+    assert(facet.adjacentCell == facet_adjacency.adjacent.cell);
+    assert(facet.adjacentDomain == facet_adjacency.adjacent.domain);
+    assert(facet.adjacentFacet == facet_adjacency.adjacent.facet);
+    assert(facet.event == facet_adjacency.event);
+
     if ( facet_adjacency.event == MC_Subfacet_Adjacency_Event::Transit_On_Processor )
     {
         // The particle will enter into an adjacent cell.
