@@ -49,6 +49,8 @@ void Device::init(MonteCarlo &mc)
         facet.adjacentCell = adjacency.adjacent.cell;
         facet.adjacentDomain = adjacency.adjacent.domain;
         facet.adjacentFacet = adjacency.adjacent.facet;
+        facet.currentDomain = adjacency.current.domain;
+        facet.neighbor = adjacency.neighbor_index;
         facet.event = adjacency.event;
       }
       for (int k = 0; k < DeviceCell::numQuadPoints; k++) {

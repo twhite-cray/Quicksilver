@@ -15,6 +15,8 @@ struct DeviceFacet {
   int adjacentCell;
   int adjacentDomain;
   int adjacentFacet;
+  int currentDomain;
+  int neighbor;
   MC_Subfacet_Adjacency_Event::Enum event;
 };
 
