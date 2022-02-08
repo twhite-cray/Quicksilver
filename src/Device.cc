@@ -144,7 +144,8 @@ void Device::init(MonteCarlo &mc)
   CHECK(hipHostMalloc(&tallies,TALLIES_SIZE*sizeof(*tallies)));
 
   {
-    const long bytes = sizeof(*processing)*mc._particleVaultContainer->getVaultSize();
+    const long vaultSize = mc._particleVaultContainer->getVaultSize();
+    const long bytes = sizeof(*processing)*vaultSize;
     assert(bytes);
     CHECK(hipHostMalloc(&processing,bytes));
     memset(processing,0,bytes);
@@ -152,6 +153,8 @@ void Device::init(MonteCarlo &mc)
     memset(processed,0,bytes);
     CHECK(hipHostMalloc(&extras,bytes));
     memset(extras,0,bytes);
+    CHECK(hipHostMalloc(&sends,sizeof(*sends)*vaultSize));
+    memset(sends,0,sizeof(*sends)*vaultSize);
   }
 
   {

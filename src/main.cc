@@ -163,9 +163,13 @@ void cycleTracking(MonteCarlo *monteCarlo)
             NVTX_Range cleanAndComm("cycleTracking_clean_and_comm");
 
             SendQueue &sendQueue = *(my_particle_vault.getSendQueue());
+            assert(device.particleSizes[Device::SENDS] == sendQueue.size());
             for ( int index = 0; index < sendQueue.size(); index++ )
             {
               sendQueueTuple& sendQueueT = sendQueue.getTuple( index );
+              const int2 tuple = device.sends[index];
+              assert(sendQueueT._neighbor == tuple.x);
+              assert(sendQueueT._particleIndex == tuple.y);
               MC_Base_Particle mcb_particle;
 
               processingVault->getBaseParticleComm( mcb_particle, sendQueueT._particleIndex );
@@ -177,6 +181,7 @@ void cycleTracking(MonteCarlo *monteCarlo)
             messages.startSends();
             processingVault->clear(); //remove the invalid particles
             sendQueue.clear();
+            device.particleSizes[Device::SENDS] = 0;
 
             // Move particles in "extra" vault into the regular vaults.
             my_particle_vault.cleanExtraVault();
