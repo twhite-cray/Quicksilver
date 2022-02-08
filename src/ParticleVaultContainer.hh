@@ -5,7 +5,6 @@
 
 #include "portability.hh"
 #include "ParticleVault.hh"
-#include "SendQueue.hh"
 
 //---------------------------------------------------------------
 // ParticleVaultContainer is a container of ParticleVaults. 
@@ -39,9 +38,6 @@ class ParticleVaultContainer
     ParticleVault *getTaskProcessingVault() { return &_processingVault; }
     ParticleVault *getTaskProcessedVault() { return &_processedVault; }
 
-    //Returns a pointer to the Send Queue
-    SendQueue* getSendQueue();
-
     //Counts Particles in all vaults
     uint64_t sizeProcessing() const { return _processingVault.size(); }
     uint64_t sizeProcessed() const { return _processedVault.size(); }
@@ -64,10 +60,6 @@ class ParticleVaultContainer
     //The Size of the ParticleVaults (fixed at runtime for 
     //each run)
     uint64_t _vaultSize;
-
-    //The send queue - stores particle index and neighbor index 
-    //for any particles that hit (TRANSIT_OFF_PROCESSOR) 
-    SendQueue _sendQueue;
 
   public:
 

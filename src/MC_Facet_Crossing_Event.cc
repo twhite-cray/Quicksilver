@@ -10,7 +10,6 @@
 #include "MC_Particle_Buffer.hh"
 #include "DeclareMacro.hh"
 #include "macros.hh"
-#include "SendQueue.hh"
 
 //----------------------------------------------------------------------------------------------------------------------
 //  Determines whether the particle has been tracked to a facet such that it:
@@ -61,8 +60,6 @@ MC_Tally_Event::Enum MC_Facet_Crossing_Event(MC_Particle &mc_particle, MonteCarl
         processingVault->putParticle( mc_particle, particle_index );
         device.processing[particle_index] = mc_particle;
 
-        //Push neighbor rank and mc_particle onto the send queue
-        monteCarlo->_particleVaultContainer->getSendQueue()->push( neighbor_rank, particle_index );
         const int sendIndex = __atomic_fetch_add(device.particleSizes+Device::SENDS,1,__ATOMIC_RELAXED);
         device.sends[sendIndex] = int2{neighbor_rank, particle_index};
     }

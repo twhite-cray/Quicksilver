@@ -15,7 +15,6 @@ ParticleVaultContainer( uint64_t vault_size )
     _processedVault.reserve( vault_size );
     _processingVault.reserve( vault_size );
     _extraVault.reserve( vault_size );
-    _sendQueue.reserve( vault_size );
 }
 
 //--------------------------------------------------------------
@@ -26,16 +25,6 @@ ParticleVaultContainer( uint64_t vault_size )
 ParticleVaultContainer::
 ~ParticleVaultContainer()
 {
-}
-
-//--------------------------------------------------------------
-//------------getSendQueue--------------------------------------
-//Returns a pointer to the Send Queue
-//--------------------------------------------------------------
-SendQueue* ParticleVaultContainer::
-getSendQueue()
-{
-    return &(this->_sendQueue);
 }
 
 //--------------------------------------------------------------

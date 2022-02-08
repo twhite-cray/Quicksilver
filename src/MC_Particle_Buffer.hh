@@ -7,7 +7,6 @@
 
 // forward declarations
 class MonteCarlo;
-class SendQueue;
 
 class mcp_test_done_class
 {

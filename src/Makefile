@@ -296,7 +296,6 @@ SOURCES= \
     ParticleVault.cc \
     ParticleVaultContainer.cc \
     PopulationControl.cc \
-    SendQueue.cc \
     SharedMemoryCommObject.cc \
     Tallies.cc \
     cmdLineParser.cc \

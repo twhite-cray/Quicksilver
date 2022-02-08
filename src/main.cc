@@ -14,7 +14,6 @@
 #include "macros.hh"
 #include "MC_Fast_Timer.hh"
 #include "MC_SourceNow.hh"
-#include "SendQueue.hh"
 #include "NVTX_Range.hh"
 #include "cudaUtils.hh"
 #include "cudaFunctions.hh"
@@ -162,25 +161,18 @@ void cycleTracking(MonteCarlo *monteCarlo)
 
             NVTX_Range cleanAndComm("cycleTracking_clean_and_comm");
 
-            SendQueue &sendQueue = *(my_particle_vault.getSendQueue());
-            assert(device.particleSizes[Device::SENDS] == sendQueue.size());
-            for ( int index = 0; index < sendQueue.size(); index++ )
+            const int sendSize = device.particleSizes[Device::SENDS];
+            for ( int index = 0; index < sendSize; index++ )
             {
-              sendQueueTuple& sendQueueT = sendQueue.getTuple( index );
-              const int2 tuple = device.sends[index];
-              assert(sendQueueT._neighbor == tuple.x);
-              assert(sendQueueT._particleIndex == tuple.y);
+              const int2 &tuple = device.sends[index];
               MC_Base_Particle mcb_particle;
-
-              processingVault->getBaseParticleComm( mcb_particle, sendQueueT._particleIndex );
-
-              int buffer = monteCarlo->particle_buffer->Choose_Buffer(sendQueueT._neighbor );
+              processingVault->getBaseParticleComm( mcb_particle, tuple.y );
+              int buffer = monteCarlo->particle_buffer->Choose_Buffer(tuple.x);
               messages.addParticle(mcb_particle,buffer);
             }
 
             messages.startSends();
             processingVault->clear(); //remove the invalid particles
-            sendQueue.clear();
             device.particleSizes[Device::SENDS] = 0;
 
             // Move particles in "extra" vault into the regular vaults.
