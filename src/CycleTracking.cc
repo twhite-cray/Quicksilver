@@ -46,7 +46,7 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault 
             // The particle undergoes a collision event producing:
             //   (0) Other-than-one same-species secondary particle, or
             //   (1) Exactly one same-species secondary particle.
-              if (CollisionEvent(monteCarlo, mc_particle) != MC_Collision_Event_Return::Continue_Tracking) {
+              if (CollisionEvent(monteCarlo->_particleVaultContainer, device, mc_particle) != MC_Collision_Event_Return::Continue_Tracking) {
                 processingVault->invalidateParticle( particle_index );
                 device.processing[particle_index++].species = -1;
               }

@@ -44,13 +44,9 @@ void updateTrajectory( double energy, double angle, MC_Particle& particle )
 }
 
 
-bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle)
+bool CollisionEvent(ParticleVaultContainer *const particleVaultContainer, Device &device, MC_Particle &mc_particle)
 {
-   Device &device = monteCarlo->_device;
-   const MC_Cell_State &cell = monteCarlo->domain[mc_particle.domain].cell_state[mc_particle.cell];
-
    const int globalMatIndex = device.domains[mc_particle.domain].cells[mc_particle.cell].material;
-   assert(globalMatIndex == cell._material);
 
    //------------------------------------------------------------------------------------------------------------------
    //    Pick the isotope and reaction.
@@ -61,15 +57,12 @@ bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle)
    int selectedIso = -1;
    int selectedUniqueNumber = -1;
    int selectedReact = -1;
-   int numIsos = (int)monteCarlo->_materialDatabase->_mat[globalMatIndex]._iso.size();
-   assert(numIsos == device.mats[globalMatIndex].isoSize);
+   const int numIsos = device.mats[globalMatIndex].isoSize;
    
    for (int isoIndex = 0; isoIndex < numIsos && currentCrossSection >= 0; isoIndex++)
    {
-      int uniqueNumber = monteCarlo->_materialDatabase->_mat[globalMatIndex]._iso[isoIndex]._gid;
-      assert(uniqueNumber == device.mats[globalMatIndex].isos[isoIndex].gid);
-      int numReacts = monteCarlo->_nuclearData->getNumberReactions(uniqueNumber);
-      assert(numReacts == device.reactionSize);
+      const int uniqueNumber = device.mats[globalMatIndex].isos[isoIndex].gid;
+      const int numReacts = device.reactionSize;
       for (int reactIndex = 0; reactIndex < numReacts; reactIndex++)
       {
          currentCrossSection -= macroscopicCrossSection(device, reactIndex, mc_particle.domain, mc_particle.cell,
@@ -91,24 +84,10 @@ bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle)
    double energyOut[MAX_PRODUCTION_SIZE];
    double angleOut[MAX_PRODUCTION_SIZE];
    int nOut = 0;
-   double mat_mass = monteCarlo->_materialDatabase->_mat[globalMatIndex]._mass;
-   assert(mat_mass == device.mats[globalMatIndex].mass);
+   const double mat_mass = device.mats[globalMatIndex].mass;
 
-   assert(monteCarlo->_nuclearData->_isotopes[selectedUniqueNumber]._species[0]._reactions[selectedReact]._nuBar == device.nuBar);
    const NuclearDataReaction::Enum reactionType = device.isotopes[selectedUniqueNumber].reactions[selectedReact+1].type;
-   assert(monteCarlo->_nuclearData->_isotopes[selectedUniqueNumber]._species[0]._reactions[selectedReact]._reactionType == reactionType);
-   uint64_t seed = mc_particle.random_number_seed;
-   double eo[MAX_PRODUCTION_SIZE];
-   double ao[MAX_PRODUCTION_SIZE];
-   int no = 0;
    device.collide(reactionType, mc_particle.kinetic_energy, mat_mass, energyOut, angleOut, nOut, mc_particle.random_number_seed);
-   monteCarlo->_nuclearData->_isotopes[selectedUniqueNumber]._species[0]._reactions[selectedReact].sampleCollision(
-      mc_particle.kinetic_energy, mat_mass, eo, ao, no, &seed, MAX_PRODUCTION_SIZE );
-   assert(no == nOut);
-   for (int i = 0; i < no; i++) {
-     assert(eo[i] == energyOut[i]);
-     assert(ao[i] == angleOut[i]);
-   }
 
    //--------------------------------------------------------------------------------------------------------------
    //  Post-Collision Phase 1:
@@ -117,8 +96,6 @@ bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle)
 
    // Set the reaction for this particle.
    ATOMIC_UPDATE( device.tallies[Device::COLLISION] );
-   assert(reactionType == monteCarlo->_nuclearData->_isotopes[selectedUniqueNumber]._species[0].\
-           _reactions[selectedReact]._reactionType);
    switch (reactionType)
    {
       case NuclearDataReaction::Scatter:
@@ -144,7 +121,7 @@ bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle)
         secondaryParticle.random_number_seed = rngSpawn_Random_Number_Seed(&mc_particle.random_number_seed);
         secondaryParticle.identifier = secondaryParticle.random_number_seed;
         updateTrajectory( energyOut[secondaryIndex], angleOut[secondaryIndex], secondaryParticle );
-        monteCarlo->_particleVaultContainer->addExtraParticle(secondaryParticle);
+        particleVaultContainer->addExtraParticle(secondaryParticle);
         device.extras[device.particleSizes[Device::EXTRAS]++] = secondaryParticle;
    }
 
@@ -155,13 +132,12 @@ bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle)
    // possibility of a particle doing multiple fission reactions in a single
    // kernel invocation and overflowing the extra storage with secondary particles.
    if ( nOut > 1 ) {
-       monteCarlo->_particleVaultContainer->addExtraParticle(mc_particle);
+       particleVaultContainer->addExtraParticle(mc_particle);
        device.extras[device.particleSizes[Device::EXTRAS]++] = mc_particle;
    }
 
    //If we are still tracking this particle the update its energy group
-   mc_particle.energy_group = monteCarlo->_nuclearData->getEnergyGroup(mc_particle.kinetic_energy);
-   assert(mc_particle.energy_group == device.getEnergyGroup(mc_particle.kinetic_energy));
+   mc_particle.energy_group = device.getEnergyGroup(mc_particle.kinetic_energy);
 
    return nOut == 1;
 }
