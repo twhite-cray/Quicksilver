@@ -23,8 +23,9 @@
 
 MC_Tally_Event::Enum MC_Facet_Crossing_Event(MC_Particle &mc_particle, MonteCarlo* monteCarlo, int particle_index, ParticleVault* processingVault)
 {
+    Device &device = monteCarlo->_device;
     MC_Location location = mc_particle.Get_Location();
-    const DeviceFacet &facet = monteCarlo->_device.domains[location.domain].cells[location.cell].facets[location.facet];
+    const DeviceFacet &facet = device.domains[location.domain].cells[location.cell].facets[location.facet];
 
     if ( facet.event == MC_Subfacet_Adjacency_Event::Transit_On_Processor )
     {
@@ -56,6 +57,7 @@ MC_Tally_Event::Enum MC_Facet_Crossing_Event(MC_Particle &mc_particle, MonteCarl
 
         // Select particle buffer
         int neighbor_rank = monteCarlo->domain[facet.currentDomain].mesh._nbrRank[facet.neighbor];
+        assert(neighbor_rank == device.domains[facet.currentDomain].neighbors[facet.neighbor]);
 
         processingVault->putParticle( mc_particle, particle_index );
 

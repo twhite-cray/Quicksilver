@@ -40,6 +40,7 @@ struct DeviceCell {
 struct DeviceDomain {
   DeviceCell *cells;
   double3 *nodes;
+  int *neighbors;
 };
 
 struct DeviceIsotope {

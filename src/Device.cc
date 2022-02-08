@@ -29,6 +29,9 @@ void Device::init(MonteCarlo &mc)
   CHECK(hipHostMalloc(&groupTallies,cellSizeSum*groupSize*sizeof(*groupTallies)));
   double3 *nodes = nullptr;
   CHECK(hipHostMalloc(&nodes,nodeSizeSum*sizeof(*nodes)));
+  const int neighborSize = mc.domain[0].mesh._nbrRank.size();
+  int *neighbors = nullptr;
+  CHECK(hipHostMalloc(&neighbors,neighborSize*domainSize*sizeof(*neighbors)));
   for (int i = 0; i < domainSize; i++) {
     domains[i].cells = cells;
     const int cellSize = mc.domain[i].cell_state.size();
@@ -65,6 +68,12 @@ void Device::init(MonteCarlo &mc)
       nodes[j] = double3{node.x,node.y,node.z};
     }
     nodes += nodeSize;
+    domains[i].neighbors = neighbors;
+    neighbors += neighborSize;
+    assert(mc.domain[i].mesh._nbrRank.size() == neighborSize);
+    for (int j = 0; j < neighborSize; j++) {
+      domains[i].neighbors[j] = mc.domain[i].mesh._nbrRank[j];
+    }
   }
 
   assert(mats == nullptr);
