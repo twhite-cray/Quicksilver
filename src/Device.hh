@@ -8,6 +8,11 @@ class MC_Base_Particle;
 class MC_Particle;
 class MonteCarlo;
 
+struct DeviceFacet {
+  double4 plane;
+  int3 point;
+};
+
 struct DeviceCell {
   static constexpr int numFacets = 24;
   static constexpr int numQuadPoints = 14;
@@ -19,9 +24,8 @@ struct DeviceCell {
   }
   double *totals;
   double *groupTallies;
-  double4 facets[numFacets];
+  DeviceFacet facets[numFacets];
   double cellNumberDensity;
-  int3 facetPoints[numFacets];
   int quadPoints[numQuadPoints];
   int material;
 };

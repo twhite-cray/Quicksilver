@@ -505,7 +505,7 @@ namespace
          {
            distance_to_facet.distance = PhysicalConstants::_hugeDouble;
 
-           const double4 &dplane = ddomain.cells[location.cell].facets[facet_index];
+           const double4 &dplane = ddomain.cells[location.cell].facets[facet_index].plane;
 
            double facet_normal_dot_direction_cosine =
              (dplane.x * direction_cosine->alpha +
@@ -519,7 +519,7 @@ namespace
 
            /* profiling with gprof showed that putting a call to MC_Facet_Coordinates_3D_G
               slowed down the code by about 10%, so we get the facet coords "by hand." */
-           const int3 &dpoint = ddomain.cells[location.cell].facetPoints[facet_index];
+           const int3 &dpoint = ddomain.cells[location.cell].facets[facet_index].point;
 
            const double3 &nodeX = ddomain.nodes[dpoint.x];
            const double3 &nodeY = ddomain.nodes[dpoint.y];
