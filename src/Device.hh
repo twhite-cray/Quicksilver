@@ -42,6 +42,7 @@ struct DeviceDomain {
   DeviceCell *cells;
   double3 *nodes;
   int *neighbors;
+  int *unmapped;
 };
 
 struct DeviceIsotope {

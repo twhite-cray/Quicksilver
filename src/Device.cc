@@ -2,6 +2,7 @@
 
 #include "cudaUtils.hh"
 #include "MC_Base_Particle.hh"
+#include "MC_Particle_Buffer.hh"
 #include "MonteCarlo.hh"
 #include "NuclearData.hh"
 #include "ParticleVaultContainer.hh"
@@ -32,6 +33,8 @@ void Device::init(MonteCarlo &mc)
   const int neighborSize = mc.domain[0].mesh._nbrRank.size();
   int *neighbors = nullptr;
   CHECK(hipHostMalloc(&neighbors,neighborSize*domainSize*sizeof(*neighbors)));
+  int *unmapped = nullptr;
+  CHECK(hipHostMalloc(&unmapped,neighborSize*domainSize*sizeof(*unmapped)));
   for (int i = 0; i < domainSize; i++) {
     domains[i].cells = cells;
     const int cellSize = mc.domain[i].cell_state.size();
@@ -70,10 +73,9 @@ void Device::init(MonteCarlo &mc)
     nodes += nodeSize;
     domains[i].neighbors = neighbors;
     neighbors += neighborSize;
+    domains[i].unmapped = unmapped;
+    unmapped += neighborSize;
     assert(mc.domain[i].mesh._nbrRank.size() == neighborSize);
-    for (int j = 0; j < neighborSize; j++) {
-      domains[i].neighbors[j] = mc.domain[i].mesh._nbrRank[j];
-    }
   }
 
   assert(mats == nullptr);
@@ -169,8 +171,16 @@ void Device::cycleInit(MonteCarlo &mc)
 {
   const int groupSize = mc._nuclearData->_numEnergyGroups;
   const int domainSize = mc.domain.size();
+  const int neighborSize = mc.domain[0].mesh._nbrRank.size();
   int cellSizeSum = 0;
-  for (int i = 0; i < domainSize; i++) cellSizeSum += mc.domain[i].cell_state.size();
+  for (int i = 0; i < domainSize; i++) {
+    cellSizeSum += mc.domain[i].cell_state.size();
+    for (int j = 0; j < neighborSize; j++) {
+      const int rank = mc.domain[i].mesh._nbrRank[j];
+      domains[i].unmapped[j] = rank;
+      domains[i].neighbors[j] = mc.particle_buffer->processor_buffer_map.at(rank);
+    }
+  }
   const int bytes = cellSizeSum*groupSize*sizeof(double);
   memset(domains->cells->totals,0,bytes);
   memset(domains->cells->groupTallies,0,bytes);

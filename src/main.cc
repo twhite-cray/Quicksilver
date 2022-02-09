@@ -141,7 +141,6 @@ void cycleTracking(MonteCarlo *monteCarlo)
             int numParticles = processingVault->size();
             device.particleSizes[Device::PROCESSING] = numParticles;
             for (int i = 0; i < numParticles; i++) device.processing[i] = (*processingVault)[i];
-            for (int i = 0; i < numParticles; i++) device.processing[i].set((*processingVault)[i]);
 
             if ( numParticles != 0 )
             {
@@ -168,7 +167,9 @@ void cycleTracking(MonteCarlo *monteCarlo)
               const int2 &tuple = device.sends[index];
               MC_Base_Particle mcb_particle;
               processingVault->getBaseParticleComm( mcb_particle, tuple.y );
+              assert(device.processing[tuple.y] == mcb_particle);
               int buffer = monteCarlo->particle_buffer->Choose_Buffer(tuple.x);
+              assert(buffer >= 0);
               messages.addParticle(mcb_particle,buffer);
             }
 

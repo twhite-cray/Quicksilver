@@ -55,7 +55,7 @@ MC_Tally_Event::Enum MC_Facet_Crossing_Event(MC_Particle &mc_particle, MonteCarl
         mc_particle.last_event = MC_Tally_Event::Facet_Crossing_Communication;
 
         // Select particle buffer
-        const int neighbor_rank = device.domains[facet.currentDomain].neighbors[facet.neighbor];
+        const int neighbor_rank = device.domains[facet.currentDomain].unmapped[facet.neighbor];
 
         processingVault->putParticle( mc_particle, particle_index );
         device.processing[particle_index] = mc_particle;
