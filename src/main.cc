@@ -168,9 +168,8 @@ void cycleTracking(MonteCarlo *monteCarlo)
               MC_Base_Particle mcb_particle;
               processingVault->getBaseParticleComm( mcb_particle, tuple.y );
               assert(device.processing[tuple.y] == mcb_particle);
-              int buffer = monteCarlo->particle_buffer->Choose_Buffer(tuple.x);
-              assert(buffer >= 0);
-              messages.addParticle(mcb_particle,buffer);
+              assert(tuple.x >= 0);
+              messages.addParticle(mcb_particle,tuple.x);
             }
 
             messages.startSends();
