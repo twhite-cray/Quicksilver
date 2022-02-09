@@ -141,6 +141,7 @@ void cycleTracking(MonteCarlo *monteCarlo)
             int numParticles = processingVault->size();
             device.particleSizes[Device::PROCESSING] = numParticles;
             for (int i = 0; i < numParticles; i++) device.processing[i] = (*processingVault)[i];
+            for (int i = 0; i < numParticles; i++) device.processing[i].set((*processingVault)[i]);
 
             if ( numParticles != 0 )
             {

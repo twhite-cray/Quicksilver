@@ -3,6 +3,7 @@
 #include "MC_Cell_State.hh"
 #include "MC_Facet_Adjacency.hh"
 #include "MC_RNG_State.hh"
+#include "MC_Tally_Event.hh"
 #include "NuclearData.hh"
 
 class MC_Base_Particle;
@@ -73,9 +74,23 @@ struct DeviceParticle {
   DeviceParticle &operator=(const MC_Base_Particle &that);
   DeviceParticle &operator=(const MC_Particle &that);
   bool operator==(const MC_Base_Particle &that) const;
-
+  void set(MC_Base_Particle &that) const;
+  double3 coordinate;
+  double3 velocity;
+  double kineticEnergy;
+  double weight;
+  double timeToCensus;
+  double age;
+  double numMeanFreePaths;
+  double numSegments;
+  uint64_t randomNumberSeed;
   uint64_t identifier;
+  MC_Tally_Event::Enum lastEvent;
+  int numCollisions;
+  int breed;
   int species;
+  int domain;
+  int cell;
 };
 
 
