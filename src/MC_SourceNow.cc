@@ -62,7 +62,6 @@ void MC_SourceNow(MonteCarlo *monteCarlo)
     // Store the source particle weight for later use.
     monteCarlo->source_particle_weight = source_particle_weight;
 
-    uint64_t task_index = 0;
     uint64_t particle_count = 0;
 
     // Compute the partial sums on each mpi process.
@@ -109,7 +108,6 @@ void MC_SourceNow(MonteCarlo *monteCarlo)
 
                 particle.domain = domain_index;
                 particle.cell   = cell_index;
-                particle.task   = task_index;
                 particle.weight = source_particle_weight;
 
                 double randomNumber = rngSample(&particle.random_number_seed);
@@ -124,40 +122,10 @@ void MC_SourceNow(MonteCarlo *monteCarlo)
 
                 particle_count++;
 
-                ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[particle.task]._source);
+                ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[0]._source);
             }
         }
     }
-
-#if 0 
-    // Check for duplicate particle random number seeds.
-    std::vector<uint64_t> particle_seeds;
-    int task_index = 0;
-    //for ( int task_index = 0; task_index < num_threads; task_index++ )
-    {
-       ParticleVault& particleVault = monteCarlo->_particleVaultContainer->getTaskProcessingVault(task_index);
-       
-       uint64_t currentNumParticles = particleVault.size();
-       for (int particleIndex = 0; particleIndex < currentNumParticles; particleIndex++)
-       {
-	  MC_Base_Particle &currentParticle = particleVault[particleIndex];
-	  particle_seeds.push_back(currentParticle.random_number_seed);
-       }
-    }
-
-    std::sort(particle_seeds.begin(), particle_seeds.end());
-    uint64_t num_dupl = 0;
-    for (size_t pi_index = 0; pi_index<particle_seeds.size()-1; pi_index++)
-    {
-      if (particle_seeds[pi_index] == particle_seeds[pi_index+1])
-      {
- 	 num_dupl++;
- 	 printf("*** found duplicate particle random number seed= %ull (%ull) at index pi_index= %d\n", 
-		particle_seeds[pi_index], particle_seeds[pi_index+1], pi_index);
-      }
-    }
-    printf("Number of duplicate random number seeds= %ull \n", num_dupl);
-#endif
 }
 
 

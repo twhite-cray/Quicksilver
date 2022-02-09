@@ -65,9 +65,6 @@ class MC_Particle
 
     double num_segments;
 
-    // task working on, used to index into
-    int task;
-
     // species of the particle
     int species;
 
@@ -156,7 +153,6 @@ inline void MC_Particle::PrintParticle()
     printf( "last_event:          %d\n", last_event);
     printf( "num_collision:       %d\n", num_collisions);
     printf( "num_segments:        %g\n", num_segments);
-    printf( "task:                %d\n", task);
     printf( "species:             %d\n", species);
     printf( "breed:               %d\n", breed);
     printf( "energy_group:        %d\n", energy_group);

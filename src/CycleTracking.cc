@@ -24,7 +24,6 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault 
           MC_Load_Particle(monteCarlo, mc_particle, processingVault, particle_index);
           p = device.processing[particle_index];
           assert(p.identifier == mc_particle.identifier);
-          mc_particle.task = 0;
           previous = particle_index;
         }
 
