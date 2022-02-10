@@ -58,6 +58,7 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, Device &device
                 else if (facet_crossing_type == MC_Tally_Event::Facet_Crossing_Escape)
                 {
                     ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[0]._escape);
+                    ATOMIC_UPDATE( device.tallies[Device::ESCAPE] );
                     mc_particle.last_event = MC_Tally_Event::Facet_Crossing_Escape;
                     mc_particle.species = -1;
                     device.processing[particle_index++].species = -1;
@@ -79,6 +80,7 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, Device &device
                 const int iProcessed = __atomic_fetch_add(device.particleSizes+Device::PROCESSED,1,__ATOMIC_RELAXED);
                 device.processed[iProcessed] = mc_particle;
                 ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[0]._census);
+                ATOMIC_UPDATE( device.tallies[Device::CENSUS] );
                 device.processing[particle_index++].species = -1;
                 break;
             }

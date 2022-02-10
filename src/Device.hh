@@ -216,7 +216,7 @@ struct Device {
   DeviceMaterial *mats;
   DeviceNuclearDataIsotope *isotopes;
 
-  enum Tallies { ABSORB, COLLISION, FISSION, PRODUCE, SEGMENTS, SCATTER, TALLIES_SIZE };
+  enum Tallies { ABSORB, CENSUS, COLLISION, ESCAPE, FISSION, PRODUCE, SEGMENTS, SCATTER, TALLIES_SIZE };
   long *tallies;
 
   enum ParticleSizes { PROCESSING, PROCESSED, EXTRAS, SENDS, PARTICLE_SIZES_SIZE };

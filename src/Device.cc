@@ -204,7 +204,9 @@ void Device::cycleFinalize(MonteCarlo &mc)
     }
   }
   mc._tallies->_balanceTask[0]._numSegments = tallies[Tallies::SEGMENTS];
+  assert(mc._tallies->_balanceTask[0]._census == tallies[Tallies::CENSUS]);
   mc._tallies->_balanceTask[0]._collision = tallies[Tallies::COLLISION];
+  assert(mc._tallies->_balanceTask[0]._escape == tallies[Tallies::ESCAPE]);
   mc._tallies->_balanceTask[0]._scatter = tallies[Tallies::SCATTER];
   mc._tallies->_balanceTask[0]._absorb = tallies[Tallies::ABSORB];
   mc._tallies->_balanceTask[0]._fission = tallies[Tallies::FISSION];
