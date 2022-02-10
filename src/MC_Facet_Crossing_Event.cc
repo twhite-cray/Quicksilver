@@ -18,9 +18,9 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 
-MC_Tally_Event::Enum MC_Facet_Crossing_Event(MC_Particle &mc_particle, MonteCarlo* monteCarlo, int particle_index)
+MC_Tally_Event::Enum MC_Facet_Crossing_Event(MC_Particle &mc_particle, Device &device, int particle_index)
 {
-    Device &device = monteCarlo->_device;
+
     MC_Location location = mc_particle.Get_Location();
     const DeviceFacet &facet = device.domains[location.domain].cells[location.cell].facets[location.facet];
 

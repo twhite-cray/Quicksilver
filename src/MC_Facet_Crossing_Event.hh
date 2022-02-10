@@ -1,12 +1,13 @@
 #ifndef MC_FACET_CROSSING_EVENT_HH
 #define MC_FACET_CROSSING_EVENT_HH
 
-#include "Tallies.hh"
+#include "MC_Tally_Event.hh"
 #include "DeclareMacro.hh"
 
+struct Device;
 class MC_Particle;
 
-MC_Tally_Event::Enum MC_Facet_Crossing_Event(MC_Particle &mc_particle, MonteCarlo* monteCarlo, int particle_index);
+MC_Tally_Event::Enum MC_Facet_Crossing_Event(MC_Particle &mc_particle, Device &device, int particle_index);
 
 #endif
 

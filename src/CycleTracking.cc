@@ -51,7 +51,7 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, Device &device
         case MC_Segment_Outcome_type::Facet_Crossing:
             {
                 // The particle has reached a cell facet.
-                MC_Tally_Event::Enum facet_crossing_type = MC_Facet_Crossing_Event(mc_particle, monteCarlo, particle_index);
+                MC_Tally_Event::Enum facet_crossing_type = MC_Facet_Crossing_Event(mc_particle, device, particle_index);
 
                 if (facet_crossing_type == MC_Tally_Event::Facet_Crossing_Transit_Exit)
                 {}
