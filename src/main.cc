@@ -136,7 +136,7 @@ void cycleTracking(MonteCarlo *monteCarlo)
             if ( numParticles != 0 )
             {
               NVTX_Range trackingKernel("cycleTracking_TrackingKernel"); 
-              CycleTrackingGuts( monteCarlo, numParticles, device );
+              CycleTrackingGuts( numParticles, device );
             }
 
             particle_count += numParticles;

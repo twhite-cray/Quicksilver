@@ -43,10 +43,8 @@ void mcp_test_done_class::Get_Local_Gains_And_Losses(MonteCarlo *monteCarlo, int
     Balance &bal = monteCarlo->_tallies->_balanceTask[0];
     const long *const tallies = monteCarlo->_device.tallies;
 
-    assert(bal._census == tallies[Device::CENSUS]);
-    assert(bal._escape == tallies[Device::ESCAPE]);
     gains   = bal._start  + bal._source + tallies[Device::PRODUCE] + bal._split;
-    losses  = tallies[Device::ABSORB] + bal._census + bal._escape  + bal._rr;
+    losses  = tallies[Device::ABSORB] + tallies[Device::CENSUS] + tallies[Device::ESCAPE] + bal._rr;
     losses += tallies[Device::FISSION]; 
 
     sent_recv[0] = gains;
