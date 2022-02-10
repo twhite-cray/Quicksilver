@@ -64,7 +64,7 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, Device &device
                 }
                 else if (facet_crossing_type == MC_Tally_Event::Facet_Crossing_Reflection)
                 {
-                    MCT_Reflect_Particle(monteCarlo, mc_particle);
+                    MCT_Reflect_Particle(device, mc_particle);
                 }
                 else
                 {

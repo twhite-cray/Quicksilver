@@ -380,16 +380,12 @@ namespace
 
 
 ///  Reflects the particle off of a reflection boundary.
-void MCT_Reflect_Particle(MonteCarlo *monteCarlo, MC_Particle &particle)
+void MCT_Reflect_Particle(const Device &device, MC_Particle &particle)
 {
     DirectionCosine *direction_cosine = particle.Get_Direction_Cosine();
     MC_Location              location = particle.Get_Location();
 
-    const MC_Domain   &domain = location.get_domain(monteCarlo);
-    const MC_General_Plane &plane = domain.mesh._cellGeometry[location.cell]._facet[location.facet];
-
-    MC_Vector facet_normal(plane.A, plane.B, plane.C);
-
+    const double4 &facet_normal = device.domains[location.domain].cells[location.cell].facets[location.facet].plane;
 
     double dot = 2.0*( direction_cosine->alpha * facet_normal.x +
                        direction_cosine->beta  * facet_normal.y +

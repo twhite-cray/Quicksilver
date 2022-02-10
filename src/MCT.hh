@@ -44,6 +44,6 @@ MC_Vector MCT_Cell_Position_3D_G(
 
 Subfacet_Adjacency &MCT_Adjacent_Facet(const MC_Location &location, MC_Particle &mc_particle, MonteCarlo* monteCarlo);
 
-void MCT_Reflect_Particle(MonteCarlo *mcco, MC_Particle &particle);
+void MCT_Reflect_Particle(const Device &device, MC_Particle &particle);
 
 #endif
