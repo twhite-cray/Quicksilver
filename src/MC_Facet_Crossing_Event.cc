@@ -1,6 +1,4 @@
 #include "MC_Facet_Crossing_Event.hh"
-#include "ParticleVaultContainer.hh"
-#include "ParticleVault.hh"
 #include "MC_Domain.hh"
 #include "Tallies.hh"
 #include "MC_Particle.hh"
@@ -20,7 +18,7 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 
-MC_Tally_Event::Enum MC_Facet_Crossing_Event(MC_Particle &mc_particle, MonteCarlo* monteCarlo, int particle_index, ParticleVault* processingVault)
+MC_Tally_Event::Enum MC_Facet_Crossing_Event(MC_Particle &mc_particle, MonteCarlo* monteCarlo, int particle_index)
 {
     Device &device = monteCarlo->_device;
     MC_Location location = mc_particle.Get_Location();
@@ -54,7 +52,6 @@ MC_Tally_Event::Enum MC_Facet_Crossing_Event(MC_Particle &mc_particle, MonteCarl
         mc_particle.facet      = facet.adjacentFacet;
         mc_particle.last_event = MC_Tally_Event::Facet_Crossing_Communication;
 
-        processingVault->putParticle( mc_particle, particle_index );
         device.processing[particle_index] = mc_particle;
 
         const int neighbor_rank = device.domains[facet.currentDomain].neighbors[facet.neighbor];

@@ -64,7 +64,6 @@ int main(int argc, char** argv)
             mcco->processor_info->comm_mc_world );
    }
 
-
    MC_FASTTIMER_STOP(MC_Fast_Timer::main);
 
    gameOver();
@@ -123,12 +122,6 @@ void cycleTracking(MonteCarlo *monteCarlo)
     Device &device = monteCarlo->_device;
     Messages &messages = monteCarlo->_messages;
 
-    ParticleVaultContainer &my_particle_vault = *(monteCarlo->_particleVaultContainer);
-    ParticleVault *processingVault = my_particle_vault.getTaskProcessingVault();
-    ParticleVault *processedVault =  my_particle_vault.getTaskProcessedVault();
-    ParticleVault &extraVault = monteCarlo->_particleVaultContainer->_extraVault;
-    assert(processedVault->size() == 0);
-
     do
     {
         int particle_count = 0; // Initialize count of num_particles processed
@@ -139,24 +132,14 @@ void cycleTracking(MonteCarlo *monteCarlo)
             MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking_Kernel);
 
             const int numParticles = device.particleSizes[Device::PROCESSING];
-            assert(numParticles == processingVault->size());
-            for (int i = 0; i < numParticles; i++) assert(device.processing[i] == (*processingVault)[i]);
 
             if ( numParticles != 0 )
             {
               NVTX_Range trackingKernel("cycleTracking_TrackingKernel"); 
-              CycleTrackingGuts( monteCarlo, numParticles, processingVault, processedVault, device );
+              CycleTrackingGuts( monteCarlo, numParticles, device );
             }
 
-            for (int i = 0; i < numParticles; i++) assert(device.processing[i] == (*processingVault)[i]);
-
             particle_count += numParticles;
-
-            assert(extraVault.size() == device.particleSizes[Device::EXTRAS]);
-            for (int i = 0; i < extraVault.size(); i++) assert(device.extras[i] == extraVault[i]);
-
-            assert(processedVault->size() == device.particleSizes[Device::PROCESSED]);
-            for (int i = 0; i < processedVault->size(); i++) assert(device.processed[i] == (*processedVault)[i]);
 
             MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking_Kernel);
 
@@ -169,8 +152,6 @@ void cycleTracking(MonteCarlo *monteCarlo)
             {
               const int2 &tuple = device.sends[index];
               MC_Base_Particle mcb_particle;
-              processingVault->getBaseParticleComm( mcb_particle, tuple.y );
-              assert(device.processing[tuple.y] == mcb_particle);
               device.processing[tuple.y].set(mcb_particle);
               assert(tuple.x >= 0);
               messages.addParticle(mcb_particle,tuple.x);
@@ -179,11 +160,6 @@ void cycleTracking(MonteCarlo *monteCarlo)
             messages.startSends();
             device.particleSizes[Device::SENDS] = 0;
 
-            processingVault->clear(); //remove the invalid particles
-
-            // Move particles in "extra" vault into the regular vaults.
-            my_particle_vault.cleanExtraVault();
-            
             std::swap(device.processing,device.extras);
             device.particleSizes[Device::PROCESSING] = device.particleSizes[Device::EXTRAS];
             device.particleSizes[Device::EXTRAS] = 0;
@@ -220,6 +196,7 @@ void cycleFinalize()
 
     mcco->_device.cycleFinalize(*mcco);
 
+    assert(mcco->_particleVaultContainer->sizeProcessed() == mcco->_device.particleSizes[Device::PROCESSED]);
     mcco->_tallies->_balanceTask[0]._end = mcco->_particleVaultContainer->sizeProcessed();
 
     // Update the cumulative tally data.

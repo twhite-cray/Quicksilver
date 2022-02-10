@@ -1,7 +1,6 @@
 #include "CycleTracking.hh"
 #include "MonteCarlo.hh"
-#include "ParticleVaultContainer.hh"
-#include "ParticleVault.hh"
+#include "MC_Base_Particle.hh"
 #include "MC_Segment_Outcome.hh"
 #include "CollisionEvent.hh"
 #include "MC_Facet_Crossing_Event.hh"
@@ -11,7 +10,7 @@
 #include "macros.hh"
 #include "qs_assert.hh"
 
-void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault *processingVault, ParticleVault *processedVault , Device &device)
+void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, Device &device)
 {
     MC_Particle mc_particle;
     int previous = -1;
@@ -43,8 +42,7 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault 
             // The particle undergoes a collision event producing:
             //   (0) Other-than-one same-species secondary particle, or
             //   (1) Exactly one same-species secondary particle.
-              if (CollisionEvent(monteCarlo->_particleVaultContainer, device, mc_particle) != MC_Collision_Event_Return::Continue_Tracking) {
-                processingVault->invalidateParticle( particle_index );
+              if (CollisionEvent(device, mc_particle) != MC_Collision_Event_Return::Continue_Tracking) {
                 device.processing[particle_index++].species = -1;
               }
             }
@@ -53,7 +51,7 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault 
         case MC_Segment_Outcome_type::Facet_Crossing:
             {
                 // The particle has reached a cell facet.
-                MC_Tally_Event::Enum facet_crossing_type = MC_Facet_Crossing_Event(mc_particle, monteCarlo, particle_index, processingVault);
+                MC_Tally_Event::Enum facet_crossing_type = MC_Facet_Crossing_Event(mc_particle, monteCarlo, particle_index);
 
                 if (facet_crossing_type == MC_Tally_Event::Facet_Crossing_Transit_Exit)
                 {}
@@ -62,7 +60,6 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault 
                     ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[0]._escape);
                     mc_particle.last_event = MC_Tally_Event::Facet_Crossing_Escape;
                     mc_particle.species = -1;
-                    processingVault->invalidateParticle( particle_index );
                     device.processing[particle_index++].species = -1;
                 }
                 else if (facet_crossing_type == MC_Tally_Event::Facet_Crossing_Reflection)
@@ -72,7 +69,6 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault 
                 else
                 {
                     // Enters an adjacent cell in an off-processor domain.
-                    processingVault->invalidateParticle( particle_index );
                     device.processing[particle_index++].species = -1;
                 }
             }
@@ -80,12 +76,9 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault 
     
         case MC_Segment_Outcome_type::Census:
             {
-                // The particle has reached the end of the time step.
-                processedVault->pushParticle(mc_particle);
                 const int iProcessed = __atomic_fetch_add(device.particleSizes+Device::PROCESSED,1,__ATOMIC_RELAXED);
                 device.processed[iProcessed] = mc_particle;
                 ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[0]._census);
-                processingVault->invalidateParticle( particle_index );
                 device.processing[particle_index++].species = -1;
                 break;
             }

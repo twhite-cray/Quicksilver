@@ -7,7 +7,6 @@
 #include "MaterialDatabase.hh"
 #include "MacroscopicCrossSection.hh"
 #include "MC_Base_Particle.hh"
-#include "ParticleVaultContainer.hh"
 #include "PhysicalConstants.hh"
 #include "DeclareMacro.hh"
 #include "AtomicMacro.hh"
@@ -44,7 +43,7 @@ void updateTrajectory( double energy, double angle, MC_Particle& particle )
 }
 
 
-bool CollisionEvent(ParticleVaultContainer *const particleVaultContainer, Device &device, MC_Particle &mc_particle)
+bool CollisionEvent(Device &device, MC_Particle &mc_particle)
 {
    const int globalMatIndex = device.domains[mc_particle.domain].cells[mc_particle.cell].material;
 
@@ -121,7 +120,6 @@ bool CollisionEvent(ParticleVaultContainer *const particleVaultContainer, Device
         secondaryParticle.random_number_seed = rngSpawn_Random_Number_Seed(&mc_particle.random_number_seed);
         secondaryParticle.identifier = secondaryParticle.random_number_seed;
         updateTrajectory( energyOut[secondaryIndex], angleOut[secondaryIndex], secondaryParticle );
-        particleVaultContainer->addExtraParticle(secondaryParticle);
         device.extras[device.particleSizes[Device::EXTRAS]++] = secondaryParticle;
    }
 
@@ -132,7 +130,6 @@ bool CollisionEvent(ParticleVaultContainer *const particleVaultContainer, Device
    // possibility of a particle doing multiple fission reactions in a single
    // kernel invocation and overflowing the extra storage with secondary particles.
    if ( nOut > 1 ) {
-       particleVaultContainer->addExtraParticle(mc_particle);
        device.extras[device.particleSizes[Device::EXTRAS]++] = mc_particle;
    }
 
