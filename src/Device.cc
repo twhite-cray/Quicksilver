@@ -3,6 +3,7 @@
 #include "cudaUtils.hh"
 #include "MC_Base_Particle.hh"
 #include "MC_Particle_Buffer.hh"
+#include "MC_Time_Info.hh"
 #include "MonteCarlo.hh"
 #include "NuclearData.hh"
 #include "ParticleVaultContainer.hh"
@@ -162,6 +163,7 @@ void Device::init(MonteCarlo &mc)
     divDelta = 1.0/delta;
   }
 
+  timeStep = mc.time_info->time_step;
 }
 
 void Device::cycleInit(MonteCarlo &mc)

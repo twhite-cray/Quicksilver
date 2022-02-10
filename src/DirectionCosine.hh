@@ -24,6 +24,14 @@ public:
        return *this;
     }
 
+   bool operator==(const DirectionCosine &that) const
+   {
+     return (
+         (alpha == that.alpha) &&
+         (beta == that.beta) &&
+         (gamma == that.gamma));
+   }
+
    void Sample_Isotropic(uint64_t *seed);
 
    // rotate a direction cosine given the sine/cosine of theta and phi

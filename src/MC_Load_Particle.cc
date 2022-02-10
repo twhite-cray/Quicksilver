@@ -16,6 +16,7 @@ void MC_Load_Particle(MonteCarlo *monteCarlo, MC_Particle &mc_particle, Particle
     if ( mc_particle.time_to_census <= 0.0 )
     {
         mc_particle.time_to_census += monteCarlo->time_info->time_step;
+        assert(monteCarlo->_device.timeStep == monteCarlo->time_info->time_step);
     }
 
     // Age
@@ -24,6 +25,8 @@ void MC_Load_Particle(MonteCarlo *monteCarlo, MC_Particle &mc_particle, Particle
     //    Energy Group
     mc_particle.energy_group = monteCarlo->_nuclearData->getEnergyGroup(mc_particle.kinetic_energy);
 //                    printf("file=%s line=%d\n",__FILE__,__LINE__);
+
+    assert(mc_particle.energy_group == monteCarlo->_device.getEnergyGroup(mc_particle.kinetic_energy));
 
 }
 

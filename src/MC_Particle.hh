@@ -4,7 +4,7 @@
 #include <cinttypes>
 
 #include "DirectionCosine.hh"
-#include "Tallies.hh"
+#include "MC_Tally_Event.hh"
 
 #include "MC_Vector.hh"
 #include "MC_Facet_Adjacency.hh"
@@ -89,6 +89,57 @@ public:
    MC_Particle();
 
    MC_Particle( const MC_Base_Particle &from_particle );
+
+   bool operator==(const MC_Particle &that) const
+   {
+     assert(coordinate == that.coordinate);
+     assert(velocity == that.velocity);
+     assert(direction_cosine == that.direction_cosine);
+     assert(kinetic_energy == that.kinetic_energy);
+     assert(weight == that.weight);
+     assert(time_to_census == that.time_to_census);
+     assert(totalCrossSection == that.totalCrossSection);
+     assert(age == that.age);
+     assert(num_mean_free_paths == that.num_mean_free_paths);
+     assert(mean_free_path == that.mean_free_path);
+     assert(segment_path_length == that.segment_path_length);
+     assert(random_number_seed == that.random_number_seed);
+     assert(identifier == that.identifier);
+     assert(last_event == that.last_event);
+     assert(num_collisions == that.num_collisions);
+     assert(num_segments == that.num_segments);
+     assert(species == that.species);
+     assert(breed == that.breed);
+     assert(energy_group == that.energy_group);
+     assert(domain == that.domain);
+     assert(cell == that.cell);
+     assert(facet == that.facet);
+     assert(normal_dot == that.normal_dot);
+      return (
+         (coordinate == that.coordinate) &&
+         (velocity == that.velocity) &&
+         (direction_cosine == that.direction_cosine) &&
+         (kinetic_energy == that.kinetic_energy) &&
+         (weight == that.weight) &&
+         (time_to_census == that.time_to_census) &&
+         (totalCrossSection == that.totalCrossSection) &&
+         (age == that.age) &&
+         (num_mean_free_paths == that.num_mean_free_paths) &&
+         (mean_free_path == that.mean_free_path) &&
+         (segment_path_length == that.segment_path_length) &&
+         (random_number_seed == that.random_number_seed) &&
+         (identifier == that.identifier) &&
+         (last_event == that.last_event) &&
+         (num_collisions == that.num_collisions) &&
+         (num_segments == that.num_segments) &&
+         (species == that.species) &&
+         (breed == that.breed) &&
+         (energy_group == that.energy_group) &&
+         (domain == that.domain) &&
+         (cell == that.cell) &&
+         (facet == that.facet) &&
+         (normal_dot == that.normal_dot));
+   }
 
    void Copy_From_Base( const MC_Base_Particle &from_particle);
 

@@ -14,7 +14,7 @@
 void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault *processingVault, ParticleVault *processedVault , Device &device)
 {
     MC_Particle mc_particle;
-    DeviceParticle p;
+    MC_Particle p;
 
     int previous = -1;
     int particle_index = 0;
@@ -22,9 +22,13 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault 
 
         if (previous != particle_index) {
           MC_Load_Particle(monteCarlo, mc_particle, processingVault, particle_index);
-          p = device.processing[particle_index];
-          assert(p.identifier == mc_particle.identifier);
           previous = particle_index;
+          device.processing[particle_index].set(p);
+          if (p.time_to_census <= 0) p.time_to_census += device.timeStep;
+          assert(p.age >= 0);
+          if (p.age < 0) p.age = 0;
+          p.energy_group = device.getEnergyGroup(p.kinetic_energy);
+          assert(p == mc_particle);
         }
 
         // Determine the outcome of a particle at the end of this segment such as:

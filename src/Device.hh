@@ -2,13 +2,13 @@
 #include "MaterialDatabase.hh"
 #include "MC_Cell_State.hh"
 #include "MC_Facet_Adjacency.hh"
+#include "MC_Particle.hh"
 #include "MC_RNG_State.hh"
 #include "MC_Tally_Event.hh"
 #include "Messages.hh"
 #include "NuclearData.hh"
 
 class MC_Base_Particle;
-class MC_Particle;
 class MonteCarlo;
 
 struct DeviceFacet {
@@ -98,6 +98,43 @@ struct DeviceParticle {
 
   bool operator==(const MC_Base_Particle &that) const;
   void set(MC_Base_Particle &that) const;
+
+  void set(MC_Particle &that) const
+  {
+    that.coordinate.x = coordinate.x;
+    that.coordinate.y = coordinate.y;
+    that.coordinate.z = coordinate.z;
+    that.velocity.x = velocity.x;
+    that.velocity.y = velocity.y;
+    that.velocity.z = velocity.z;
+    {
+      const double divSpeed = 1.0/sqrt(velocity.x*velocity.x+velocity.y*velocity.y+velocity.z*velocity.z);
+      that.direction_cosine.alpha = divSpeed*velocity.x;
+      that.direction_cosine.beta = divSpeed*velocity.y;
+      that.direction_cosine.gamma = divSpeed*velocity.z;
+    }
+    that.kinetic_energy = kineticEnergy;
+    that.weight = weight;
+    that.time_to_census = timeToCensus;
+    that.totalCrossSection = 0;
+    that.age = age;
+    that.num_mean_free_paths = numMeanFreePaths;
+    that.mean_free_path = 0;
+    that.segment_path_length = 0;
+    that.random_number_seed = randomNumberSeed;
+    that.identifier = identifier;
+    that.last_event = lastEvent;
+    that.num_collisions = numCollisions;
+    that.num_segments = numSegments;
+    that.species = species;
+    that.breed = breed;
+    that.energy_group = 0;
+    that.domain = domain;
+    that.cell = cell;
+    that.facet = 0;
+    that.normal_dot = 0;
+  }
+
   double3 coordinate;
   double3 velocity;
   double kineticEnergy;
@@ -128,9 +165,11 @@ struct Device {
     processing(nullptr),
     processed(nullptr),
     extras(nullptr),
+    sends(nullptr),
     nuBar(0),
     logLow(0),
     divDelta(0),
+    timeStep(0),
     numGroups(0),
     reactionSize(0)
   {}
@@ -190,6 +229,7 @@ struct Device {
   double nuBar;
   double logLow;
   double divDelta;
+  double timeStep;
   int numGroups;
   int reactionSize;
 };

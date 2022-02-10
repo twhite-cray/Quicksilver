@@ -262,6 +262,7 @@ inline MC_Particle::MC_Particle( const MC_Base_Particle &from_particle )
 
      weight(from_particle.weight),
      time_to_census(from_particle.time_to_census),
+     totalCrossSection(0),
      age(from_particle.age),
      num_mean_free_paths(from_particle.num_mean_free_paths),
 
@@ -281,6 +282,7 @@ inline MC_Particle::MC_Particle( const MC_Base_Particle &from_particle )
      energy_group(0),
      domain(from_particle.domain),
      cell(from_particle.cell),
+     facet(0),
      normal_dot(0.0)
 {
     double speed = from_particle.velocity.Length();

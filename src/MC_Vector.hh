@@ -26,7 +26,7 @@ class MC_Vector
       return *this;
    }
 
-   bool operator==( const MC_Vector& tmp )
+   bool operator==( const MC_Vector& tmp ) const
    {
       return tmp.x == x && tmp.y == y && tmp.z == z;
    }
