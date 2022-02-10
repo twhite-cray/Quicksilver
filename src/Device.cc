@@ -161,6 +161,7 @@ void Device::init(MonteCarlo &mc)
     const double delta = (log(mc._nuclearData->_energies[numGroups])-logLow)/double(numGroups);
     divDelta = 1.0/delta;
   }
+
 }
 
 void Device::cycleInit(MonteCarlo &mc)
@@ -180,6 +181,12 @@ void Device::cycleInit(MonteCarlo &mc)
   memset(domains->cells->totals,0,bytes);
   memset(domains->cells->groupTallies,0,bytes);
   memset(tallies,0,TALLIES_SIZE*sizeof(*tallies));
+
+  memset(particleSizes,0,PARTICLE_SIZES_SIZE*sizeof(*particleSizes));
+  const ParticleVault &vault = *(mc._particleVaultContainer->getTaskProcessingVault());
+  particleSizes[PROCESSING] = vault.size();
+  assert(vault.size());
+  for (int i = 0; i < vault.size(); i++) processing[i] = vault[i];
 }
   
 void Device::cycleFinalize(MonteCarlo &mc)
@@ -200,6 +207,11 @@ void Device::cycleFinalize(MonteCarlo &mc)
   mc._tallies->_balanceTask[0]._absorb = tallies[Tallies::ABSORB];
   mc._tallies->_balanceTask[0]._fission = tallies[Tallies::FISSION];
   mc._tallies->_balanceTask[0]._produce = tallies[Tallies::PRODUCE];
+  
+  const ParticleVault &vault = *(mc._particleVaultContainer->getTaskProcessedVault());
+  assert(particleSizes[PROCESSED] == vault.size());
+  assert(vault.size());
+  for (int i = 0; i < vault.size(); i++) assert(processed[i] == vault[i]);
 }
 
 DeviceParticle &DeviceParticle::operator=(const MC_Base_Particle &that)

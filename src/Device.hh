@@ -4,6 +4,7 @@
 #include "MC_Facet_Adjacency.hh"
 #include "MC_RNG_State.hh"
 #include "MC_Tally_Event.hh"
+#include "Messages.hh"
 #include "NuclearData.hh"
 
 class MC_Base_Particle;
@@ -73,6 +74,28 @@ struct DeviceNuclearDataIsotope {
 struct DeviceParticle {
   DeviceParticle &operator=(const MC_Base_Particle &that);
   DeviceParticle &operator=(const MC_Particle &that);
+
+  DeviceParticle &operator=(const MessageParticle &that)
+  {
+    coordinate = that.coordinate;
+    velocity = that.velocity;
+    kineticEnergy = that.kineticEnergy;
+    weight = that.weight;
+    timeToCensus = that.timeToCensus;
+    age = that.age;
+    numMeanFreePaths = that.numMeanFreePaths;
+    numSegments = that.numSegments;
+    randomNumberSeed = that.randomNumberSeed;
+    identifier = that.identifier;
+    lastEvent = MC_Tally_Event::Facet_Crossing_Communication;
+    numCollisions = that.numCollisions;
+    breed = that.breed;
+    species = that.species;
+    domain = that.domain;
+    cell = that.cell;
+    return *this;
+  }
+
   bool operator==(const MC_Base_Particle &that) const;
   void set(MC_Base_Particle &that) const;
   double3 coordinate;
@@ -170,4 +193,5 @@ struct Device {
   int numGroups;
   int reactionSize;
 };
+
 

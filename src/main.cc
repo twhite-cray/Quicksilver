@@ -139,8 +139,8 @@ void cycleTracking(MonteCarlo *monteCarlo)
             MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking_Kernel);
 
             int numParticles = processingVault->size();
-            device.particleSizes[Device::PROCESSING] = numParticles;
-            for (int i = 0; i < numParticles; i++) device.processing[i] = (*processingVault)[i];
+            assert(device.particleSizes[Device::PROCESSING] == numParticles);
+            for (int i = 0; i < numParticles; i++) assert(device.processing[i] == (*processingVault)[i]);
 
             if ( numParticles != 0 )
             {
@@ -155,6 +155,9 @@ void cycleTracking(MonteCarlo *monteCarlo)
             assert(extraVault.size() == device.particleSizes[Device::EXTRAS]);
             for (int i = 0; i < extraVault.size(); i++) assert(device.extras[i] == extraVault[i]);
 
+            assert(processedVault->size() == device.particleSizes[Device::PROCESSED]);
+            for (int i = 0; i < processedVault->size(); i++) assert(device.processed[i] == (*processedVault)[i]);
+
             MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking_Kernel);
 
             MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking_MPI);
@@ -168,18 +171,22 @@ void cycleTracking(MonteCarlo *monteCarlo)
               MC_Base_Particle mcb_particle;
               processingVault->getBaseParticleComm( mcb_particle, tuple.y );
               assert(device.processing[tuple.y] == mcb_particle);
+              device.processing[tuple.y].set(mcb_particle);
               assert(tuple.x >= 0);
               messages.addParticle(mcb_particle,tuple.x);
             }
 
             messages.startSends();
-            processingVault->clear(); //remove the invalid particles
             device.particleSizes[Device::SENDS] = 0;
+
+            processingVault->clear(); //remove the invalid particles
 
             // Move particles in "extra" vault into the regular vaults.
             my_particle_vault.cleanExtraVault();
+            
+            std::swap(device.processing,device.extras);
+            device.particleSizes[Device::PROCESSING] = device.particleSizes[Device::EXTRAS];
             device.particleSizes[Device::EXTRAS] = 0;
-            MPI_Barrier(MPI_COMM_WORLD);
 
             // receive any particles that have arrived from other ranks
             messages.completeRecvs();

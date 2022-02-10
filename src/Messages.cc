@@ -163,6 +163,8 @@ void Messages::completeRecvs()
     for (int j = 0; j < count; j++) {
       recvParts[offset+j].set(p);
       mc._particleVaultContainer->addProcessingParticle(p);
+      const int ip = __atomic_fetch_add(mc._device.particleSizes+Device::PROCESSING,1,__ATOMIC_RELAXED);
+      mc._device.processing[ip] = recvParts[offset+j];
     }
   }
 }

@@ -84,6 +84,8 @@ void CycleTrackingGuts( MonteCarlo *monteCarlo, int numParticles, ParticleVault 
             {
                 // The particle has reached the end of the time step.
                 processedVault->pushParticle(mc_particle);
+                const int iProcessed = __atomic_fetch_add(device.particleSizes+Device::PROCESSED,1,__ATOMIC_RELAXED);
+                device.processed[iProcessed] = mc_particle;
                 ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[0]._census);
                 processingVault->invalidateParticle( particle_index );
                 device.processing[particle_index++].species = -1;
