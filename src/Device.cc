@@ -208,10 +208,16 @@ void Device::cycleFinalize(MonteCarlo &mc)
   mc._tallies->_balanceTask[0]._fission = tallies[Tallies::FISSION];
   mc._tallies->_balanceTask[0]._produce = tallies[Tallies::PRODUCE];
   
-  const ParticleVault &vault = *(mc._particleVaultContainer->getTaskProcessedVault());
-  assert(particleSizes[PROCESSED] == vault.size());
-  assert(vault.size());
-  for (int i = 0; i < vault.size(); i++) assert(processed[i] == vault[i]);
+  ParticleVault &processedVault = *(mc._particleVaultContainer->getTaskProcessedVault());
+  processedVault.clear();
+  const int processedSize = particleSizes[PROCESSED];
+  MC_Base_Particle particle;
+  for (int i = 0; i < processedSize; i++) {
+    processed[i].set(particle);
+    processedVault.pushBaseParticle(particle);
+  }
+
+  mc._particleVaultContainer->getTaskProcessingVault()->clear();
 }
 
 DeviceParticle &DeviceParticle::operator=(const MC_Base_Particle &that)

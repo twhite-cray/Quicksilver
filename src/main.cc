@@ -138,8 +138,8 @@ void cycleTracking(MonteCarlo *monteCarlo)
             messages.startRecvs();
             MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking_Kernel);
 
-            int numParticles = processingVault->size();
-            assert(device.particleSizes[Device::PROCESSING] == numParticles);
+            const int numParticles = device.particleSizes[Device::PROCESSING];
+            assert(numParticles == processingVault->size());
             for (int i = 0; i < numParticles; i++) assert(device.processing[i] == (*processingVault)[i]);
 
             if ( numParticles != 0 )
