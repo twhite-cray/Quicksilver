@@ -118,75 +118,65 @@ void cycleTracking(MonteCarlo *monteCarlo)
 {
     MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking);
 
-    bool done = false;
     Device &device = monteCarlo->_device;
     Messages &messages = monteCarlo->_messages;
 
-    do
-    {
-        int particle_count = 0; // Initialize count of num_particles processed
+    int particle_count = 0; // Initialize count of num_particles processed
 
-        while ( !done )
-        {
-            messages.startRecvs();
-            MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking_Kernel);
+    bool done = false;
+    do {
+      messages.startRecvs();
+      MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking_Kernel);
 
-            const int numParticles = device.particleSizes[Device::PROCESSING];
+      const int numParticles = device.particleSizes[Device::PROCESSING];
 
-            if ( numParticles != 0 )
-            {
-              NVTX_Range trackingKernel("cycleTracking_TrackingKernel"); 
-              CycleTrackingGuts( numParticles, device );
-            }
+      if ( numParticles != 0 )
+      {
+        NVTX_Range trackingKernel("cycleTracking_TrackingKernel"); 
+        CycleTrackingGuts( numParticles, device );
+      }
 
-            particle_count += numParticles;
+      particle_count += numParticles;
 
-            MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking_Kernel);
+      MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking_Kernel);
 
-            MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking_MPI);
+      MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking_MPI);
 
-            NVTX_Range cleanAndComm("cycleTracking_clean_and_comm");
+      NVTX_Range cleanAndComm("cycleTracking_clean_and_comm");
 
-            const int sendSize = device.particleSizes[Device::SENDS];
-            for ( int index = 0; index < sendSize; index++ )
-            {
-              const int2 &tuple = device.sends[index];
-              MC_Base_Particle mcb_particle;
-              device.processing[tuple.y].set(mcb_particle);
-              assert(tuple.x >= 0);
-              messages.addParticle(mcb_particle,tuple.x);
-            }
+      const int sendSize = device.particleSizes[Device::SENDS];
+      for ( int index = 0; index < sendSize; index++ )
+      {
+        const int2 &tuple = device.sends[index];
+        MC_Base_Particle mcb_particle;
+        device.processing[tuple.y].set(mcb_particle);
+        assert(tuple.x >= 0);
+        messages.addParticle(mcb_particle,tuple.x);
+      }
 
-            messages.startSends();
-            device.particleSizes[Device::SENDS] = 0;
+      messages.startSends();
+      device.particleSizes[Device::SENDS] = 0;
 
-            std::swap(device.processing,device.extras);
-            device.particleSizes[Device::PROCESSING] = device.particleSizes[Device::EXTRAS];
-            device.particleSizes[Device::EXTRAS] = 0;
+      std::swap(device.processing,device.extras);
+      device.particleSizes[Device::PROCESSING] = device.particleSizes[Device::EXTRAS];
+      device.particleSizes[Device::EXTRAS] = 0;
 
-            // receive any particles that have arrived from other ranks
-            messages.completeRecvs();
-            messages.completeSends();
+      messages.completeRecvs();
+      messages.completeSends();
 
-            MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking_MPI);
+      MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking_MPI);
 
-            MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking_MPI);
+      MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking_MPI);
 
-            //Test for done - blocking on all MPI ranks
-            NVTX_Range doneRange("cycleTracking_Test_Done_New");
-            done = monteCarlo->particle_buffer->Test_Done_New();
-            doneRange.endRange();
+      NVTX_Range doneRange("cycleTracking_Test_Done_New");
+      done = monteCarlo->particle_buffer->Test_Done_New();
+      doneRange.endRange();
 
-            MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking_MPI);
-
-        } // while not done: Test_Done_New()
-
-        // Everything should be done normally.
-        done = monteCarlo->particle_buffer->Test_Done_New();
+      MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking_MPI);
 
     } while ( !done );
 
-   MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking);
+    MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking);
 }
 
 
