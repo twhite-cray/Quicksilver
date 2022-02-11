@@ -65,11 +65,12 @@ struct Messages {
   MPI_Datatype mpiParticle;
   int nMessages;
   int maxCount;
-  int *counts;
   int *ranks;
+  int *recvCounts;
   MessageParticle *recvParts;
   MPI_Request *recvReqs;
   MPI_Status *recvStats;
+  int *sendCounts;
   MessageParticle *sendParts;
   MPI_Request *sendReqs;
 };

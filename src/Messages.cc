@@ -61,11 +61,12 @@ Messages::Messages(MonteCarlo &mc_):
   mpiParticle(MPI_DATATYPE_NULL),
   nMessages(0),
   maxCount(0),
-  counts(nullptr),
   ranks(nullptr),
+  recvCounts(nullptr),
   recvParts(nullptr),
   recvReqs(nullptr),
   recvStats(nullptr),
+  sendCounts(nullptr),
   sendParts(nullptr),
   sendReqs(nullptr)
 {
@@ -77,11 +78,12 @@ Messages::~Messages()
 {
   delete [] sendReqs;
   CHECK(hipHostFree(sendParts)); sendParts = nullptr;
+  CHECK(hipHostFree(sendCounts)); sendCounts = nullptr;
   delete [] recvStats;
   delete [] recvReqs;
   CHECK(hipHostFree(recvParts)); recvParts = nullptr;
+  CHECK(hipHostFree(recvCounts)); recvCounts = nullptr;
   delete [] ranks;
-  CHECK(hipHostFree(counts)); counts = nullptr;
   maxCount = 0;
   nMessages = 0;
   MPI_Type_free(&mpiParticle);
@@ -101,8 +103,8 @@ void Messages::init()
 
   nMessages = mc.particle_buffer->num_buffers;
   maxCount = mc.particle_buffer->buffer_size;
-  CHECK(hipHostMalloc(&counts,nMessages*sizeof(*counts)));
   ranks = new int[nMessages];
+  CHECK(hipHostMalloc(&recvCounts,nMessages*sizeof(*recvCounts)));
   recvReqs = new MPI_Request[nMessages];
   recvStats = new MPI_Status[nMessages];
   sendReqs = new MPI_Request[nMessages];
@@ -117,37 +119,42 @@ void Messages::init()
   }
   const size_t msgBytes = sizeof(MessageParticle)*nMessages*maxCount;
   CHECK(hipHostMalloc(&recvParts,msgBytes));
+  CHECK(hipHostMalloc(&sendCounts,nMessages*sizeof(*sendCounts)));
   CHECK(hipHostMalloc(&sendParts,msgBytes));
 }
 
 void Messages::addParticle(const MC_Base_Particle &part, const int buffer)
 {
   assert(buffer < nMessages);
-  const int i = counts[buffer]++;
+  const int i = sendCounts[buffer]++;
   assert(i < maxCount);
   sendParts[buffer*maxCount+i] = part;
 }
 
 void Messages::completeRecvs()
 {
-  MC_Base_Particle p;
   MPI_Waitall(nMessages,recvReqs,recvStats);
-  for (int i = 0, offset = 0; i < nMessages; i++, offset += maxCount) {
+  int total = 0;
+  for (int i = 0; i < nMessages; i++) {
     int count = 0;
     MPI_Get_count(recvStats+i,mpiParticle,&count);
-    assert(count < maxCount);
-    for (int j = 0; j < count; j++) {
-      recvParts[offset+j].set(p);
-      const int ip = __atomic_fetch_add(mc._device.particleSizes+Device::PROCESSING,1,__ATOMIC_RELAXED);
-      mc._device.processing[ip] = recvParts[offset+j];
-    }
+    recvCounts[i] = count;
+    total += count;
   }
+  int ip = mc._device.particleSizes[Device::PROCESSING];
+  for (int i = 0, offset = 0; i < nMessages; i++, offset += maxCount) {
+    const int count = recvCounts[i];
+    assert(count < maxCount);
+    for (int j = 0; j < count; j++, ip++) mc._device.processing[ip] = recvParts[offset+j];
+  }
+  assert(ip-mc._device.particleSizes[Device::PROCESSING] == total);
+  mc._device.particleSizes[Device::PROCESSING] += total;
 }
 
 void Messages::completeSends()
 {
   MPI_Waitall(nMessages,sendReqs,MPI_STATUSES_IGNORE);
-  for (int i = 0; i < nMessages; i++) counts[i] = 0;
+  for (int i = 0; i < nMessages; i++) sendCounts[i] = 0;
 }
 
 void Messages::startRecvs()
@@ -162,7 +169,7 @@ void Messages::startSends()
 {
   for (int i =0, offset = 0; i < nMessages; i++, offset += maxCount) {
     assert(sendReqs[i] == MPI_REQUEST_NULL);
-    assert(counts[i] <= maxCount);
-    MPI_Isend(sendParts+offset,counts[i],mpiParticle,ranks[i],tag,MPI_COMM_WORLD,sendReqs+i);
+    assert(sendCounts[i] <= maxCount);
+    MPI_Isend(sendParts+offset,sendCounts[i],mpiParticle,ranks[i],tag,MPI_COMM_WORLD,sendReqs+i);
   }
 }
