@@ -7,6 +7,7 @@
 #include "ParticleVault.hh"
 #include "utilsMpi.hh"
 #include "NVTX_Range.hh"
+#include "Tallies.hh"
 #include <vector>
 
 namespace

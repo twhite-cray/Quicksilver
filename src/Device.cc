@@ -7,6 +7,7 @@
 #include "MonteCarlo.hh"
 #include "NuclearData.hh"
 #include "ParticleVaultContainer.hh"
+#include "Tallies.hh"
 
 void Device::init(MonteCarlo &mc)
 {

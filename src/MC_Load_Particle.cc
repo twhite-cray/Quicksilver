@@ -1,6 +1,7 @@
 #include "ParticleVault.hh"
 #include "MC_Particle.hh"
 #include "MC_Time_Info.hh"
+#include "MonteCarlo.hh"
 #include "DeclareMacro.hh"
 
 //----------------------------------------------------------------------------------------------------------------------
