@@ -65,9 +65,6 @@ class MC_Particle
 
     double num_segments;
 
-    // species of the particle
-    int species;
-
     // the breed of the particle how it was produced
     int breed;
 
@@ -108,7 +105,6 @@ public:
      assert(last_event == that.last_event);
      assert(num_collisions == that.num_collisions);
      assert(num_segments == that.num_segments);
-     assert(species == that.species);
      assert(breed == that.breed);
      assert(energy_group == that.energy_group);
      assert(domain == that.domain);
@@ -132,7 +128,6 @@ public:
          (last_event == that.last_event) &&
          (num_collisions == that.num_collisions) &&
          (num_segments == that.num_segments) &&
-         (species == that.species) &&
          (breed == that.breed) &&
          (energy_group == that.energy_group) &&
          (domain == that.domain) &&
@@ -204,7 +199,6 @@ inline void MC_Particle::PrintParticle()
     printf( "last_event:          %d\n", last_event);
     printf( "num_collision:       %d\n", num_collisions);
     printf( "num_segments:        %g\n", num_segments);
-    printf( "species:             %d\n", species);
     printf( "breed:               %d\n", breed);
     printf( "energy_group:        %d\n", energy_group);
     printf( "domain:              %d\n", domain);

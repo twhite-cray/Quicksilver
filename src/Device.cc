@@ -244,7 +244,6 @@ DeviceParticle &DeviceParticle::operator=(const MC_Base_Particle &that)
   lastEvent = that.last_event;
   numCollisions = that.num_collisions;
   breed = that.breed;
-  species = that.species;
   domain = that.domain;
   cell = that.cell;
   return *this;
@@ -274,7 +273,6 @@ bool DeviceParticle::operator==(const MC_Base_Particle &that) const
       (lastEvent == that.last_event) &&
       (numCollisions == that.num_collisions) &&
       (breed == that.breed) &&
-      (species == that.species) &&
       (domain == that.domain) &&
       (cell == that.cell));
 }
@@ -298,7 +296,6 @@ void DeviceParticle::set(MC_Base_Particle &that) const
   that.last_event = lastEvent;
   that.num_collisions = numCollisions;
   that.breed = breed;
-  that.species = species;
   that.domain = domain;
   that.cell = cell;
 }

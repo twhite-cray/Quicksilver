@@ -137,7 +137,6 @@ getBaseParticleComm( MC_Base_Particle &particle, int index )
     if( size() > index )
     {
             particle = _particles[index];
-            _particles[index].species = -1;
             return true;
     }
     else
@@ -181,7 +180,6 @@ invalidateParticle( int index )
 {
     qs_assert( index >= 0 );
     qs_assert( index < _particles.size() );
-    _particles[index].species = -1;
 }
 
 // -----------------------------------------------------------------------

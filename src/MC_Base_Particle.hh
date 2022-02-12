@@ -38,7 +38,6 @@ class MC_Base_Particle
     MC_Base_Particle&  operator= ( const MC_Particle& );
 
     int particle_id_number() const;
-    int invalidate();
 
     // serialize the vault
     void Serialize(int *int_data, double *float_data, char *char_data,
@@ -50,11 +49,6 @@ class MC_Base_Particle
 
     // copy contents to a string
     void Copy_Particle_Base_To_String(std::string &output_string) const;
-
-    // aliases for the type of particle that we have
-    inline int type() const     { return species; }
-    inline int index() const    { return species; }
-    inline int is_valid() const { return (0 <= species); }
 
     inline double Get_Energy() const                     { return kinetic_energy; }
     inline MC_Vector *Get_Velocity() { return &velocity; }
@@ -75,7 +69,6 @@ class MC_Base_Particle
     MC_Tally_Event::Enum               last_event;
     int                                num_collisions;
     int                                breed;
-    int                                species;
     int                                domain;
     int                                cell;
 
@@ -99,24 +92,6 @@ inline MC_Location MC_Base_Particle::Get_Location() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-// Invalidate a particle.
-//
-// This public method "invalidates" this particle by setting its particle type to UNKNOWN. This
-// method will fail if this particle is already invalid.
-//
-// return: A value of 1 (true) is returned on success, 0 (false) on failure.
-//----------------------------------------------------------------------------------------------------------------------
-inline int MC_Base_Particle::invalidate()
-{
-   if (is_valid())
-   {
-      species = -1;
-      return 1;
-   }
-   else return 0;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
 //  Base information for a particle.
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -137,8 +112,6 @@ inline MC_Base_Particle::MC_Base_Particle( ) :
         last_event(MC_Tally_Event::Census),
         num_collisions(0),
         breed(0),
-        // species == -1 is a special signifier for invalidated particle
-        species(-1),
         domain(0),
         cell(0)
 {
@@ -163,7 +136,6 @@ inline MC_Base_Particle::MC_Base_Particle(const MC_Base_Particle &particle)
     last_event          = particle.last_event;
     num_collisions      = particle.num_collisions;
     breed               = particle.breed;
-    species             = particle.species;
     domain              = particle.domain;
     cell                = particle.cell;
 }
@@ -186,7 +158,6 @@ inline MC_Base_Particle::MC_Base_Particle(const MC_Particle &particle)
     last_event          = particle.last_event;
     num_collisions      = particle.num_collisions;
     breed               = particle.breed;
-    species             = particle.species;
     domain              = particle.domain;
     cell                = particle.cell;
 }
@@ -211,7 +182,6 @@ inline MC_Base_Particle& MC_Base_Particle::operator= (const MC_Particle &particl
     last_event = particle.last_event;
     num_collisions = particle.num_collisions;
     breed = particle.breed;
-    species = particle.species;
     domain = particle.domain;
     cell = particle.cell;
 
@@ -240,7 +210,6 @@ inline MC_Particle::MC_Particle()
      num_collisions (0),
      num_segments(0.0),
 
-     species(0),
      breed(0),
      energy_group(0),
      domain(0),
@@ -277,7 +246,6 @@ inline MC_Particle::MC_Particle( const MC_Base_Particle &from_particle )
      num_segments(from_particle.num_segments),
 
 
-     species(from_particle.species),
      breed(from_particle.breed),
      energy_group(0),
      domain(from_particle.domain),
@@ -322,7 +290,6 @@ inline void MC_Particle::Copy_From_Base( const MC_Base_Particle &from_particle)
     this->num_collisions      = from_particle.num_collisions;
     this->num_segments        = from_particle.num_segments;
 
-    this->species             = from_particle.species;
     this->breed               = from_particle.breed;
     this->domain              = from_particle.domain;
     this->cell                = from_particle.cell;

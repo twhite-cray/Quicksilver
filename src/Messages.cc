@@ -26,7 +26,6 @@ bool MessageParticle::operator==(const MC_Base_Particle &that) const
       (that.last_event == MC_Tally_Event::Facet_Crossing_Communication) &&
       (numCollisions == that.num_collisions) &&
       (breed == that.breed) &&
-      (species == that.species) &&
       (domain == that.domain) &&
       (cell == that.cell));
 }
@@ -50,7 +49,6 @@ void MessageParticle::set(MC_Base_Particle &that) const
   that.last_event = MC_Tally_Event::Facet_Crossing_Communication;
   that.num_collisions = numCollisions;
   that.breed = breed;
-  that.species = species;
   that.domain = domain;
   that.cell = cell;
 }

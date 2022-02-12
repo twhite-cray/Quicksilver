@@ -39,11 +39,8 @@ void CycleTrackingGuts( const int numParticles, Device &device)
         switch (segment_outcome) {
         case MC_Segment_Outcome_type::Collision:
             {
-            // The particle undergoes a collision event producing:
-            //   (0) Other-than-one same-species secondary particle, or
-            //   (1) Exactly one same-species secondary particle.
               if (CollisionEvent(device, mc_particle) != MC_Collision_Event_Return::Continue_Tracking) {
-                device.processing[particle_index++].species = -1;
+                particle_index++;
               }
             }
             break;
@@ -59,8 +56,7 @@ void CycleTrackingGuts( const int numParticles, Device &device)
                 {
                     ATOMIC_UPDATE( device.tallies[Device::ESCAPE] );
                     mc_particle.last_event = MC_Tally_Event::Facet_Crossing_Escape;
-                    mc_particle.species = -1;
-                    device.processing[particle_index++].species = -1;
+                    particle_index++;
                 }
                 else if (facet_crossing_type == MC_Tally_Event::Facet_Crossing_Reflection)
                 {
@@ -69,7 +65,7 @@ void CycleTrackingGuts( const int numParticles, Device &device)
                 else
                 {
                     // Enters an adjacent cell in an off-processor domain.
-                    device.processing[particle_index++].species = -1;
+                    particle_index++;
                 }
             }
             break;
@@ -79,7 +75,7 @@ void CycleTrackingGuts( const int numParticles, Device &device)
                 const int iProcessed = __atomic_fetch_add(device.particleSizes+Device::PROCESSED,1,__ATOMIC_RELAXED);
                 device.processed[iProcessed] = mc_particle;
                 ATOMIC_UPDATE( device.tallies[Device::CENSUS] );
-                device.processing[particle_index++].species = -1;
+                particle_index++;
                 break;
             }
             

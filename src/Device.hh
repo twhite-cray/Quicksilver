@@ -90,7 +90,6 @@ struct DeviceParticle {
     lastEvent = MC_Tally_Event::Facet_Crossing_Communication;
     numCollisions = that.numCollisions;
     breed = that.breed;
-    species = that.species;
     domain = that.domain;
     cell = that.cell;
     return *this;
@@ -126,7 +125,6 @@ struct DeviceParticle {
     that.last_event = lastEvent;
     that.num_collisions = numCollisions;
     that.num_segments = numSegments;
-    that.species = species;
     that.breed = breed;
     that.energy_group = 0;
     that.domain = domain;
@@ -148,7 +146,6 @@ struct DeviceParticle {
   MC_Tally_Event::Enum lastEvent;
   int numCollisions;
   int breed;
-  int species;
   int domain;
   int cell;
 };

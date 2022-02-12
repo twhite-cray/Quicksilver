@@ -79,7 +79,6 @@ void MC_Base_Particle::Serialize(int *int_data, double *float_data, char *char_d
     MCP_DATA_MEMBER_CAST_OLD(last_event, int_data, int_index, mode, MC_Tally_Event::Enum);
     MCP_DATA_MEMBER_OLD(num_collisions, int_data, int_index, mode);
     MCP_DATA_MEMBER_OLD(breed, int_data, int_index, mode);
-    MCP_DATA_MEMBER_OLD(species, int_data, int_index, mode);
     MCP_DATA_MEMBER_OLD(domain, int_data, int_index, mode);
     MCP_DATA_MEMBER_OLD(cell, int_data, int_index, mode);
 }

@@ -25,7 +25,6 @@ struct MessageParticle {
     identifier = that.identifier;
     numCollisions = that.num_collisions;
     breed = that.breed;
-    species = that.species;
     domain = that.domain;
     cell = that.cell;
     return *this;
@@ -45,7 +44,6 @@ struct MessageParticle {
   uint64_t identifier;
   int numCollisions;
   int breed;
-  int species;
   int domain;
   int cell;
 };
