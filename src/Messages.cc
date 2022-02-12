@@ -170,8 +170,8 @@ void Messages::completeRecvs()
 
 void Messages::completeSends()
 {
-  MPI_Waitall(nMessages,sendReqs,MPI_STATUSES_IGNORE);
   for (int i = 0; i < nMessages; i++) sendCounts[i] = 0;
+  MPI_Waitall(nMessages,sendReqs,MPI_STATUSES_IGNORE);
 }
 
 void Messages::startRecvs()

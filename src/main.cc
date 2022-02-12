@@ -144,24 +144,7 @@ void cycleTracking(MonteCarlo *monteCarlo)
 
       NVTX_Range cleanAndComm("cycleTracking_clean_and_comm");
 
-      const int sendSize = device.particleSizes[Device::SENDS];
-      {
-        int total = 0;
-        for (int i = 0; i < messages.nMessages; i++) total += messages.sendCounts[i];
-        assert (total == sendSize);
-        std::vector<int> counts(messages.nMessages);
-        for (int index = 0; index < sendSize; index++) {
-          const int2 &tuple = device.sends[index];
-          MC_Base_Particle mcb_particle;
-          device.processing[tuple.y].set(mcb_particle);
-          const int count = counts.at(tuple.x)++;
-          assert(messages.sendParts[tuple.x*messages.maxCount+count] == mcb_particle);
-        }
-        for (int i = 0; i < messages.nMessages; i++) assert(counts[i] == messages.sendCounts[i]);
-      }
-      
       messages.startSends();
-      device.particleSizes[Device::SENDS] = 0;
 
       std::swap(device.processing,device.extras);
       device.particleSizes[Device::PROCESSING] = device.particleSizes[Device::EXTRAS];

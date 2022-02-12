@@ -162,7 +162,6 @@ struct Device {
     processing(nullptr),
     processed(nullptr),
     extras(nullptr),
-    sends(nullptr),
     nuBar(0),
     logLow(0),
     divDelta(0),
@@ -216,12 +215,11 @@ struct Device {
   enum Tallies { ABSORB, CENSUS, COLLISION, ESCAPE, FISSION, PRODUCE, SEGMENTS, SCATTER, TALLIES_SIZE };
   long *tallies;
 
-  enum ParticleSizes { PROCESSING, PROCESSED, EXTRAS, SENDS, PARTICLE_SIZES_SIZE };
+  enum ParticleSizes { PROCESSING, PROCESSED, EXTRAS, PARTICLE_SIZES_SIZE };
   int *particleSizes;
   DeviceParticle *processing;
   DeviceParticle *processed;
   DeviceParticle *extras;
-  int2 *sends;
 
   double nuBar;
   double logLow;

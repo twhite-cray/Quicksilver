@@ -153,8 +153,6 @@ void Device::init(MonteCarlo &mc)
     memset(processed,0,bytes);
     CHECK(hipHostMalloc(&extras,bytes));
     memset(extras,0,bytes);
-    CHECK(hipHostMalloc(&sends,sizeof(*sends)*vaultSize));
-    memset(sends,0,sizeof(*sends)*vaultSize);
   }
 
   {
