@@ -121,49 +121,17 @@ void cycleTracking(MonteCarlo *monteCarlo)
     Device &device = monteCarlo->_device;
     Messages &messages = monteCarlo->_messages;
 
-    int particle_count = 0; // Initialize count of num_particles processed
-
-    bool done = false;
     do {
       messages.startRecvs();
-      MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking_Kernel);
-
       const int numParticles = device.particleSizes[Device::PROCESSING];
-
-      if ( numParticles != 0 )
-      {
-        NVTX_Range trackingKernel("cycleTracking_TrackingKernel"); 
-        CycleTrackingGuts( numParticles, device, messages.maxCount, messages.sendCounts, messages.sendParts );
-      }
-
-      particle_count += numParticles;
-
-      MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking_Kernel);
-
-      MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking_MPI);
-
-      NVTX_Range cleanAndComm("cycleTracking_clean_and_comm");
-
+      if ( numParticles != 0 ) CycleTrackingGuts( numParticles, device, messages.maxCount, messages.sendCounts, messages.sendParts );
       messages.startSends();
-
       std::swap(device.processing,device.extras);
       device.particleSizes[Device::PROCESSING] = device.particleSizes[Device::EXTRAS];
       device.particleSizes[Device::EXTRAS] = 0;
-
       messages.completeRecvs();
       messages.completeSends();
-
-      MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking_MPI);
-
-      MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking_MPI);
-
-      NVTX_Range doneRange("cycleTracking_Test_Done_New");
-      done = monteCarlo->particle_buffer->Test_Done_New();
-      doneRange.endRange();
-
-      MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking_MPI);
-
-    } while ( !done );
+    } while ( !monteCarlo->particle_buffer->Test_Done_New() );
 
     MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking);
 }

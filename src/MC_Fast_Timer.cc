@@ -10,8 +10,6 @@ const char *mc_fast_timer_names[MC_Fast_Timer::Num_Timers] =
     "main",
     "cycleInit",
     "cycleTracking",
-    "cycleTracking_Kernel",
-    "cycleTracking_MPI",
     "cycleTracking_Test_Done",
     "cycleFinalize"
 };

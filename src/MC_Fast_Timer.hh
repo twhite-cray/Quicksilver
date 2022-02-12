@@ -33,8 +33,6 @@ class MC_Fast_Timer
     main = 0,
     cycleInit,
     cycleTracking,
-    cycleTracking_Kernel,
-    cycleTracking_MPI,
     cycleTracking_Test_Done,
     cycleFinalize,
     Num_Timers
