@@ -30,6 +30,29 @@ struct MessageParticle {
     return *this;
   }
 
+  MessageParticle &operator=(const MC_Particle &that)
+  {
+    coordinate.x = that.coordinate.x;
+    coordinate.y = that.coordinate.y;
+    coordinate.z = that.coordinate.z;
+    velocity.x = that.velocity.x;
+    velocity.y = that.velocity.y;
+    velocity.z = that.velocity.z;
+    kineticEnergy = that.kinetic_energy;
+    weight = that.weight;
+    timeToCensus = that.time_to_census;
+    age = that.age;
+    numMeanFreePaths = that.num_mean_free_paths;
+    numSegments = that.num_segments;
+    randomNumberSeed = that.random_number_seed;
+    identifier = that.identifier;
+    numCollisions = that.num_collisions;
+    breed = that.breed;
+    domain = that.domain;
+    cell = that.cell;
+    return *this;
+  }
+
   bool operator==(const MC_Base_Particle &that) const;
   void set(MC_Base_Particle &that) const;
   double3 coordinate;

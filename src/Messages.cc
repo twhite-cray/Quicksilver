@@ -9,6 +9,25 @@ static int uniqueTag = 33;
 
 bool MessageParticle::operator==(const MC_Base_Particle &that) const
 {
+  assert(coordinate.x == that.coordinate.x);
+  assert(coordinate.y == that.coordinate.y);
+  assert(coordinate.z == that.coordinate.z);
+  assert(velocity.x == that.velocity.x);
+  assert(velocity.y == that.velocity.y);
+  assert(velocity.z == that.velocity.z);
+  assert(kineticEnergy == that.kinetic_energy);
+  assert(weight == that.weight);
+  assert(timeToCensus == that.time_to_census);
+  assert(age == that.age);
+  assert(numMeanFreePaths == that.num_mean_free_paths);
+  assert(numSegments == that.num_segments);
+  assert(randomNumberSeed == that.random_number_seed);
+  assert(identifier == that.identifier);
+  assert(that.last_event == MC_Tally_Event::Facet_Crossing_Communication);
+  assert(numCollisions == that.num_collisions);
+  assert(breed == that.breed);
+  assert(domain == that.domain);
+  assert(cell == that.cell);
   return ((coordinate.x == that.coordinate.x) &&
       (coordinate.y == that.coordinate.y) &&
       (coordinate.z == that.coordinate.z) &&

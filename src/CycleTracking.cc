@@ -10,7 +10,7 @@
 #include "macros.hh"
 #include "qs_assert.hh"
 
-void CycleTrackingGuts( const int numParticles, Device &device)
+void CycleTrackingGuts( const int numParticles, Device &device, const int maxCount, int *const sendCounts, MessageParticle *const sendParts)
 {
     MC_Particle mc_particle;
     int previous = -1;
@@ -48,7 +48,7 @@ void CycleTrackingGuts( const int numParticles, Device &device)
         case MC_Segment_Outcome_type::Facet_Crossing:
             {
                 // The particle has reached a cell facet.
-                MC_Tally_Event::Enum facet_crossing_type = MC_Facet_Crossing_Event(mc_particle, device, particle_index);
+                MC_Tally_Event::Enum facet_crossing_type = MC_Facet_Crossing_Event(mc_particle, device, particle_index, maxCount, sendCounts, sendParts);
 
                 if (facet_crossing_type == MC_Tally_Event::Facet_Crossing_Transit_Exit)
                 {}
