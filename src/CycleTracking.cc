@@ -10,16 +10,16 @@
 #include "macros.hh"
 #include "qs_assert.hh"
 
-void CycleTrackingGuts( const int numParticles, Device &device, const int maxCount, int *const sendCounts, MessageParticle *const sendParts)
+void CycleTrackingGuts( const int ipLo, const int ipHi, Device &device, const int maxCount, int *const sendCounts, MessageParticle *const sendParts)
 {
     MC_Particle mc_particle;
-    int previous = -1;
-    int particle_index = 0;
-    while (particle_index < numParticles) {
+    int ipOld = ipLo-1;
+    int ip = ipLo;
+    while (ip < ipHi) {
 
-        if (previous != particle_index) {
-          previous = particle_index;
-          device.processing[particle_index].set(mc_particle);
+        if (ipOld != ip) {
+          ipOld = ip;
+          device.processing[ip].set(mc_particle);
           if (mc_particle.time_to_census <= 0) mc_particle.time_to_census += device.timeStep;
           mc_particle.energy_group = device.getEnergyGroup(mc_particle.kinetic_energy);
         }
@@ -40,7 +40,7 @@ void CycleTrackingGuts( const int numParticles, Device &device, const int maxCou
         case MC_Segment_Outcome_type::Collision:
             {
               if (CollisionEvent(device, mc_particle) != MC_Collision_Event_Return::Continue_Tracking) {
-                particle_index++;
+                ip++;
               }
             }
             break;
@@ -48,7 +48,7 @@ void CycleTrackingGuts( const int numParticles, Device &device, const int maxCou
         case MC_Segment_Outcome_type::Facet_Crossing:
             {
                 // The particle has reached a cell facet.
-                MC_Tally_Event::Enum facet_crossing_type = MC_Facet_Crossing_Event(mc_particle, device, particle_index, maxCount, sendCounts, sendParts);
+                MC_Tally_Event::Enum facet_crossing_type = MC_Facet_Crossing_Event(mc_particle, device, ip, maxCount, sendCounts, sendParts);
 
                 if (facet_crossing_type == MC_Tally_Event::Facet_Crossing_Transit_Exit)
                 {}
@@ -56,7 +56,7 @@ void CycleTrackingGuts( const int numParticles, Device &device, const int maxCou
                 {
                     ATOMIC_UPDATE( device.tallies[Device::ESCAPE] );
                     mc_particle.last_event = MC_Tally_Event::Facet_Crossing_Escape;
-                    particle_index++;
+                    ip++;
                 }
                 else if (facet_crossing_type == MC_Tally_Event::Facet_Crossing_Reflection)
                 {
@@ -65,7 +65,7 @@ void CycleTrackingGuts( const int numParticles, Device &device, const int maxCou
                 else
                 {
                     // Enters an adjacent cell in an off-processor domain.
-                    particle_index++;
+                    ip++;
                 }
             }
             break;
@@ -75,12 +75,12 @@ void CycleTrackingGuts( const int numParticles, Device &device, const int maxCou
                 const int iProcessed = __atomic_fetch_add(device.particleSizes+Device::PROCESSED,1,__ATOMIC_RELAXED);
                 device.processed[iProcessed] = mc_particle;
                 ATOMIC_UPDATE( device.tallies[Device::CENSUS] );
-                particle_index++;
+                ip++;
                 break;
             }
             
         default:
-           qs_assert(false);
+           abort();
            break;  // should this be an error
         }
     }

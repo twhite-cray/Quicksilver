@@ -124,7 +124,11 @@ void cycleTracking(MonteCarlo *monteCarlo)
     do {
       messages.startRecvs();
       const int numParticles = device.particleSizes[Device::PROCESSING];
-      if ( numParticles != 0 ) CycleTrackingGuts( numParticles, device, messages.maxCount, messages.sendCounts, messages.sendParts );
+      if ( numParticles != 0 ) {
+        const int nMid = numParticles/2;
+        CycleTrackingGuts( 0, nMid, device, messages.maxCount, messages.sendCounts, messages.sendParts );
+        CycleTrackingGuts( nMid, numParticles, device, messages.maxCount, messages.sendCounts, messages.sendParts );
+      }
       messages.startSends();
       std::swap(device.processing,device.extras);
       device.particleSizes[Device::PROCESSING] = device.particleSizes[Device::EXTRAS];

@@ -4,4 +4,4 @@
 struct Device;
 struct MessageParticle;
 
-void CycleTrackingGuts( int particle_index, Device &device, int maxCount, int *sendCounts, MessageParticle *sendParts );
+void CycleTrackingGuts( int ipLo, int ipHi, Device &device, int maxCount, int *sendCounts, MessageParticle *sendParts );
