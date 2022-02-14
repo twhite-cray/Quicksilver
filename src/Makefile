@@ -275,7 +275,6 @@ SOURCES= \
     MC_Adjacent_Facet.cc \
     MC_Base_Particle.cc \
     MC_Domain.cc \
-    MC_Facet_Crossing_Event.cc \
     MC_Fast_Timer.cc \
     MC_Load_Particle.cc \
     MC_Location.cc \
