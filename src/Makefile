@@ -273,7 +273,6 @@ SOURCES= \
     GlobalFccGrid.cc \
     GridAssignmentObject.cc \
     InputBlock.cc \
-    MCT.cc \
     MC_Adjacent_Facet.cc \
     MC_Base_Particle.cc \
     MC_Domain.cc \
