@@ -284,7 +284,6 @@ SOURCES= \
     MC_Particle_Buffer.cc \
     MC_RNG_State.cc \
     MC_SourceNow.cc \
-    MacroscopicCrossSection.cc \
     MeshPartition.cc \
     Messages.cc \
     MonteCarlo.cc \
