@@ -264,7 +264,6 @@ Quicksilver_EXE=qs
 
 # For development purposes, what is working now.
 SOURCES= \
-    CollisionEvent.cc \
     CoralBenchmark.cc \
     DecompositionObject.cc \
     Device.cc \
