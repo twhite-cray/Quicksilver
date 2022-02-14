@@ -280,7 +280,6 @@ SOURCES= \
     MC_Load_Particle.cc \
     MC_Location.cc \
     MC_Particle_Buffer.cc \
-    MC_RNG_State.cc \
     MC_SourceNow.cc \
     MeshPartition.cc \
     Messages.cc \
