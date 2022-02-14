@@ -43,7 +43,7 @@ public:
    double source_particle_weight;
 
    Device _device;
-   Messages _messages;
+   Messages _messagesA, _messagesB;
 
 private:
    // Disable copy constructor and assignment operator

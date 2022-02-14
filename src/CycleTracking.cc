@@ -10,8 +10,9 @@
 #include "macros.hh"
 #include "qs_assert.hh"
 
-void CycleTrackingGuts( const int ipLo, const int ipHi, Device &device, const int maxCount, int *const sendCounts, MessageParticle *const sendParts)
+void CycleTrackingGuts( const int ipLo, int ipHi, Device &device, const int maxCount, int *const sendCounts, MessageParticle *const sendParts)
 {
+    ipHi = (ipHi < 0) ? device.particleSizes[Device::PROCESSING] : ipHi;
     MC_Particle mc_particle;
     int ipOld = ipLo-1;
     int ip = ipLo;

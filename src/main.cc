@@ -100,7 +100,8 @@ void cycleInit( bool loadBalance )
     mcco->_tallies->_balanceTask[0]._start = mcco->_particleVaultContainer->sizeProcessing();
 
     mcco->particle_buffer->Initialize();
-    mcco->_messages.init(*mcco);
+    mcco->_messagesA.init(*mcco);
+    mcco->_messagesB.init(*mcco);
 
     MC_SourceNow(mcco);
    
@@ -119,20 +120,38 @@ void cycleTracking(MonteCarlo *monteCarlo)
     MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking);
 
     Device &device = monteCarlo->_device;
-    Messages &messages = monteCarlo->_messages;
+    Messages &ma = monteCarlo->_messagesA;
+    Messages &mb = monteCarlo->_messagesB;
 
-    do {
-      messages.startRecvs();
-      const int numParticles = device.particleSizes[Device::PROCESSING];
-      if ( numParticles != 0 ) {
-        const int nMid = numParticles/2;
-        CycleTrackingGuts( 0, nMid, device, messages.maxCount, messages.sendCounts, messages.sendParts );
-        CycleTrackingGuts( nMid, numParticles, device, messages.maxCount, messages.sendCounts, messages.sendParts );
+    const int nMid = device.particleSizes[Device::PROCESSING]/2;
+    ma.startRecvs();
+    CycleTrackingGuts(0,nMid,device,ma.maxCount,ma.sendCounts,ma.sendParts);
+    mb.startRecvs();
+    CycleTrackingGuts(nMid,-1,device,mb.maxCount,mb.sendCounts,mb.sendParts);
+    bool doA = true;
+    bool doB = true;
+    while (doA || doB) {
+      if (doA) {
+        ma.startSends();
+        ma.completeRecvs(device);
+        ma.completeSends();
+        doA = !monteCarlo->particle_buffer->Test_Done_New();
       }
-      messages.startSends();
-      messages.completeRecvs(device);
-      messages.completeSends();
-    } while ( !monteCarlo->particle_buffer->Test_Done_New() );
+      if (doA) {
+        ma.startRecvs();
+        CycleTrackingGuts(0,-1,device,ma.maxCount,ma.sendCounts,ma.sendParts);
+      }
+      if (doB) {
+        mb.startSends();
+        mb.completeRecvs(device);
+        mb.completeSends();
+        doB = !monteCarlo->particle_buffer->Test_Done_New();
+      }
+      if (doB) {
+        mb.startRecvs();
+        CycleTrackingGuts(0,-1,device,mb.maxCount,mb.sendCounts,mb.sendParts);
+      }
+    }
 
     MC_FASTTIMER_STOP(MC_Fast_Timer::cycleTracking);
 }
