@@ -266,7 +266,6 @@ Quicksilver_EXE=qs
 SOURCES= \
     CollisionEvent.cc \
     CoralBenchmark.cc \
-    CycleTracking.cc \
     DecompositionObject.cc \
     Device.cc \
     DirectionCosine.cc \

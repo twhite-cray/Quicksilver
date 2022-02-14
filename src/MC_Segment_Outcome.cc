@@ -28,12 +28,12 @@ static inline unsigned int MC_Find_Min(const double *array,
 MC_Segment_Outcome_type::Enum MC_Segment_Outcome(Device &device, MC_Particle &mc_particle)
 {
     // initialize distances to large number
-    int number_of_events = 3;
+    static constexpr int number_of_events = 3;
     double distance[3];
     distance[0] = distance[1] = distance[2] = 1e80;
 
     // Calculate the particle speed
-    double particle_speed = mc_particle.Get_Velocity()->Length();
+    const double particle_speed = mc_particle.Get_Velocity()->Length();
 
     // Force collision if a census event narrowly preempts a collision
     int force_collision = 0 ;
@@ -48,7 +48,7 @@ MC_Segment_Outcome_type::Enum MC_Segment_Outcome(Device &device, MC_Particle &mc
 
     // Randomly determine the distance to the next collision
     // based upon the composition of the current cell.
-    double macroscopic_total_cross_section = weightedMacroscopicCrossSection(device, 0,
+    const double macroscopic_total_cross_section = weightedMacroscopicCrossSection(device, 0,
                              mc_particle.domain, mc_particle.cell, mc_particle.energy_group);
 
     // Cache the cross section

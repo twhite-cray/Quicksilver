@@ -31,8 +31,8 @@ struct DeviceCell {
     material = that._material;
     return *this;
   }
-  double *totals;
-  double *groupTallies;
+  double *__restrict__ totals;
+  double *__restrict__ groupTallies;
   DeviceFacet facets[numFacets];
   double cellNumberDensity;
   int quadPoints[numQuadPoints];
@@ -40,9 +40,9 @@ struct DeviceCell {
 };
 
 struct DeviceDomain {
-  DeviceCell *cells;
-  double3 *nodes;
-  int *neighbors;
+  DeviceCell *__restrict__ cells;
+  double3 *__restrict__ nodes;
+  int *__restrict__ neighbors;
 };
 
 struct DeviceIsotope {
@@ -57,18 +57,18 @@ struct DeviceIsotope {
 };
 
 struct DeviceMaterial {
-  DeviceIsotope *isos;
+  DeviceIsotope *__restrict__ isos;
   double mass;
   int isoSize;
 };
 
 struct DeviceReaction {
-  double *crossSections;
+  double *__restrict__ crossSections;
   NuclearDataReaction::Enum type;
 };
 
 struct DeviceNuclearDataIsotope {
-  DeviceReaction *reactions;
+  DeviceReaction *__restrict__ reactions;
 };
 
 struct DeviceParticle {
@@ -208,18 +208,18 @@ struct Device {
     return std::max(0,std::min(numGroups,i));
   }
 
-  DeviceDomain *domains;
-  DeviceMaterial *mats;
-  DeviceNuclearDataIsotope *isotopes;
+  DeviceDomain *__restrict__ domains;
+  DeviceMaterial *__restrict__ mats;
+  DeviceNuclearDataIsotope *__restrict__ isotopes;
 
   enum Tallies { ABSORB, CENSUS, COLLISION, ESCAPE, FISSION, PRODUCE, SEGMENTS, SCATTER, TALLIES_SIZE };
-  long *tallies;
+  long *__restrict__ tallies;
 
   enum ParticleSizes { PROCESSING, PROCESSED, EXTRAS, PARTICLE_SIZES_SIZE };
-  int *particleSizes;
-  DeviceParticle *processing;
-  DeviceParticle *processed;
-  DeviceParticle *extras;
+  int *__restrict__ particleSizes;
+  DeviceParticle *__restrict__ processing;
+  DeviceParticle *__restrict__ processed;
+  DeviceParticle *__restrict__ extras;
 
   double nuBar;
   double logLow;

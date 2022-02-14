@@ -13,7 +13,7 @@ void Device::init(MonteCarlo &mc)
 {
   assert(domains == nullptr);
   const int domainSize = mc.domain.size();
-  CHECK(hipHostMalloc(&domains,domainSize*sizeof(*domains)));
+  CHECK(hipHostMalloc((void**)&domains,domainSize*sizeof(*domains)));
 
   const int groupSize = mc._nuclearData->_numEnergyGroups;
 
@@ -78,7 +78,7 @@ void Device::init(MonteCarlo &mc)
 
   assert(mats == nullptr);
   const int matSize = mc._materialDatabase->_mat.size();
-  CHECK(hipHostMalloc(&mats,matSize*sizeof(*mats)));
+  CHECK(hipHostMalloc((void**)&mats,matSize*sizeof(*mats)));
   
   int isoSizeSum = 0;
   for (int i = 0; i < matSize; i++) isoSizeSum += mc._materialDatabase->_mat[i]._iso.size();
@@ -95,7 +95,7 @@ void Device::init(MonteCarlo &mc)
   }
 
   const int ndiSize = mc._nuclearData->_isotopes.size();
-  CHECK(hipHostMalloc(&isotopes,ndiSize*sizeof(*isotopes)));
+  CHECK(hipHostMalloc((void**)&isotopes,ndiSize*sizeof(*isotopes)));
   reactionSize = mc._nuclearData->_isotopes[0]._species[0]._reactions.size();
   const int rSizeP1 = reactionSize+1;
   assert(groupSize == mc._nuclearData->_isotopes[0]._species[0]._reactions[0]._crossSection.size());
@@ -138,20 +138,20 @@ void Device::init(MonteCarlo &mc)
     }
   }
 
-  CHECK(hipHostMalloc(&particleSizes,PARTICLE_SIZES_SIZE*sizeof(*particleSizes)));
+  CHECK(hipHostMalloc((void**)&particleSizes,PARTICLE_SIZES_SIZE*sizeof(*particleSizes)));
   memset(particleSizes,0,PARTICLE_SIZES_SIZE*sizeof(*particleSizes));
 
-  CHECK(hipHostMalloc(&tallies,TALLIES_SIZE*sizeof(*tallies)));
+  CHECK(hipHostMalloc((void**)&tallies,TALLIES_SIZE*sizeof(*tallies)));
 
   {
     const long vaultSize = mc._particleVaultContainer->getVaultSize();
     const long bytes = sizeof(*processing)*vaultSize;
     assert(bytes);
-    CHECK(hipHostMalloc(&processing,bytes));
+    CHECK(hipHostMalloc((void**)&processing,bytes));
     memset(processing,0,bytes);
-    CHECK(hipHostMalloc(&processed,bytes));
+    CHECK(hipHostMalloc((void**)&processed,bytes));
     memset(processed,0,bytes);
-    CHECK(hipHostMalloc(&extras,bytes));
+    CHECK(hipHostMalloc((void**)&extras,bytes));
     memset(extras,0,bytes);
   }
 
