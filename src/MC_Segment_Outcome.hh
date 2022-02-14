@@ -162,29 +162,16 @@ static inline MC_Segment_Outcome_type::Enum MC_Segment_Outcome(Device &device, M
     MC_Segment_Outcome_type::Enum segment_outcome =
         (MC_Segment_Outcome_type::Enum) MC_Find_Min(distance);
 
-    if (distance[segment_outcome] < 0)
-    {
-        MC_Fatal_Jump( "Negative distances to events are NOT permitted!\n"
-                       "identifier              = %" PRIu64 "\n"
-                       "(Collision              = %g,\n"
-                       " Facet Crossing         = %g,\n"
-                       " Census                 = %g,\n",
-                       mc_particle.identifier,
-                       distance[MC_Segment_Outcome_type::Collision],
-                       distance[MC_Segment_Outcome_type::Facet_Crossing],
-                       distance[MC_Segment_Outcome_type::Census]);
-    }
+    qs_assert(distance[segment_outcome] >= 0);
     mc_particle.segment_path_length = distance[segment_outcome];
 
     mc_particle.num_mean_free_paths -= mc_particle.segment_path_length / mc_particle.mean_free_path;
 
     // Before using segment_outcome as an index, verify it is valid
-    if (segment_outcome < 0 || segment_outcome >= MC_Segment_Outcome_type::Max_Number)
-    {
-        MC_Fatal_Jump( "segment_outcome '%d' is invalid\n", (int)segment_outcome );
-    }
+    qs_assert(segment_outcome >= 0);
+    qs_assert(segment_outcome < MC_Segment_Outcome_type::Max_Number);
 
-    MC_Tally_Event::Enum SegmentOutcome_to_LastEvent[MC_Segment_Outcome_type::Max_Number] =
+    static constexpr MC_Tally_Event::Enum SegmentOutcome_to_LastEvent[MC_Segment_Outcome_type::Max_Number] =
     {
         MC_Tally_Event::Collision,
         MC_Tally_Event::Facet_Crossing_Transit_Exit,
@@ -226,7 +213,7 @@ static inline MC_Segment_Outcome_type::Enum MC_Segment_Outcome(Device &device, M
     // Project the particle trajectory along the segment path length.
     mc_particle.Move_Particle(mc_particle.direction_cosine, mc_particle.segment_path_length);
 
-    double segment_path_time = (mc_particle.segment_path_length/particle_speed);
+    const double segment_path_time = (mc_particle.segment_path_length/particle_speed);
 
     // Decrement the time to census and increment age.
     mc_particle.time_to_census -= segment_path_time;
@@ -244,8 +231,5 @@ static inline MC_Segment_Outcome_type::Enum MC_Segment_Outcome(Device &device, M
 
     return segment_outcome;
 }
-
-
-
 
 #endif
