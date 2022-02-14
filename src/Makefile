@@ -283,7 +283,6 @@ SOURCES= \
     MC_Location.cc \
     MC_Particle_Buffer.cc \
     MC_RNG_State.cc \
-    MC_Segment_Outcome.cc \
     MC_SourceNow.cc \
     MacroscopicCrossSection.cc \
     MeshPartition.cc \
