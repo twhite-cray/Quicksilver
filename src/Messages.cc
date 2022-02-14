@@ -72,8 +72,7 @@ void MessageParticle::set(MC_Base_Particle &that) const
   that.cell = cell;
 }
 
-Messages::Messages(MonteCarlo &mc_):
-  mc(mc_),
+Messages::Messages():
   tag(uniqueTag++),
   mpiParticle(MPI_DATATYPE_NULL),
   nMessages(0),
@@ -106,7 +105,7 @@ Messages::~Messages()
   MPI_Type_free(&mpiParticle);
 }
 
-void Messages::init()
+void Messages::init(MonteCarlo &mc)
 {
   if (nMessages) {
     assert(maxCount == mc.particle_buffer->buffer_size);
@@ -148,7 +147,7 @@ void Messages::addParticle(const MC_Base_Particle &part, const int buffer)
   sendParts[buffer*maxCount+i] = part;
 }
 
-void Messages::completeRecvs()
+void Messages::completeRecvs(Device &device)
 {
   MPI_Waitall(nMessages,recvReqs,recvStats);
   int total = 0;
@@ -158,14 +157,16 @@ void Messages::completeRecvs()
     recvCounts[i] = count;
     total += count;
   }
-  int ip = mc._device.particleSizes[Device::PROCESSING];
+  std::swap(device.processing,device.extras);
+  int ip = device.particleSizes[Device::PROCESSING] = device.particleSizes[Device::EXTRAS];
+  device.particleSizes[Device::EXTRAS] = 0;
   for (int i = 0, offset = 0; i < nMessages; i++, offset += maxCount) {
     const int count = recvCounts[i];
     assert(count < maxCount);
-    for (int j = 0; j < count; j++, ip++) mc._device.processing[ip] = recvParts[offset+j];
+    for (int j = 0; j < count; j++, ip++) device.processing[ip] = recvParts[offset+j];
   }
-  assert(ip-mc._device.particleSizes[Device::PROCESSING] == total);
-  mc._device.particleSizes[Device::PROCESSING] += total;
+  assert(ip-device.particleSizes[Device::PROCESSING] == total);
+  device.particleSizes[Device::PROCESSING] += total;
 }
 
 void Messages::completeSends()

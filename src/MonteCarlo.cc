@@ -20,8 +20,7 @@ using std::ceil;
 //----------------------------------------------------------------------------------------------------------------------
 MonteCarlo::MonteCarlo(const Parameters& params)
 : _params(params),
-  _nuclearData(NULL),
-  _messages(*this)
+  _nuclearData(NULL)
 {
    _nuclearData            = 0;
    _materialDatabase       = 0;

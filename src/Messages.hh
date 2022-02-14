@@ -3,6 +3,7 @@
 #include "MC_Base_Particle.hh"
 #include <mpi.h>
 
+struct Device;
 class MonteCarlo;
 
 struct MessageParticle {
@@ -72,16 +73,15 @@ struct MessageParticle {
 };
 
 struct Messages {
-  Messages(MonteCarlo &mc);
+  Messages();
   ~Messages();
-  void init();
-  void completeRecvs();
+  void init(MonteCarlo &mc);
+  void completeRecvs(Device &device);
   void completeSends();
   void startRecvs();
   void startSends();
   void addParticle(const MC_Base_Particle &part, int buffer); 
 
-  MonteCarlo &mc;
   int tag;
   MPI_Datatype mpiParticle;
   int nMessages;

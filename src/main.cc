@@ -100,7 +100,7 @@ void cycleInit( bool loadBalance )
     mcco->_tallies->_balanceTask[0]._start = mcco->_particleVaultContainer->sizeProcessing();
 
     mcco->particle_buffer->Initialize();
-    mcco->_messages.init();
+    mcco->_messages.init(*mcco);
 
     MC_SourceNow(mcco);
    
@@ -130,10 +130,7 @@ void cycleTracking(MonteCarlo *monteCarlo)
         CycleTrackingGuts( nMid, numParticles, device, messages.maxCount, messages.sendCounts, messages.sendParts );
       }
       messages.startSends();
-      std::swap(device.processing,device.extras);
-      device.particleSizes[Device::PROCESSING] = device.particleSizes[Device::EXTRAS];
-      device.particleSizes[Device::EXTRAS] = 0;
-      messages.completeRecvs();
+      messages.completeRecvs(device);
       messages.completeSends();
     } while ( !monteCarlo->particle_buffer->Test_Done_New() );
 
