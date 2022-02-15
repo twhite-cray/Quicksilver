@@ -97,8 +97,8 @@ Messages::~Messages()
   CHECK(hipHostFree(sendCounts)); sendCounts = nullptr;
   delete [] recvStats;
   delete [] recvReqs;
-  CHECK(hipHostFree(recvParts)); recvParts = nullptr;
-  CHECK(hipHostFree(recvCounts)); recvCounts = nullptr;
+  CHECK(hipFree(recvParts)); recvParts = nullptr;
+  CHECK(hipFree(recvCounts)); recvCounts = nullptr;
   delete [] ranks;
   maxCount = 0;
   nMessages = 0;
@@ -120,7 +120,7 @@ void Messages::init(MonteCarlo &mc)
   nMessages = mc.particle_buffer->num_buffers;
   maxCount = mc.particle_buffer->buffer_size;
   ranks = new int[nMessages];
-  CHECK(hipHostMalloc(&recvCounts,nMessages*sizeof(*recvCounts)));
+  CHECK(hipMalloc(&recvCounts,nMessages*sizeof(*recvCounts)));
   recvReqs = new MPI_Request[nMessages];
   recvStats = new MPI_Status[nMessages];
   sendReqs = new MPI_Request[nMessages];
@@ -134,7 +134,7 @@ void Messages::init(MonteCarlo &mc)
     ranks[pair.second] = pair.first;
   }
   const size_t msgBytes = sizeof(MessageParticle)*nMessages*maxCount;
-  CHECK(hipHostMalloc(&recvParts,msgBytes));
+  CHECK(hipMalloc(&recvParts,msgBytes));
   CHECK(hipHostMalloc(&sendCounts,nMessages*sizeof(*sendCounts)));
   CHECK(hipHostMalloc(&sendParts,msgBytes));
 }
