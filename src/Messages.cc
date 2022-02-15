@@ -147,6 +147,28 @@ void Messages::addParticle(const MC_Base_Particle &part, const int buffer)
   sendParts[buffer*maxCount+i] = part;
 }
 
+__global__ __launch_bounds__(1)
+static void recvInit(const int nReceived, int *__restrict__ const nProcessing, int *__restrict__ const nExtras)
+{
+  *nProcessing = *nExtras+nReceived;
+  *nExtras = 0;
+}
+
+__global__ __launch_bounds__(64)
+static void recvCopy(const int nMessages, const int maxCount, const int totalCount, const int *const recvCounts, const MessageParticle *const recvParts, const int *const nParts, DeviceParticle *__restrict__ const parts)
+{
+  const int j = blockDim.x*blockIdx.x+threadIdx.x;
+  int sumCount = 0;
+  for (int i = 0; i < nMessages; i++) {
+    const int count = recvCounts[i];
+    sumCount += count;
+    if (j < sumCount) {
+      parts[*nParts-totalCount+j] = recvParts[i*maxCount+j-sumCount+count];
+      return;
+    }
+  }
+}
+
 void Messages::completeRecvs(Device &device)
 {
   MPI_Waitall(nMessages,recvReqs,recvStats);
@@ -158,15 +180,11 @@ void Messages::completeRecvs(Device &device)
     total += count;
   }
   std::swap(device.processing,device.extras);
-  int ip = device.particleSizes[Device::PROCESSING] = device.particleSizes[Device::EXTRAS];
-  device.particleSizes[Device::EXTRAS] = 0;
-  for (int i = 0, offset = 0; i < nMessages; i++, offset += maxCount) {
-    const int count = recvCounts[i];
-    assert(count < maxCount);
-    for (int j = 0; j < count; j++, ip++) device.processing[ip] = recvParts[offset+j];
-  }
-  assert(ip-device.particleSizes[Device::PROCESSING] == total);
-  device.particleSizes[Device::PROCESSING] += total;
+  recvInit<<<1,1>>>(total,device.particleSizes+Device::PROCESSING,device.particleSizes+Device::EXTRAS);
+  static constexpr int nt = 64;
+  const int nb = (total+nt-1)/nt;
+  recvCopy<<<nb,nt>>>(nMessages,maxCount,total,recvCounts,recvParts,device.particleSizes+Device::PROCESSING,device.processing);
+  CHECK(hipDeviceSynchronize());
 }
 
 void Messages::completeSends()

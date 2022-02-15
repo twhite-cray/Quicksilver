@@ -75,7 +75,7 @@ struct DeviceParticle {
   DeviceParticle &operator=(const MC_Base_Particle &that);
   DeviceParticle &operator=(const MC_Particle &that);
 
-  DeviceParticle &operator=(const MessageParticle &that)
+  __device__  DeviceParticle &operator=(const MessageParticle &that)
   {
     coordinate = that.coordinate;
     velocity = that.velocity;

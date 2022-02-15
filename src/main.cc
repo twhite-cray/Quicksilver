@@ -87,7 +87,8 @@ void CycleTrackingGuts( const int ipLo, int ipHi, Device &device, const int maxC
     
         case MC_Segment_Outcome_type::Census:
             {
-                const int iProcessed = __atomic_fetch_add(device.particleSizes+Device::PROCESSED,1,__ATOMIC_RELAXED);
+                //const int iProcessed = __atomic_fetch_add(device.particleSizes+Device::PROCESSED,1,__ATOMIC_RELAXED);
+                const int iProcessed = device.particleSizes[Device::PROCESSED]++;
                 device.processed[iProcessed] = mc_particle;
                 ATOMIC_UPDATE( device.tallies[Device::CENSUS] );
                 ip++;

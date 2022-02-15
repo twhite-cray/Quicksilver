@@ -50,7 +50,8 @@ static inline MC_Tally_Event::Enum MC_Facet_Crossing_Event(MC_Particle &mc_parti
         device.processing[particle_index] = mc_particle;
 
         const int neighbor_rank = device.domains[facet.currentDomain].neighbors[facet.neighbor];
-        const int offset = __atomic_fetch_add(sendCounts+neighbor_rank,1,__ATOMIC_RELAXED);
+        //const int offset = __atomic_fetch_add(sendCounts+neighbor_rank,1,__ATOMIC_RELAXED);
+        const int offset = sendCounts[neighbor_rank]++;
         sendParts[maxCount*neighbor_rank+offset] = mc_particle;
     }
 
