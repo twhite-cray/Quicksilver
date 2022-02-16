@@ -93,8 +93,8 @@ Messages::Messages():
 Messages::~Messages()
 {
   delete [] sendReqs;
-  CHECK(hipHostFree(sendParts)); sendParts = nullptr;
-  CHECK(hipHostFree(sendCounts)); sendCounts = nullptr;
+  CHECK(hipFree(sendParts)); sendParts = nullptr;
+  CHECK(hipFree(sendCounts)); sendCounts = nullptr;
   delete [] recvStats;
   delete [] recvReqs;
   CHECK(hipFree(recvParts)); recvParts = nullptr;
@@ -121,6 +121,7 @@ void Messages::init(MonteCarlo &mc)
   maxCount = mc.particle_buffer->buffer_size;
   ranks = new int[nMessages];
   CHECK(hipMalloc(&recvCounts,nMessages*sizeof(*recvCounts)));
+  CHECK(hipMemset(recvCounts,0,nMessages*sizeof(*recvCounts)));
   recvReqs = new MPI_Request[nMessages];
   recvStats = new MPI_Status[nMessages];
   sendReqs = new MPI_Request[nMessages];
@@ -135,8 +136,11 @@ void Messages::init(MonteCarlo &mc)
   }
   const size_t msgBytes = sizeof(MessageParticle)*nMessages*maxCount;
   CHECK(hipMalloc(&recvParts,msgBytes));
-  CHECK(hipHostMalloc(&sendCounts,nMessages*sizeof(*sendCounts)));
-  CHECK(hipHostMalloc(&sendParts,msgBytes));
+  CHECK(hipMemset(recvParts,0,msgBytes));
+  CHECK(hipMalloc(&sendCounts,nMessages*sizeof(*sendCounts)));
+  CHECK(hipMemset(sendCounts,0,nMessages*sizeof(*sendCounts)));
+  CHECK(hipMalloc(&sendParts,msgBytes));
+  CHECK(hipMemset(sendParts,0,msgBytes));
 }
 
 void Messages::addParticle(const MC_Base_Particle &part, const int buffer)
@@ -205,7 +209,8 @@ void Messages::startSends()
 {
   for (int i =0, offset = 0; i < nMessages; i++, offset += maxCount) {
     assert(sendReqs[i] == MPI_REQUEST_NULL);
-    assert(sendCounts[i] <= maxCount);
-    MPI_Isend(sendParts+offset,sendCounts[i],mpiParticle,ranks[i],tag,MPI_COMM_WORLD,sendReqs+i);
+    const int count = sendCounts[i];
+    assert(count <= maxCount);
+    MPI_Isend(sendParts+offset,count,mpiParticle,ranks[i],tag,MPI_COMM_WORLD,sendReqs+i);
   }
 }

@@ -14,4 +14,12 @@ static void checkHip(const hipError_t err, const char *const file, const int lin
 
 #define VAR_MEM MemoryControl::AllocationPolicy::HOST_MEM
 
+template <typename T>
+__host__ T atomicAdd(T *const p, const T x)
+{
+  const T y = *p;
+  *p += x;
+  return y;
+}
+
 #endif
