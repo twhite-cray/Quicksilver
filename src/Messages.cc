@@ -120,8 +120,7 @@ void Messages::init(MonteCarlo &mc)
   nMessages = mc.particle_buffer->num_buffers;
   maxCount = mc.particle_buffer->buffer_size;
   ranks = new int[nMessages];
-  CHECK(hipMalloc(&recvCounts,nMessages*sizeof(*recvCounts)));
-  CHECK(hipMemset(recvCounts,0,nMessages*sizeof(*recvCounts)));
+  hipCalloc(nMessages,recvCounts);
   recvReqs = new MPI_Request[nMessages];
   recvStats = new MPI_Status[nMessages];
   sendReqs = new MPI_Request[nMessages];
@@ -134,13 +133,9 @@ void Messages::init(MonteCarlo &mc)
     assert(pair.second < nMessages);
     ranks[pair.second] = pair.first;
   }
-  const size_t msgBytes = sizeof(MessageParticle)*nMessages*maxCount;
-  CHECK(hipMalloc(&recvParts,msgBytes));
-  CHECK(hipMemset(recvParts,0,msgBytes));
-  CHECK(hipMalloc(&sendCounts,nMessages*sizeof(*sendCounts)));
-  CHECK(hipMemset(sendCounts,0,nMessages*sizeof(*sendCounts)));
-  CHECK(hipMalloc(&sendParts,msgBytes));
-  CHECK(hipMemset(sendParts,0,msgBytes));
+  hipCalloc(nMessages*maxCount,recvParts);
+  hipCalloc(nMessages,sendCounts);
+  hipCalloc(nMessages*maxCount,sendParts);
 }
 
 void Messages::addParticle(const MC_Base_Particle &part, const int buffer)

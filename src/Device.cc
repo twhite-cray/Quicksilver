@@ -13,7 +13,7 @@ void Device::init(MonteCarlo &mc)
 {
   assert(domains == nullptr);
   const int domainSize = mc.domain.size();
-  CHECK(hipHostMalloc((void**)&domains,domainSize*sizeof(*domains)));
+  hipCalloc(domainSize,domains);
 
   const int groupSize = mc._nuclearData->_numEnergyGroups;
 
@@ -25,16 +25,16 @@ void Device::init(MonteCarlo &mc)
   }
   
   DeviceCell *cells = nullptr;
-  CHECK(hipHostMalloc(&cells,cellSizeSum*sizeof(*cells)));
+  hipCalloc(cellSizeSum,cells);
   double *totals = nullptr;
-  CHECK(hipHostMalloc(&totals,cellSizeSum*groupSize*sizeof(*totals)));
+  hipCalloc(cellSizeSum*groupSize,totals);
   double *groupTallies = nullptr;
-  CHECK(hipHostMalloc(&groupTallies,cellSizeSum*groupSize*sizeof(*groupTallies)));
+  hipCalloc(cellSizeSum*groupSize,groupTallies);
   double3 *nodes = nullptr;
-  CHECK(hipHostMalloc(&nodes,nodeSizeSum*sizeof(*nodes)));
+  hipCalloc(nodeSizeSum,nodes);
   const int neighborSize = mc.domain[0].mesh._nbrRank.size();
   int *neighbors = nullptr;
-  CHECK(hipHostMalloc(&neighbors,neighborSize*domainSize*sizeof(*neighbors)));
+  hipCalloc(neighborSize*domainSize,neighbors);
   for (int i = 0; i < domainSize; i++) {
     domains[i].cells = cells;
     const int cellSize = mc.domain[i].cell_state.size();
@@ -78,13 +78,13 @@ void Device::init(MonteCarlo &mc)
 
   assert(mats == nullptr);
   const int matSize = mc._materialDatabase->_mat.size();
-  CHECK(hipHostMalloc((void**)&mats,matSize*sizeof(*mats)));
+  hipCalloc(matSize,mats);
   
   int isoSizeSum = 0;
   for (int i = 0; i < matSize; i++) isoSizeSum += mc._materialDatabase->_mat[i]._iso.size();
 
   DeviceIsotope *isos = nullptr;
-  CHECK(hipHostMalloc(&isos,isoSizeSum*sizeof(*isos)));
+  hipCalloc(isoSizeSum,isos);
   for (int i = 0; i < matSize; i++) {
     mats[i].isos = isos;
     const int isoSize = mc._materialDatabase->_mat[i]._iso.size();
@@ -95,7 +95,7 @@ void Device::init(MonteCarlo &mc)
   }
 
   const int ndiSize = mc._nuclearData->_isotopes.size();
-  CHECK(hipHostMalloc((void**)&isotopes,ndiSize*sizeof(*isotopes)));
+  hipCalloc(ndiSize,isotopes);
   reactionSize = mc._nuclearData->_isotopes[0]._species[0]._reactions.size();
   const int rSizeP1 = reactionSize+1;
   assert(groupSize == mc._nuclearData->_isotopes[0]._species[0]._reactions[0]._crossSection.size());
@@ -109,9 +109,9 @@ void Device::init(MonteCarlo &mc)
   }
 
   DeviceReaction *rs = nullptr;
-  CHECK(hipHostMalloc(&rs,ndiSize*rSizeP1*sizeof(*rs)));
+  hipCalloc(ndiSize*rSizeP1,rs);
   double *xs = nullptr;
-  CHECK(hipHostMalloc(&xs,ndiSize*rSizeP1*groupSize*sizeof(*xs)));
+  hipCalloc(ndiSize*rSizeP1*groupSize,xs);
   for (int i = 0; i < ndiSize; i++) {
     isotopes[i].reactions = rs;
     for (int j = 0; j < rSizeP1; j++) {
@@ -138,21 +138,14 @@ void Device::init(MonteCarlo &mc)
     }
   }
 
-  CHECK(hipHostMalloc((void**)&particleSizes,PARTICLE_SIZES_SIZE*sizeof(*particleSizes)));
-  memset(particleSizes,0,PARTICLE_SIZES_SIZE*sizeof(*particleSizes));
-
-  CHECK(hipHostMalloc((void**)&tallies,TALLIES_SIZE*sizeof(*tallies)));
+  hipCalloc(PARTICLE_SIZES_SIZE,particleSizes);
+  hipCalloc(TALLIES_SIZE,tallies);
 
   {
-    const long vaultSize = mc._particleVaultContainer->getVaultSize();
-    const long bytes = sizeof(*processing)*vaultSize;
-    assert(bytes);
-    CHECK(hipHostMalloc((void**)&processing,bytes));
-    memset(processing,0,bytes);
-    CHECK(hipHostMalloc((void**)&processed,bytes));
-    memset(processed,0,bytes);
-    CHECK(hipHostMalloc((void**)&extras,bytes));
-    memset(extras,0,bytes);
+    const size_t vaultSize = mc._particleVaultContainer->getVaultSize();
+    hipCalloc(vaultSize,processing);
+    hipCalloc(vaultSize,processed);
+    hipCalloc(vaultSize,extras);
   }
 
   {
