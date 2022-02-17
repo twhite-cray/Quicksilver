@@ -84,6 +84,7 @@ struct Messages {
 
   int tag;
   MPI_Datatype mpiParticle;
+  hipEvent_t event;
   int nMessages;
   int maxCount;
   int *ranks;

@@ -88,6 +88,7 @@ Messages::Messages():
 {
   MPI_Type_contiguous(sizeof(MessageParticle),MPI_BYTE,&mpiParticle);
   MPI_Type_commit(&mpiParticle);
+  CHECK(hipEventCreate(&event));
 }
 
 Messages::~Messages()
@@ -102,6 +103,7 @@ Messages::~Messages()
   delete [] ranks;
   maxCount = 0;
   nMessages = 0;
+  CHECK(hipEventDestroy(event));
   MPI_Type_free(&mpiParticle);
 }
 

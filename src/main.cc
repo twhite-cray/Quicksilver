@@ -28,7 +28,9 @@
 #include "git_hash.hh"
 #include "git_vers.hh"
 
-void CycleTrackingGuts( const int ipLo, int ipHi, Device &device, const int maxCount, int *__restrict__ const sendCounts, MessageParticle *__restrict__ const sendParts)
+//static constexpr int NT = 64;
+
+static void CycleTrackingGuts( const int ipLo, int ipHi, Device device, const int maxCount, int *__restrict__ const sendCounts, MessageParticle *__restrict__ const sendParts)
 {
     ipHi = (ipHi < 0) ? device.particleSizes[Device::PROCESSING] : ipHi;
     MC_Particle mc_particle;
@@ -194,6 +196,8 @@ void cycleInit( bool loadBalance )
 void cycleTracking(MonteCarlo *monteCarlo)
 {
     MC_FASTTIMER_START(MC_Fast_Timer::cycleTracking);
+
+    //const int nb = (monteCarlo->processor_info->thread_target+NT-1)/NT;
 
     Device &device = monteCarlo->_device;
     Messages &ma = monteCarlo->_messagesA;

@@ -202,7 +202,7 @@ struct Device {
     }
   }
 
-  int getEnergyGroup(const double e)
+  int getEnergyGroup(const double e) const
   {
     const int i = int((log(e)-logLow)*divDelta);
     return std::max(0,std::min(numGroups,i));
