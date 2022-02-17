@@ -227,7 +227,7 @@ static inline MC_Segment_Outcome_type::Enum MC_Segment_Outcome(Device &device, M
 
     // Accumulate the particle's contribution to the scalar flux.
     const double value = mc_particle.segment_path_length * mc_particle.weight;
-    ATOMIC_ADD(device.domains[mc_particle.domain].cells[mc_particle.cell].groupTallies[mc_particle.energy_group], value);
+    atomicAdd(device.domains[mc_particle.domain].cells[mc_particle.cell].groupTallies+mc_particle.energy_group,value);
 
     return segment_outcome;
 }

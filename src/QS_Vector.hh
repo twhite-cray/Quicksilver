@@ -2,7 +2,6 @@
 #define QS_VECTOR_HH
 
 #include "DeclareMacro.hh"
-#include "AtomicMacro.hh"
 #include "qs_assert.hh"
 #include "MemoryControl.hh"
 
@@ -172,11 +171,7 @@ class qs_vector
    //Atomically retrieve an availible index then increment that index some amount
    int atomic_Index_Inc( int inc )
    {
-       int pos;
-
-       ATOMIC_CAPTURE( _size, inc, pos );
-
-       return pos;
+       return atomicAdd(&_size,inc);
    }
 
    const T *begin() const { return _data; }

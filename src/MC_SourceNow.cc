@@ -15,8 +15,8 @@
 #include "MCT.hh"
 #include "PhysicalConstants.hh"
 #include "macros.hh"
-#include "AtomicMacro.hh"
 #include "NVTX_Range.hh"
+#include "cudaUtils.hh"
 #include <vector>
 
 namespace
@@ -83,9 +83,7 @@ void MC_SourceNow(MonteCarlo *monteCarlo)
             {
                 MC_Particle particle;
 
-                uint64_t random_number_seed;
-
-                ATOMIC_CAPTURE( cell._sourceTally, 1, random_number_seed );
+                uint64_t random_number_seed = atomicAdd<unsigned>(&(cell._sourceTally),1);
 
                 random_number_seed += cell._id;
 
@@ -122,7 +120,7 @@ void MC_SourceNow(MonteCarlo *monteCarlo)
 
                 particle_count++;
 
-                ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[0]._source);
+                atomicAdd(&(monteCarlo->_tallies->_balanceTask[0]._source),1ULL);
             }
         }
     }

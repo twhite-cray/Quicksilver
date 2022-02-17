@@ -53,7 +53,7 @@ static void CycleTrackingGuts( const int ipLo, int ipHi, Device device, const in
         //
         const MC_Segment_Outcome_type::Enum segment_outcome = MC_Segment_Outcome(device, mc_particle);
 
-        ATOMIC_UPDATE( device.tallies[Device::SEGMENTS] );
+        atomicAdd(device.tallies+Device::SEGMENTS,1L);
 
         mc_particle.num_segments += 1.;  /* Track the number of segments this particle has
                                             undergone this cycle on all processes. */
@@ -71,7 +71,7 @@ static void CycleTrackingGuts( const int ipLo, int ipHi, Device device, const in
                 {}
                 else if (facet_crossing_type == MC_Tally_Event::Facet_Crossing_Escape)
                 {
-                    ATOMIC_UPDATE( device.tallies[Device::ESCAPE] );
+                    atomicAdd(device.tallies+Device::ESCAPE,1L);
                     mc_particle.last_event = MC_Tally_Event::Facet_Crossing_Escape;
                     ip++;
                 }
@@ -89,10 +89,9 @@ static void CycleTrackingGuts( const int ipLo, int ipHi, Device device, const in
     
         case MC_Segment_Outcome_type::Census:
             {
-                //const int iProcessed = __atomic_fetch_add(device.particleSizes+Device::PROCESSED,1,__ATOMIC_RELAXED);
-                const int iProcessed = device.particleSizes[Device::PROCESSED]++;
+                const int iProcessed = atomicAdd(device.particleSizes+Device::PROCESSED,1);
                 device.processed[iProcessed] = mc_particle;
-                ATOMIC_UPDATE( device.tallies[Device::CENSUS] );
+                atomicAdd(device.tallies+Device::CENSUS,1L);
                 ip++;
                 break;
             }
