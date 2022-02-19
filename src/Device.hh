@@ -213,7 +213,7 @@ struct Device {
   DeviceNuclearDataIsotope *__restrict__ isotopes;
 
   enum Tallies { ABSORB, CENSUS, COLLISION, ESCAPE, FISSION, PRODUCE, SEGMENTS, SCATTER, TALLIES_SIZE };
-  long *__restrict__ tallies;
+  unsigned long *__restrict__ tallies;
 
   enum ParticleSizes { PROCESSING, PROCESSED, EXTRAS, PARTICLE_SIZES_SIZE };
   int *__restrict__ particleSizes;

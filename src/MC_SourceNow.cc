@@ -83,7 +83,7 @@ void MC_SourceNow(MonteCarlo *monteCarlo)
             {
                 MC_Particle particle;
 
-                uint64_t random_number_seed = atomicAdd<unsigned>(&(cell._sourceTally),1);
+                uint64_t random_number_seed = atomicFetchAdd<unsigned>(&(cell._sourceTally),1);
 
                 random_number_seed += cell._id;
 
@@ -120,7 +120,7 @@ void MC_SourceNow(MonteCarlo *monteCarlo)
 
                 particle_count++;
 
-                atomicAdd(&(monteCarlo->_tallies->_balanceTask[0]._source),1ULL);
+                atomicFetchAdd(&(monteCarlo->_tallies->_balanceTask[0]._source),1ULL);
             }
         }
     }

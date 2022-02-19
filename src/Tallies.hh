@@ -305,7 +305,7 @@ class Tallies
 
     void TallyCellValue(double value, int domain, int cell)
     {
-        atomicAdd(&(_cellTallyDomain[domain]._task[0]._cell[cell]),value);
+        atomicFetchAdd(&(_cellTallyDomain[domain]._task[0]._cell[cell]),value);
     }
 
     double ScalarFluxSum(MonteCarlo *mcco);

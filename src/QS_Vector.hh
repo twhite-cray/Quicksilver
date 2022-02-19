@@ -171,7 +171,7 @@ class qs_vector
    //Atomically retrieve an availible index then increment that index some amount
    int atomic_Index_Inc( int inc )
    {
-       return atomicAdd(&_size,inc);
+       return atomicFetchAdd(&_size,inc);
    }
 
    const T *begin() const { return _data; }

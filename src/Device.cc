@@ -172,11 +172,11 @@ void Device::cycleInit(MonteCarlo &mc)
     }
   }
   const int bytes = cellSizeSum*groupSize*sizeof(double);
-  memset(domains->cells->totals,0,bytes);
-  memset(domains->cells->groupTallies,0,bytes);
-  memset(tallies,0,TALLIES_SIZE*sizeof(*tallies));
+  CHECK(hipMemset(domains->cells->totals,0,bytes));
+  CHECK(hipMemset(domains->cells->groupTallies,0,bytes));
+  CHECK(hipMemset(tallies,0,TALLIES_SIZE*sizeof(*tallies)));
 
-  memset(particleSizes,0,PARTICLE_SIZES_SIZE*sizeof(*particleSizes));
+  CHECK(hipMemset(particleSizes,0,PARTICLE_SIZES_SIZE*sizeof(*particleSizes)));
   const ParticleVault &vault = *(mc._particleVaultContainer->getTaskProcessingVault());
   particleSizes[PROCESSING] = vault.size();
   assert(vault.size());

@@ -90,18 +90,18 @@ static inline bool CollisionEvent(Device &device, MC_Particle &mc_particle)
    //--------------------------------------------------------------------------------------------------------------
 
    // Set the reaction for this particle.
-   atomicAdd(device.tallies+Device::COLLISION,1L);
+   atomicFetchAdd(device.tallies+Device::COLLISION,1UL);
    switch (reactionType)
    {
       case NuclearDataReaction::Scatter:
-         atomicAdd(device.tallies+Device::SCATTER,1L);
+         atomicFetchAdd(device.tallies+Device::SCATTER,1UL);
          break;
       case NuclearDataReaction::Absorption:
-         atomicAdd(device.tallies+Device::ABSORB,1L);
+         atomicFetchAdd(device.tallies+Device::ABSORB,1UL);
          break;
       case NuclearDataReaction::Fission:
-         atomicAdd(device.tallies+Device::FISSION,1L);
-         atomicAdd(device.tallies+Device::PRODUCE,long(nOut));
+         atomicFetchAdd(device.tallies+Device::FISSION,1UL);
+         atomicFetchAdd<unsigned long>(device.tallies+Device::PRODUCE,nOut);
          break;
       case NuclearDataReaction::Undefined:
          abort();

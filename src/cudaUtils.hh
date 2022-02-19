@@ -15,11 +15,13 @@ static void checkHip(const hipError_t err, const char *const file, const int lin
 #define VAR_MEM MemoryControl::AllocationPolicy::HOST_MEM
 
 template <typename T>
-__host__ T atomicAdd(T *const p, const T x)
+__host__ __device__ T atomicFetchAdd(T *const p, const T x)
 {
-  const T y = *p;
-  *p += x;
-  return y;
+#ifdef __HIP_DEVICE_COMPILE__
+  return atomicAdd(p,x);
+#else
+  return __atomic_fetch_add(p,x,__ATOMIC_RELAXED);
+#endif
 }
 
 template <typename T>
