@@ -38,7 +38,7 @@ struct MC_Collision_Event_Return
 
 #include "DeclareMacro.hh"
 
-static inline unsigned int MC_Find_Min(const double *__restrict__ const array)
+__host__ __device__ static inline unsigned int MC_Find_Min(const double *__restrict__ const array)
 {
     double min = array[0];
     int    min_index = 0;
@@ -61,7 +61,7 @@ static inline unsigned int MC_Find_Min(const double *__restrict__ const array)
 //  (iii) census at the end of the time step.
 //--------------------------------------------------------------------------------------------------
 
-static inline MC_Segment_Outcome_type::Enum MC_Segment_Outcome(Device &device, MC_Particle &mc_particle)
+__host__ __device__ static inline MC_Segment_Outcome_type::Enum MC_Segment_Outcome(Device &device, MC_Particle &mc_particle)
 {
     // initialize distances to large number
     double distance[3];

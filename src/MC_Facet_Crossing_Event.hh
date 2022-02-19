@@ -13,7 +13,7 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 
-static inline MC_Tally_Event::Enum MC_Facet_Crossing_Event(MC_Particle &mc_particle, Device &device, const int particle_index, const int maxCount, int *__restrict__ const sendCounts, MessageParticle *__restrict__ const sendParts)
+__host__ __device__ static inline MC_Tally_Event::Enum MC_Facet_Crossing_Event(MC_Particle &mc_particle, Device &device, const int particle_index, const int maxCount, int *__restrict__ const sendCounts, MessageParticle *__restrict__ const sendParts)
 {
 
     MC_Location location = mc_particle.Get_Location();

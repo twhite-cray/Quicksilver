@@ -11,7 +11,7 @@
 //----------------------------------------------------------------------------------------------------------------------
 
    // Break a 64 bit state into 2 32 bit ints.
-   static inline void breakup_uint64( const uint64_t uint64_in,
+   __host__ __device__ static inline void breakup_uint64( const uint64_t uint64_in,
                         uint32_t& front_bits, uint32_t& back_bits )
    {
       front_bits = static_cast<uint32_t>( uint64_in >> 32 );
@@ -23,7 +23,7 @@
    // from Numerical Recipies in C, 2nd edition: psdes, p. 302.  This is
    // used to make 64 bit numbers for use as initial states for the 64
    // bit lcg random number generator.
-   static inline void pseudo_des( uint32_t& lword, uint32_t& irword )
+   __host__ __device__ static inline void pseudo_des( uint32_t& lword, uint32_t& irword )
    {
       // This random number generator assumes that type uint32_t is a 32 bit int
       // = 1/2 of a 64 bit int. The sizeof operator returns the size in bytes = 8 bits.
@@ -49,7 +49,7 @@
    }
 
    // Function used to reconstruct  a 64 bit from 2 32 bit ints.
-   static inline uint64_t reconstruct_uint64( const uint32_t front_bits, const uint32_t back_bits )
+   __host__ __device__ static inline uint64_t reconstruct_uint64( const uint32_t front_bits, const uint32_t back_bits )
    {
       uint64_t reconstructed, temp;
       reconstructed = static_cast<uint64_t>( front_bits );
@@ -65,7 +65,7 @@
       return reconstructed;
    }
    // Function used to hash a 64 bit int to get an initial state.
-   static inline uint64_t hash_state( const uint64_t initial_number )
+   __host__ __device__ static inline uint64_t hash_state( const uint64_t initial_number )
    {
       // break initial number apart into 2 32 bit ints
       uint32_t front_bits, back_bits;
@@ -82,7 +82,7 @@
 //  Sample returns the pseudo-random number produced by a call to a random
 //  number generator.
 //----------------------------------------------------------------------------------------------------------------------
-static inline double rngSample(uint64_t *__restrict__ const seed)
+__host__ __device__ static inline double rngSample(uint64_t *__restrict__ const seed)
 {
    // Reset the state from the previous value.
    *seed = 2862933555777941757ULL*(*seed) + 3037000493ULL;
@@ -96,7 +96,7 @@ static inline double rngSample(uint64_t *__restrict__ const seed)
 //  This routine spawns a "child" random number seed from a "parent" random number seed.
 //----------------------------------------------------------------------------------------------------------------------
 
-static inline uint64_t rngSpawn_Random_Number_Seed(uint64_t *__restrict__ const parent_seed)
+__host__ __device__ static inline uint64_t rngSpawn_Random_Number_Seed(uint64_t *__restrict__ const parent_seed)
 {
   const uint64_t spawned_seed = hash_state(*parent_seed);
   // Bump the parent seed as that is what is expected from the interface.

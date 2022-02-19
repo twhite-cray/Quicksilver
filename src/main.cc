@@ -28,14 +28,15 @@
 #include "git_hash.hh"
 #include "git_vers.hh"
 
-//static constexpr int NT = 64;
+static constexpr int NT = 64;
 
-static void CycleTrackingGuts( const int ipLo, int ipHi, Device device, const int maxCount, int *__restrict__ const sendCounts, MessageParticle *__restrict__ const sendParts)
+__global__ __launch_bounds__(NT) static void CycleTrackingGuts( const int ipLo, int ipHi, Device device, const int maxCount, int *__restrict__ const sendCounts, MessageParticle *__restrict__ const sendParts)
 {
+    const int di = gridDim.x*blockDim.x;
     ipHi = (ipHi < 0) ? device.particleSizes[Device::PROCESSING] : ipHi;
     MC_Particle mc_particle;
     int ipOld = ipLo-1;
-    int ip = ipLo;
+    int ip = ipLo+blockIdx.x*blockDim.x+threadIdx.x;
     while (ip < ipHi) {
 
         if (ipOld != ip) {
@@ -60,7 +61,7 @@ static void CycleTrackingGuts( const int ipLo, int ipHi, Device device, const in
         switch (segment_outcome) {
         case MC_Segment_Outcome_type::Collision:
             {
-              if (CollisionEvent(device, mc_particle) != MC_Collision_Event_Return::Continue_Tracking) ip++;
+              if (CollisionEvent(device, mc_particle) != MC_Collision_Event_Return::Continue_Tracking) ip += di;
             }
             break;
         case MC_Segment_Outcome_type::Facet_Crossing:
@@ -73,7 +74,7 @@ static void CycleTrackingGuts( const int ipLo, int ipHi, Device device, const in
                 {
                     atomicFetchAdd(device.tallies+Device::ESCAPE,1UL);
                     mc_particle.last_event = MC_Tally_Event::Facet_Crossing_Escape;
-                    ip++;
+                    ip += di;
                 }
                 else if (facet_crossing_type == MC_Tally_Event::Facet_Crossing_Reflection)
                 {
@@ -82,7 +83,7 @@ static void CycleTrackingGuts( const int ipLo, int ipHi, Device device, const in
                 else
                 {
                     // Enters an adjacent cell in an off-processor domain.
-                    ip++;
+                    ip += di;
                 }
             }
             break;
@@ -92,7 +93,7 @@ static void CycleTrackingGuts( const int ipLo, int ipHi, Device device, const in
                 const int iProcessed = atomicFetchAdd(device.particleSizes+Device::PROCESSED,1);
                 device.processed[iProcessed] = mc_particle;
                 atomicFetchAdd(device.tallies+Device::CENSUS,1UL);
-                ip++;
+                ip += di;
                 break;
             }
             
@@ -202,11 +203,15 @@ void cycleTracking(MonteCarlo *monteCarlo)
     Messages &ma = monteCarlo->_messagesA;
     Messages &mb = monteCarlo->_messagesB;
 
+    const int nb = (monteCarlo->processor_info->thread_target+NT-1)/NT;
+
     const int nMid = device.particleSizes[Device::PROCESSING]/2;
     ma.startRecvs();
-    CycleTrackingGuts(0,nMid,device,ma.maxCount,ma.sendCounts,ma.sendParts);
+    CycleTrackingGuts<<<nb,NT>>>(0,nMid,device,ma.maxCount,ma.sendCounts,ma.sendParts);
+    CHECK(hipDeviceSynchronize());
     mb.startRecvs();
-    CycleTrackingGuts(nMid,-1,device,mb.maxCount,mb.sendCounts,mb.sendParts);
+    CycleTrackingGuts<<<nb,NT>>>(nMid,-1,device,mb.maxCount,mb.sendCounts,mb.sendParts);
+    CHECK(hipDeviceSynchronize());
     bool doA = true;
     bool doB = true;
     while (doA || doB) {
@@ -218,7 +223,8 @@ void cycleTracking(MonteCarlo *monteCarlo)
       }
       if (doA) {
         ma.startRecvs();
-        CycleTrackingGuts(0,-1,device,ma.maxCount,ma.sendCounts,ma.sendParts);
+        CycleTrackingGuts<<<nb,NT>>>(0,-1,device,ma.maxCount,ma.sendCounts,ma.sendParts);
+        CHECK(hipDeviceSynchronize());
       }
       if (doB) {
         mb.startSends();
@@ -228,7 +234,8 @@ void cycleTracking(MonteCarlo *monteCarlo)
       }
       if (doB) {
         mb.startRecvs();
-        CycleTrackingGuts(0,-1,device,mb.maxCount,mb.sendCounts,mb.sendParts);
+        CycleTrackingGuts<<<nb,NT>>>(0,-1,device,mb.maxCount,mb.sendCounts,mb.sendParts);
+        CHECK(hipDeviceSynchronize());
       }
     }
 

@@ -12,7 +12,7 @@ public:
    double beta;
    double gamma;
 
-   DirectionCosine();
+   __host__ __device__ DirectionCosine();
 
    DirectionCosine(double alpha, double beta, double gamma);
 
@@ -35,14 +35,14 @@ public:
    void Sample_Isotropic(uint64_t *seed);
 
    // rotate a direction cosine given the sine/cosine of theta and phi
-   inline void Rotate3DVector( double sine_Theta,
+   __host__ __device__ inline void Rotate3DVector( double sine_Theta,
                                double cosine_Theta,
                                double sine_Phi,
                                double cosine_Phi );
 
 };
 
-inline DirectionCosine::DirectionCosine()
+__host__ __device__ inline DirectionCosine::DirectionCosine()
    : alpha(0.0), beta(0.0), gamma(0.0)
 {
 }
@@ -117,7 +117,7 @@ inline DirectionCosine::DirectionCosine(double a_alpha, double a_beta, double a_
 //        direction_cosine.beta =   cos_theta*sin_phi*Alpha + cos_phi*Beta + sin_theta*sin_phi*Gamma;
 //        direction_cosine.gamma = -sin_theta        *Alpha +                cos_theta        *Gamma;
 //----------------------------------------------------------------------------------------------------------------------
-inline void DirectionCosine::Rotate3DVector(double sin_Theta, double cos_Theta, double sin_Phi, double cos_Phi)
+__host__ __device__ inline void DirectionCosine::Rotate3DVector(double sin_Theta, double cos_Theta, double sin_Phi, double cos_Phi)
 {
     // Calculate additional variables in the rotation matrix.
     double cos_theta = this->gamma;

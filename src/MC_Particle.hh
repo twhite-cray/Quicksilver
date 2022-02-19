@@ -83,7 +83,7 @@ class MC_Particle
     double normal_dot;
 
 public:
-   MC_Particle();
+   __host__ __device__ MC_Particle();
 
    MC_Particle( const MC_Base_Particle &from_particle );
 
@@ -138,13 +138,13 @@ public:
 
    void Copy_From_Base( const MC_Base_Particle &from_particle);
 
-   MC_Location Get_Location() const;
+   __host__ __device__ MC_Location Get_Location() const;
 
    // format a string with the contents of the particle
    void Copy_Particle_To_String(std::string &output_string) const;
 
    // move a particle a distance in the direction_cosine direction
-   void Move_Particle(const DirectionCosine & direction_cosine, const double distance);
+   __host__ __device__ void Move_Particle(const DirectionCosine & direction_cosine, const double distance);
 
    void PrintParticle();
 };
@@ -152,7 +152,7 @@ public:
 //----------------------------------------------------------------------------------------------------------------------
 //  Return a MC_Location given domain, cell, facet.
 //----------------------------------------------------------------------------------------------------------------------
-inline MC_Location MC_Particle::Get_Location() const
+__host__ __device__ inline MC_Location MC_Particle::Get_Location() const
 {
     return MC_Location(domain, cell, facet);
 }
@@ -160,7 +160,7 @@ inline MC_Location MC_Particle::Get_Location() const
 //----------------------------------------------------------------------------------------------------------------------
 //  Move the particle a straight-line distance along a specified cosine.
 //----------------------------------------------------------------------------------------------------------------------
-inline void MC_Particle::Move_Particle( const DirectionCosine &my_direction_cosine,
+__host__ __device__ inline void MC_Particle::Move_Particle( const DirectionCosine &my_direction_cosine,
                                       const double distance)
 {
     coordinate.x += (my_direction_cosine.alpha * distance);

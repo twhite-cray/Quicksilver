@@ -31,7 +31,7 @@ struct MessageParticle {
     return *this;
   }
 
-  MessageParticle &operator=(const MC_Particle &that)
+  __host__ __device__ MessageParticle &operator=(const MC_Particle &that)
   {
     coordinate.x = that.coordinate.x;
     coordinate.y = that.coordinate.y;

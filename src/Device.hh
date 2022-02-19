@@ -97,7 +97,7 @@ struct DeviceParticle {
     return *this;
   }
 
-  DeviceParticle &operator=(const MC_Particle &that)
+  __host__ __device__ DeviceParticle &operator=(const MC_Particle &that)
   {
     coordinate.x = that.coordinate.x;
     coordinate.y = that.coordinate.y;
@@ -144,7 +144,7 @@ struct DeviceParticle {
   bool operator==(const MC_Base_Particle &that) const;
   void set(MC_Base_Particle &that) const;
 
-  void set(MC_Particle &that) const
+  __host__ __device__ void set(MC_Particle &that) const
   {
     that.coordinate.x = coordinate.x;
     that.coordinate.y = coordinate.y;
@@ -221,7 +221,7 @@ struct Device {
   void cycleInit(MonteCarlo &mc);
   void cycleFinalize(MonteCarlo &mc);
 
-  void collide(const NuclearDataReaction::Enum type, const double energyIn, const double mass, double *__restrict__ const energyOut, double *__restrict__ const angleOut, int &nOut, uint64_t &seed) const
+  __host__ __device__ void collide(const NuclearDataReaction::Enum type, const double energyIn, const double mass, double *__restrict__ const energyOut, double *__restrict__ const angleOut, int &nOut, uint64_t &seed) const
   {
     switch(type) {
       case NuclearDataReaction::Scatter:
@@ -248,7 +248,7 @@ struct Device {
     }
   }
 
-  int getEnergyGroup(const double e) const
+  __host__ __device__ int getEnergyGroup(const double e) const
   {
     const int i = int((log(e)-logLow)*divDelta);
     return std::max(0,std::min(numGroups,i));

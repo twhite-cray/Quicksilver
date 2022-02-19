@@ -190,7 +190,7 @@ inline MC_Base_Particle& MC_Base_Particle::operator= (const MC_Particle &particl
 //----------------------------------------------------------------------------------------------------------------------
 // MC_Particle Constructor.
 //----------------------------------------------------------------------------------------------------------------------
-inline MC_Particle::MC_Particle()
+__host__ __device__ inline MC_Particle::MC_Particle()
    : coordinate(),
      velocity(),
      direction_cosine(),

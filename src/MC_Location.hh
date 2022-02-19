@@ -18,7 +18,7 @@ class MC_Location
    int cell;
    int facet;
 
-   MC_Location(int adomain, int acell, int afacet)
+   __host__ __device__ MC_Location(int adomain, int acell, int afacet)
    : domain(adomain),
      cell(acell),
      facet(afacet)

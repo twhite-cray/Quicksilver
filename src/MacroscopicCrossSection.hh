@@ -10,7 +10,7 @@
 //
 //  A reactionIndex of -1 means total cross section.
 //----------------------------------------------------------------------------------------------------------------------
-static inline double macroscopicCrossSection(const Device &device, int reactionIndex, int domainIndex, int cellIndex,
+__host__ __device__ static inline double macroscopicCrossSection(const Device &device, int reactionIndex, int domainIndex, int cellIndex,
                                int isoIndex, int energyGroup)
 {
    // The cell number density is the fraction of the atoms in cell
@@ -43,7 +43,7 @@ static inline double macroscopicCrossSection(const Device &device, int reactionI
 //applied by this routine.  In Mercury we would weight for multiple
 //materials in a cell.
 //----------------------------------------------------------------------------------------------------------------------
-static inline double weightedMacroscopicCrossSection(Device &device, int taskIndex, int domainIndex,
+__host__ __device__ static inline double weightedMacroscopicCrossSection(Device &device, int taskIndex, int domainIndex,
                                        int cellIndex, int energyGroup)
 {
    const double xs = device.domains[domainIndex].cells[cellIndex].totals[energyGroup];

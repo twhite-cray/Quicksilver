@@ -15,7 +15,7 @@
 //  Return true if the particle will continue.
 //----------------------------------------------------------------------------------------------------------------------
 
-static inline void updateTrajectory( const double energy, const double angle, MC_Particle& particle )
+__host__ __device__ static inline void updateTrajectory( const double energy, const double angle, MC_Particle& particle )
 {
     particle.kinetic_energy = energy;
     const double cosTheta = angle;
@@ -38,7 +38,7 @@ static inline void updateTrajectory( const double energy, const double angle, MC
 }
 
 
-static inline bool CollisionEvent(Device &device, MC_Particle &mc_particle)
+__host__ __device__ static inline bool CollisionEvent(Device &device, MC_Particle &mc_particle)
 {
    const int globalMatIndex = device.domains[mc_particle.domain].cells[mc_particle.cell].material;
 

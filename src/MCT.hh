@@ -18,7 +18,7 @@ Subfacet_Adjacency &MCT_Adjacent_Facet(const MC_Location &location, MC_Particle 
 ///  Calculates the distance from the specified coordinates to the
 ///  input segment. This is used to track to the faces of a 3D_G
 ///  mesh.
-static inline double MCT_Nearest_Facet_3D_G_Distance_To_Segment(double plane_tolerance,
+__host__ __device__ static inline double MCT_Nearest_Facet_3D_G_Distance_To_Segment(double plane_tolerance,
     double facet_normal_dot_direction_cosine,
     double A, double B, double C, double D,
     const double3 &facet_coords0,
@@ -158,7 +158,7 @@ static inline MC_Vector MCT_Cell_Position_3D_G(const MC_Domain &domain, int cell
   return coordinate;
 }
 
-static inline MC_Vector MCT_Cell_Position_3D_G(const DeviceDomain &ddomain, const int cell_index)
+__host__ __device__ static inline MC_Vector MCT_Cell_Position_3D_G(const DeviceDomain &ddomain, const int cell_index)
 {
   MC_Vector coordinate;
 
@@ -182,7 +182,7 @@ static inline MC_Vector MCT_Cell_Position_3D_G(const DeviceDomain &ddomain, cons
 }
 
 ///  Move the input particle by a small amount toward the center of the cell.
-static inline void MCT_Nearest_Facet_3D_G_Move_Particle(const DeviceDomain &ddomain,
+__host__ __device__ static inline void MCT_Nearest_Facet_3D_G_Move_Particle(const DeviceDomain &ddomain,
     const MC_Location &location,
     MC_Vector &coordinate, // input/output: move this coordinate
     const double move_factor)      // input: multiplication factor for move
@@ -194,7 +194,7 @@ static inline void MCT_Nearest_Facet_3D_G_Move_Particle(const DeviceDomain &ddom
   coordinate.z += move_factor * ( move_to.z - coordinate.z );
 }
 
-static inline void MCT_Nearest_Facet_Find_Nearest(MC_Particle *__restrict__ const mc_particle,
+__host__ __device__ static inline void MCT_Nearest_Facet_Find_Nearest(MC_Particle *__restrict__ const mc_particle,
     const DeviceDomain &ddomain,
     MC_Location *__restrict__ const location,
     MC_Vector &coordinate,
@@ -247,7 +247,7 @@ static inline void MCT_Nearest_Facet_Find_Nearest(MC_Particle *__restrict__ cons
 ///  of the facets of the specified cell in a three-dimensional,
 ///  unstructured, hexahedral (Type 3D_G) domain, storing the minimum
 ///  distance and associated facet number.
-static inline MC_Nearest_Facet MCT_Nearest_Facet_3D_G(
+__host__ __device__ static inline MC_Nearest_Facet MCT_Nearest_Facet_3D_G(
     MC_Particle *__restrict__ const mc_particle,
     const DeviceDomain &ddomain,
     MC_Location &location,
@@ -354,7 +354,7 @@ static inline MC_Nearest_Facet MCT_Nearest_Facet_3D_G(
 ///  specified coordinates.
 ///
 /// \return The minimum distance and facet number.
-static inline MC_Nearest_Facet MCT_Nearest_Facet(MC_Particle *__restrict__ const mc_particle,
+__host__ __device__ static inline MC_Nearest_Facet MCT_Nearest_Facet(MC_Particle *__restrict__ const mc_particle,
     MC_Location &location,
     MC_Vector &coordinate,
     const DirectionCosine *__restrict__ const direction_cosine,
@@ -514,7 +514,7 @@ static inline void MCT_Generate_Coordinate_3D_G(uint64_t *random_number_seed,
 }
 
 ///  Reflects the particle off of a reflection boundary.
-static inline void MCT_Reflect_Particle(const Device &device, MC_Particle &particle)
+__host__ __device__ static inline void MCT_Reflect_Particle(const Device &device, MC_Particle &particle)
 {
   DirectionCosine *__restrict__ const direction_cosine = &particle.direction_cosine;
   MC_Location              location = particle.Get_Location();

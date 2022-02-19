@@ -12,7 +12,7 @@ class MC_Vector
    double y;
    double z;
 
-   MC_Vector() : x(0), y(0), z(0) {}
+   __host__ __device__ MC_Vector() : x(0), y(0), z(0) {}
    MC_Vector(double a, double b, double c) : x(a), y(b), z(c) {}
 
    MC_Vector& operator=( const MC_Vector&tmp )
@@ -83,7 +83,7 @@ class MC_Vector
       return MC_Vector(scalar*x, scalar*y, scalar*z);
    }
 
-   inline double Length() const { return std::sqrt(x*x + y*y + z*z); }
+   __host__ __device__ inline double Length() const { return std::sqrt(x*x + y*y + z*z); }
 
    // Distance from this vector to another point.
    inline double Distance(const MC_Vector& vv) const

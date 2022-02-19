@@ -11,13 +11,13 @@ class MC_Nearest_Facet
    double distance_to_facet;
    double dot_product;
 
-   MC_Nearest_Facet()
+   __host__ __device__ MC_Nearest_Facet()
    : facet(0),
      distance_to_facet(1e80),
      dot_product(0.0)
    {}
 
-   MC_Nearest_Facet& operator=( const MC_Nearest_Facet& nf )
+   __host__ __device__ MC_Nearest_Facet& operator=( const MC_Nearest_Facet& nf )
    {
         this->facet             = nf.facet;
         this->distance_to_facet = nf.distance_to_facet;
