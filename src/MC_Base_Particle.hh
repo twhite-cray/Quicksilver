@@ -51,8 +51,6 @@ class MC_Base_Particle
     void Copy_Particle_Base_To_String(std::string &output_string) const;
 
     inline double Get_Energy() const                     { return kinetic_energy; }
-    inline MC_Vector *Get_Velocity() { return &velocity; }
-
 
     MC_Vector                          coordinate;
     MC_Vector                          velocity;

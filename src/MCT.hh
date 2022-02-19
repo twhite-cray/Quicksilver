@@ -516,7 +516,7 @@ static inline void MCT_Generate_Coordinate_3D_G(uint64_t *random_number_seed,
 ///  Reflects the particle off of a reflection boundary.
 static inline void MCT_Reflect_Particle(const Device &device, MC_Particle &particle)
 {
-  DirectionCosine *__restrict__ const direction_cosine = particle.Get_Direction_Cosine();
+  DirectionCosine *__restrict__ const direction_cosine = &particle.direction_cosine;
   MC_Location              location = particle.Get_Location();
 
   const double4 &facet_normal = device.domains[location.domain].cells[location.cell].facets[location.facet].plane;

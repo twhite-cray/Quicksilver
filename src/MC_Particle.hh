@@ -147,16 +147,6 @@ public:
    void Move_Particle(const DirectionCosine & direction_cosine, const double distance);
 
    void PrintParticle();
-
-   DirectionCosine *Get_Direction_Cosine()
-   {
-      return &this->direction_cosine;
-   }
-
-   MC_Vector *Get_Velocity()
-   {
-      return &this->velocity;
-   }
 };
 
 //----------------------------------------------------------------------------------------------------------------------

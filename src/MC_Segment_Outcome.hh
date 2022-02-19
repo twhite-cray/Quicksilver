@@ -68,7 +68,7 @@ static inline MC_Segment_Outcome_type::Enum MC_Segment_Outcome(Device &device, M
     distance[0] = distance[1] = distance[2] = 1e80;
 
     // Calculate the particle speed
-    const double particle_speed = mc_particle.Get_Velocity()->Length();
+    const double particle_speed = mc_particle.velocity.Length();
 
     // Force collision if a census event narrowly preempts a collision
     int force_collision = 0 ;
