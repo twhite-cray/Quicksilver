@@ -109,6 +109,7 @@ static inline bool CollisionEvent(Device &device, MC_Particle &mc_particle)
 
    if( nOut == 0 ) return false;
 
+   const int extraOffset = (nOut > 1) ? atomicFetchAdd(device.particleSizes+Device::EXTRAS,nOut) : 0;
    for (int secondaryIndex = 1; secondaryIndex < nOut; secondaryIndex++)
    {
         // Newly created particles start as copies of their parent
@@ -116,7 +117,7 @@ static inline bool CollisionEvent(Device &device, MC_Particle &mc_particle)
         secondaryParticle.random_number_seed = rngSpawn_Random_Number_Seed(&mc_particle.random_number_seed);
         secondaryParticle.identifier = secondaryParticle.random_number_seed;
         updateTrajectory( energyOut[secondaryIndex], angleOut[secondaryIndex], secondaryParticle );
-        device.extras[device.particleSizes[Device::EXTRAS]++] = secondaryParticle;
+        device.extras[extraOffset+secondaryIndex] = secondaryParticle;
    }
 
    updateTrajectory( energyOut[0], angleOut[0], mc_particle);
@@ -126,7 +127,7 @@ static inline bool CollisionEvent(Device &device, MC_Particle &mc_particle)
    // possibility of a particle doing multiple fission reactions in a single
    // kernel invocation and overflowing the extra storage with secondary particles.
    if ( nOut > 1 ) {
-       device.extras[device.particleSizes[Device::EXTRAS]++] = mc_particle;
+       device.extras[extraOffset] = mc_particle;
    }
 
    //If we are still tracking this particle the update its energy group
