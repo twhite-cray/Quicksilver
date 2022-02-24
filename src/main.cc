@@ -30,17 +30,23 @@
 
 static constexpr int NT = 64;
 
-__global__ __launch_bounds__(NT) static void CycleTrackingGuts( const int ipLo, int ipHi, Device device, const int maxCount, int *__restrict__ const sendCounts, MessageParticle *__restrict__ const sendParts)
+__global__ __launch_bounds__(NT) static void CycleTrackingGuts( const int ipMin, int ipMax, Device device, const int maxCount, int *__restrict__ const sendCounts, MessageParticle *__restrict__ const sendParts)
 {
     __shared__ unsigned long tallies[Device::TALLIES_SIZE];
+    __shared__ int sip;
+
     if (threadIdx.x < Device::TALLIES_SIZE) tallies[threadIdx.x] = 0;
+
+    ipMax = (ipMax < 0) ? device.particleSizes[Device::PROCESSING] : ipMax;
+    const int perBlock = (ipMax-ipMin+gridDim.x-1)/gridDim.x;
+    const int ipLo = ipMin+blockIdx.x*perBlock;
+    const int ipHi = std::min(ipMax,ipLo+perBlock);
+    if (threadIdx.x == 0) sip = ipLo+blockDim.x;
     __syncthreads();
 
-    const int di = gridDim.x*blockDim.x;
-    ipHi = (ipHi < 0) ? device.particleSizes[Device::PROCESSING] : ipHi;
     MC_Particle mc_particle;
-    int ipOld = ipLo-1;
-    int ip = ipLo+blockIdx.x*blockDim.x+threadIdx.x;
+    int ipOld = -1;
+    int ip = ipLo+threadIdx.x;
     while (ip < ipHi) {
 
         if (ipOld != ip) {
@@ -65,7 +71,7 @@ __global__ __launch_bounds__(NT) static void CycleTrackingGuts( const int ipLo, 
         switch (segment_outcome) {
         case MC_Segment_Outcome_type::Collision:
             {
-              if (CollisionEvent(device, mc_particle, tallies) != MC_Collision_Event_Return::Continue_Tracking) ip += di;
+              if (CollisionEvent(device, mc_particle, tallies) != MC_Collision_Event_Return::Continue_Tracking) ip = atomicFetchAdd(&sip,1);
             }
             break;
         case MC_Segment_Outcome_type::Facet_Crossing:
@@ -78,7 +84,7 @@ __global__ __launch_bounds__(NT) static void CycleTrackingGuts( const int ipLo, 
                 {
                     atomicFetchAdd(tallies+Device::ESCAPE,1UL);
                     mc_particle.last_event = MC_Tally_Event::Facet_Crossing_Escape;
-                    ip += di;
+                    ip = atomicFetchAdd(&sip,1);
                 }
                 else if (facet_crossing_type == MC_Tally_Event::Facet_Crossing_Reflection)
                 {
@@ -87,7 +93,7 @@ __global__ __launch_bounds__(NT) static void CycleTrackingGuts( const int ipLo, 
                 else
                 {
                     // Enters an adjacent cell in an off-processor domain.
-                    ip += di;
+                    ip = atomicFetchAdd(&sip,1);
                 }
             }
             break;
@@ -97,7 +103,7 @@ __global__ __launch_bounds__(NT) static void CycleTrackingGuts( const int ipLo, 
                 const int iProcessed = atomicFetchAdd(device.particleSizes+Device::PROCESSED,1);
                 device.processed[iProcessed] = mc_particle;
                 atomicFetchAdd(tallies+Device::CENSUS,1UL);
-                ip += di;
+                ip = atomicFetchAdd(&sip,1);
                 break;
             }
             
