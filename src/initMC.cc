@@ -81,10 +81,6 @@ namespace
             int GPUID = monteCarlo->processor_info->rank%Ngpus;
             monteCarlo->processor_info->gpu_id = GPUID;
             CHECK(hipSetDevice(GPUID));
-            hipDeviceProp_t prop;
-            CHECK(hipGetDeviceProperties(&prop,GPUID));
-            monteCarlo->processor_info->thread_target = prop.multiProcessorCount * prop.maxThreadsPerMultiProcessor;
-            Print0("Targeting %d threads per device\n",monteCarlo->processor_info->thread_target);
          }
          else
          {

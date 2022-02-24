@@ -130,6 +130,17 @@ int main(int argc, char** argv)
    // mcco stores just about everything. 
    mcco = initMC(params); 
 
+   if (mcco->processor_info->use_gpu) {
+     int gpu = -1;
+     CHECK(hipGetDevice(&gpu));
+     hipDeviceProp_t prop;
+     CHECK(hipGetDeviceProperties(&prop,gpu));
+     int numBlocks = 0;
+     CHECK(hipOccupancyMaxActiveBlocksPerMultiprocessor(&numBlocks, CycleTrackingGuts, NT, 0));
+     mcco->processor_info->thread_target = prop.multiProcessorCount * numBlocks * NT;
+     Print0("Targeting %dx%dx%d=%d threads per device\n",prop.multiProcessorCount,numBlocks,NT,mcco->processor_info->thread_target);
+   }
+
    int loadBalance = params.simulationParams.loadBalance;
 
    MC_FASTTIMER_START(MC_Fast_Timer::main);     // this can be done once mcco exist.
