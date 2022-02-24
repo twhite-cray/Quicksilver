@@ -181,10 +181,12 @@ void Device::cycleInit(MonteCarlo &mc)
   particleSizes[PROCESSING] = vault.size();
   assert(vault.size());
   for (int i = 0; i < vault.size(); i++) processing[i] = vault[i];
+  CHECK(hipDeviceSynchronize());
 }
   
 void Device::cycleFinalize(MonteCarlo &mc)
 {
+  CHECK(hipDeviceSynchronize());
   const int groupSize = mc._nuclearData->_numEnergyGroups;
   const int domainSize = mc.domain.size();
   for (int i = 0; i < domainSize; i++) {

@@ -208,14 +208,15 @@ void cycleTracking(MonteCarlo *monteCarlo)
     const int nMid = device.particleSizes[Device::PROCESSING]/2;
     ma.startRecvs();
     CycleTrackingGuts<<<nb,NT>>>(0,nMid,device,ma.maxCount,ma.sendCounts,ma.sendParts);
-    CHECK(hipDeviceSynchronize());
+    CHECK(hipEventRecord(ma.event));
     mb.startRecvs();
     CycleTrackingGuts<<<nb,NT>>>(nMid,-1,device,mb.maxCount,mb.sendCounts,mb.sendParts);
-    CHECK(hipDeviceSynchronize());
+    CHECK(hipEventRecord(mb.event));
     bool doA = true;
     bool doB = true;
     while (doA || doB) {
       if (doA) {
+        CHECK(hipEventSynchronize(ma.event));
         ma.startSends();
         ma.completeRecvs(device);
         ma.completeSends();
@@ -224,9 +225,10 @@ void cycleTracking(MonteCarlo *monteCarlo)
       if (doA) {
         ma.startRecvs();
         CycleTrackingGuts<<<nb,NT>>>(0,-1,device,ma.maxCount,ma.sendCounts,ma.sendParts);
-        CHECK(hipDeviceSynchronize());
+        CHECK(hipEventRecord(ma.event));
       }
       if (doB) {
+        CHECK(hipEventSynchronize(mb.event));
         mb.startSends();
         mb.completeRecvs(device);
         mb.completeSends();
@@ -235,7 +237,7 @@ void cycleTracking(MonteCarlo *monteCarlo)
       if (doB) {
         mb.startRecvs();
         CycleTrackingGuts<<<nb,NT>>>(0,-1,device,mb.maxCount,mb.sendCounts,mb.sendParts);
-        CHECK(hipDeviceSynchronize());
+        CHECK(hipEventRecord(mb.event));
       }
     }
 

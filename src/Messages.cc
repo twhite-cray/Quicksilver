@@ -88,11 +88,11 @@ Messages::Messages():
 {
   MPI_Type_contiguous(sizeof(MessageParticle),MPI_BYTE,&mpiParticle);
   MPI_Type_commit(&mpiParticle);
-  CHECK(hipEventCreate(&event));
 }
 
 Messages::~Messages()
 {
+  CHECK(hipEventDestroy(event));
   delete [] sendReqs;
   CHECK(hipFree(sendParts)); sendParts = nullptr;
   CHECK(hipFree(sendCounts)); sendCounts = nullptr;
@@ -103,7 +103,6 @@ Messages::~Messages()
   delete [] ranks;
   maxCount = 0;
   nMessages = 0;
-  CHECK(hipEventDestroy(event));
   MPI_Type_free(&mpiParticle);
 }
 
@@ -138,6 +137,7 @@ void Messages::init(MonteCarlo &mc)
   hipCalloc(nMessages*maxCount,recvParts);
   hipCalloc(nMessages,sendCounts);
   hipCalloc(nMessages*maxCount,sendParts);
+  CHECK(hipEventCreate(&event));
 }
 
 void Messages::addParticle(const MC_Base_Particle &part, const int buffer)
@@ -185,7 +185,6 @@ void Messages::completeRecvs(Device &device)
   static constexpr int nt = 64;
   const int nb = (total+nt-1)/nt;
   recvCopy<<<nb,nt>>>(nMessages,maxCount,total,recvCounts,recvParts,device.particleSizes+Device::PROCESSING,device.processing);
-  CHECK(hipDeviceSynchronize());
 }
 
 void Messages::completeSends()
