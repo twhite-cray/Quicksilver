@@ -38,7 +38,7 @@ __host__ __device__ static inline void updateTrajectory( const double energy, co
 }
 
 
-__host__ __device__ static inline bool CollisionEvent(Device &device, MC_Particle &mc_particle)
+__host__ __device__ static inline bool CollisionEvent(Device &device, MC_Particle &mc_particle, __shared__ unsigned long *__restrict__ const tallies)
 {
    const int globalMatIndex = device.domains[mc_particle.domain].cells[mc_particle.cell].material;
 
@@ -90,18 +90,18 @@ __host__ __device__ static inline bool CollisionEvent(Device &device, MC_Particl
    //--------------------------------------------------------------------------------------------------------------
 
    // Set the reaction for this particle.
-   atomicFetchAdd(device.tallies+Device::COLLISION,1UL);
+   atomicFetchAdd(tallies+Device::COLLISION,1UL);
    switch (reactionType)
    {
       case NuclearDataReaction::Scatter:
-         atomicFetchAdd(device.tallies+Device::SCATTER,1UL);
+         atomicFetchAdd(tallies+Device::SCATTER,1UL);
          break;
       case NuclearDataReaction::Absorption:
-         atomicFetchAdd(device.tallies+Device::ABSORB,1UL);
+         atomicFetchAdd(tallies+Device::ABSORB,1UL);
          break;
       case NuclearDataReaction::Fission:
-         atomicFetchAdd(device.tallies+Device::FISSION,1UL);
-         atomicFetchAdd<unsigned long>(device.tallies+Device::PRODUCE,nOut);
+         atomicFetchAdd(tallies+Device::FISSION,1UL);
+         atomicFetchAdd<unsigned long>(tallies+Device::PRODUCE,nOut);
          break;
       case NuclearDataReaction::Undefined:
          abort();
