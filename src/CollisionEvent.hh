@@ -75,22 +75,16 @@ __host__ __device__ static inline bool CollisionEvent(Device &device, MC_Particl
    //------------------------------------------------------------------------------------------------------------------
    //    Do the collision.
    //------------------------------------------------------------------------------------------------------------------
-   static constexpr int MAX_PRODUCTION_SIZE = 4;
-   double energyOut[MAX_PRODUCTION_SIZE];
-   double angleOut[MAX_PRODUCTION_SIZE];
-   const double mat_mass = device.mats[globalMatIndex].mass;
-
    atomicFetchAdd(tallies+Device::COLLISION,1UL);
-
    const NuclearDataReaction::Enum reactionType = device.isotopes[selectedUniqueNumber].reactions[selectedReact+1].type;
-
    switch(reactionType) {
      case NuclearDataReaction::Scatter:
        { 
-         energyOut[0] = mc_particle.kinetic_energy*(1.0-(rngSample(&mc_particle.random_number_seed)*(1.0/mat_mass)));
-         angleOut[0] = rngSample(&mc_particle.random_number_seed)*2.0-1.0;
          atomicFetchAdd(tallies+Device::SCATTER,1UL);
-         updateTrajectory( energyOut[0], angleOut[0], mc_particle);
+         const double mat_mass = device.mats[globalMatIndex].mass;
+         const double energyOut = mc_particle.kinetic_energy*(1.0-(rngSample(&mc_particle.random_number_seed)*(1.0/mat_mass)));
+         const double angleOut = rngSample(&mc_particle.random_number_seed)*2.0-1.0;
+         updateTrajectory( energyOut, angleOut, mc_particle);
          mc_particle.energy_group = device.getEnergyGroup(mc_particle.kinetic_energy);
          return true;
        }
@@ -103,30 +97,27 @@ __host__ __device__ static inline bool CollisionEvent(Device &device, MC_Particl
        { 
          const int nOut = int(device.nuBar+rngSample(&mc_particle.random_number_seed));
          if( nOut == 0 ) return false;
-         for (int i = 0; i < nOut; i++) {
-           const double ran = rngSample(&mc_particle.random_number_seed)/2.0+0.5;
-           energyOut[i] = 20.0*ran*ran;
-           angleOut[i] = rngSample(&mc_particle.random_number_seed)*2.0-1.0;
-         }
          const int extraOffset = (nOut > 1) ? atomicFetchAdd(device.particleSizes+Device::EXTRAS,nOut) : 0;
-         for (int secondaryIndex = 1; secondaryIndex < nOut; secondaryIndex++)
-         {
-           // Newly created particles start as copies of their parent
+         const double ran = rngSample(&mc_particle.random_number_seed)/2.0+0.5;
+         const double energyOut = 20.0*ran*ran;
+         const double angleOut = rngSample(&mc_particle.random_number_seed)*2.0-1.0;
+         for (int i = 1; i < nOut; i++) {
+           const double ran = rngSample(&mc_particle.random_number_seed)/2.0+0.5;
+           const double energyOut = 20.0*ran*ran;
+           const double angleOut = rngSample(&mc_particle.random_number_seed)*2.0-1.0;
            MC_Particle secondaryParticle = mc_particle;
            secondaryParticle.random_number_seed = rngSpawn_Random_Number_Seed(&mc_particle.random_number_seed);
            secondaryParticle.identifier = secondaryParticle.random_number_seed;
-           updateTrajectory( energyOut[secondaryIndex], angleOut[secondaryIndex], secondaryParticle );
-           device.extras[extraOffset+secondaryIndex] = secondaryParticle;
+           updateTrajectory( energyOut, angleOut, secondaryParticle );
+           device.extras[extraOffset+i] = secondaryParticle;
          }
-         updateTrajectory( energyOut[0], angleOut[0], mc_particle);
+         updateTrajectory( energyOut, angleOut, mc_particle);
 
          // If a fission reaction produces secondary particles we also add the original
          // particle to the "extras" that we will handle later.  This avoids the 
          // possibility of a particle doing multiple fission reactions in a single
          // kernel invocation and overflowing the extra storage with secondary particles.
-         if ( nOut > 1 ) {
-           device.extras[extraOffset] = mc_particle;
-         }
+         if ( nOut > 1 ) device.extras[extraOffset] = mc_particle;
 
          atomicFetchAdd(tallies+Device::FISSION,1UL);
          atomicFetchAdd<unsigned long>(tallies+Device::PRODUCE,nOut);
