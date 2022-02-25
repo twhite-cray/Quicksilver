@@ -153,7 +153,7 @@ struct DeviceParticle {
     that.velocity.y = velocity.y;
     that.velocity.z = velocity.z;
     {
-      const double divSpeed = 1.0/sqrt(velocity.x*velocity.x+velocity.y*velocity.y+velocity.z*velocity.z);
+      const double divSpeed = rnorm3d(velocity.x,velocity.y,velocity.z);
       that.direction_cosine.alpha = divSpeed*velocity.x;
       that.direction_cosine.beta = divSpeed*velocity.y;
       that.direction_cosine.gamma = divSpeed*velocity.z;

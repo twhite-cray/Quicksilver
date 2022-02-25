@@ -83,7 +83,8 @@ class MC_Vector
       return MC_Vector(scalar*x, scalar*y, scalar*z);
    }
 
-   __host__ __device__ inline double Length() const { return std::sqrt(x*x + y*y + z*z); }
+   __device__ inline double Length() const { return norm3d(x,y,z); }
+   __host__ inline double Length() const { return sqrt(x*x+y*y+z*z); }
 
    // Distance from this vector to another point.
    inline double Distance(const MC_Vector& vv) const
