@@ -51,6 +51,7 @@ __host__ __device__ static inline MC_Tally_Event::Enum MC_Facet_Crossing_Event(M
 
         const int neighbor_rank = device.domains[facet.currentDomain].neighbors[facet.neighbor];
         const int offset = atomicFetchAdd(sendCounts+neighbor_rank,1);
+        if (offset >= maxCount) abort();
         sendParts[maxCount*neighbor_rank+offset] = mc_particle;
     }
 

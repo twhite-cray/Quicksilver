@@ -108,9 +108,10 @@ Messages::~Messages()
 
 void Messages::init(MonteCarlo &mc)
 {
+  static constexpr int BUFFER_FRACTION = 8;
   if (nMessages) {
-    assert(maxCount == mc.particle_buffer->buffer_size);
     assert(nMessages == mc.particle_buffer->processor_buffer_map.size());
+    assert(maxCount == mc.particle_buffer->buffer_size/BUFFER_FRACTION);
     for (const auto &pair : mc.particle_buffer->processor_buffer_map) {
       assert(pair.second < nMessages);
       assert(ranks[pair.second] == pair.first);
@@ -119,7 +120,7 @@ void Messages::init(MonteCarlo &mc)
   }
 
   nMessages = mc.particle_buffer->num_buffers;
-  maxCount = mc.particle_buffer->buffer_size;
+  maxCount = mc.particle_buffer->buffer_size/BUFFER_FRACTION;
   ranks = new int[nMessages];
   hipCalloc(nMessages,recvCounts);
   recvReqs = new MPI_Request[nMessages];

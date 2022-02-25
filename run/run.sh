@@ -15,7 +15,7 @@ NODES=$(( ( TASKS + 7 ) / 8 ))
 ELEMENTS=$(( X * Y * Z ))
 PARTICLES=$(( ELEMENTS * P ))
 export MPICH_GPU_SUPPORT_ENABLED=1
-ulimit -c unlimited
+ulimit -c 0
 rm -f core
-export MPICH_OFI_NIC_VERBOSE=2
-srun -l --unbuffered -t 5:00 --exclusive -N ${NODES} -n ${TASKS} -c 8 ../src/qs -i Coral2_P1.inp -X ${X} -Y ${Y} -Z ${Z} -x ${X} -y ${Y} -z ${Z} -I ${I} -J ${J} -K ${K} --nParticles ${PARTICLES} 
+#export MPICH_OFI_NIC_VERBOSE=2
+srun -l --unbuffered -t 15:00 --exclusive -N ${NODES} -n ${TASKS} -c 8 ../src/qs -i Coral2_P1.inp -X ${X} -Y ${Y} -Z ${Z} -x ${X} -y ${Y} -z ${Z} -I ${I} -J ${J} -K ${K} --nParticles ${PARTICLES} 
