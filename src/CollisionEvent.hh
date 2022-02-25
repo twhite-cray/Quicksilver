@@ -40,37 +40,32 @@ __host__ __device__ static inline void updateTrajectory( const double energy, co
 
 __host__ __device__ static inline bool CollisionEvent(Device &device, MC_Particle &mc_particle, __shared__ unsigned long *__restrict__ const tallies)
 {
-   const int globalMatIndex = device.domains[mc_particle.domain].cells[mc_particle.cell].material;
 
    //------------------------------------------------------------------------------------------------------------------
    //    Pick the isotope and reaction.
    //------------------------------------------------------------------------------------------------------------------
-   double randomNumber = rngSample(&mc_particle.random_number_seed);
-   double totalCrossSection = mc_particle.totalCrossSection;
-   double currentCrossSection = totalCrossSection * randomNumber;
-   int selectedIso = -1;
+   const double randomNumber = rngSample(&mc_particle.random_number_seed);
+   double currentCrossSection = mc_particle.totalCrossSection * randomNumber;
    int selectedUniqueNumber = -1;
    int selectedReact = -1;
-   const int numIsos = device.mats[globalMatIndex].isoSize;
+   const int globalMatIndex = device.domains[mc_particle.domain].cells[mc_particle.cell].material;
+   const DeviceMaterial &mat = device.mats[globalMatIndex];
    
-   for (int isoIndex = 0; isoIndex < numIsos && currentCrossSection >= 0; isoIndex++)
+   for (int isoIndex = 0; (isoIndex < mat.isoSize) && (currentCrossSection >= 0); isoIndex++)
    {
-      const int uniqueNumber = device.mats[globalMatIndex].isos[isoIndex].gid;
-      const int numReacts = device.reactionSize;
-      for (int reactIndex = 0; reactIndex < numReacts; reactIndex++)
+      const DeviceIsotope &iso = mat.isos[isoIndex];
+      const int uniqueNumber = iso.gid;
+      for (int reactIndex = 0; reactIndex < device.reactionSize; reactIndex++)
       {
-         currentCrossSection -= macroscopicCrossSection(device, reactIndex, mc_particle.domain, mc_particle.cell,
-                   isoIndex, mc_particle.energy_group);
+         currentCrossSection -= macroscopicCrossSection(device, reactIndex, mc_particle.domain, mc_particle.cell, iso, mc_particle.energy_group);
          if (currentCrossSection < 0)
          {
-            selectedIso = isoIndex;
             selectedUniqueNumber = uniqueNumber;
             selectedReact = reactIndex;
             break;
          }
       }
    }
-   qs_assert(selectedIso != -1);
 
    //------------------------------------------------------------------------------------------------------------------
    //    Do the collision.
@@ -81,7 +76,7 @@ __host__ __device__ static inline bool CollisionEvent(Device &device, MC_Particl
      case NuclearDataReaction::Scatter:
        { 
          atomicFetchAdd(tallies+Device::SCATTER,1UL);
-         const double mat_mass = device.mats[globalMatIndex].mass;
+         const double mat_mass = mat.mass;
          const double energyOut = mc_particle.kinetic_energy*(1.0-(rngSample(&mc_particle.random_number_seed)*(1.0/mat_mass)));
          const double angleOut = rngSample(&mc_particle.random_number_seed)*2.0-1.0;
          updateTrajectory( energyOut, angleOut, mc_particle);

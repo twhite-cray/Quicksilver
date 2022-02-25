@@ -10,8 +10,7 @@
 //
 //  A reactionIndex of -1 means total cross section.
 //----------------------------------------------------------------------------------------------------------------------
-__host__ __device__ static inline double macroscopicCrossSection(const Device &device, int reactionIndex, int domainIndex, int cellIndex,
-                               int isoIndex, int energyGroup)
+__host__ __device__ static inline double macroscopicCrossSection(const Device &device, const int reactionIndex, int domainIndex, int cellIndex, const DeviceIsotope &iso, int energyGroup)
 {
    // The cell number density is the fraction of the atoms in cell
    // volume of this isotope.  We set this (elsewhere) to 1/nIsotopes.
@@ -20,9 +19,7 @@ __host__ __device__ static inline double macroscopicCrossSection(const Device &d
 
    const DeviceCell &cell = device.domains[domainIndex].cells[cellIndex];
    const double cellNumberDensity = cell.cellNumberDensity;
-   const int globalMatIndex = cell.material;
 
-   const DeviceIsotope &iso = device.mats[globalMatIndex].isos[isoIndex];
    const double atomFraction = iso.atomFraction;
    const int isotopeGid = iso.gid;
 
@@ -50,11 +47,11 @@ __host__ __device__ static inline double weightedMacroscopicCrossSection(Device 
    if (xs > 0.0) return xs;
 
    const int globalMatIndex = device.domains[domainIndex].cells[cellIndex].material;
-   const int nIsotopes = device.mats[globalMatIndex].isoSize;
+   const DeviceMaterial &mat = device.mats[globalMatIndex];
    double sum = 0.0;
-   for (int isoIndex = 0; isoIndex < nIsotopes; isoIndex++)
+   for (int isoIndex = 0; isoIndex < mat.isoSize; isoIndex++)
    {
-      sum += macroscopicCrossSection(device, -1, domainIndex, cellIndex, isoIndex, energyGroup);
+      sum += macroscopicCrossSection(device, -1, domainIndex, cellIndex, mat.isos[isoIndex], energyGroup);
    }
    device.domains[domainIndex].cells[cellIndex].totals[energyGroup] = sum;
    return sum;
