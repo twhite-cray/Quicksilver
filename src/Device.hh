@@ -221,33 +221,6 @@ struct Device {
   void cycleInit(MonteCarlo &mc);
   void cycleFinalize(MonteCarlo &mc);
 
-  __host__ __device__ void collide(const NuclearDataReaction::Enum type, const double energyIn, const double mass, double *__restrict__ const energyOut, double *__restrict__ const angleOut, int &nOut, uint64_t &seed) const
-  {
-    switch(type) {
-      case NuclearDataReaction::Scatter:
-        {
-          nOut = 1;
-          energyOut[0] = energyIn*(1.0-(rngSample(&seed)*(1.0/mass)));
-          angleOut[0] = rngSample(&seed)*2.0-1.0;
-        }
-        break;
-      case NuclearDataReaction::Absorption:
-        break;
-      case NuclearDataReaction::Fission:
-        {
-          nOut = int(nuBar+rngSample(&seed));
-          for (int i = 0; i < nOut; i++) {
-            const double ran = rngSample(&seed)/2.0+0.5;
-            energyOut[i] = 20.0*ran*ran;
-            angleOut[i] = rngSample(&seed)*2.0-1.0;
-          }
-        }
-        break;
-      case NuclearDataReaction::Undefined:
-        abort();
-    }
-  }
-
   __host__ __device__ int getEnergyGroup(const double e) const
   {
     const int i = int((log(e)-logLow)*divDelta);

@@ -81,30 +81,36 @@ __host__ __device__ static inline bool CollisionEvent(Device &device, MC_Particl
    int nOut = 0;
    const double mat_mass = device.mats[globalMatIndex].mass;
 
-   const NuclearDataReaction::Enum reactionType = device.isotopes[selectedUniqueNumber].reactions[selectedReact+1].type;
-   device.collide(reactionType, mc_particle.kinetic_energy, mat_mass, energyOut, angleOut, nOut, mc_particle.random_number_seed);
-
-   //--------------------------------------------------------------------------------------------------------------
-   //  Post-Collision Phase 1:
-   //    Tally the collision
-   //--------------------------------------------------------------------------------------------------------------
-
-   // Set the reaction for this particle.
    atomicFetchAdd(tallies+Device::COLLISION,1UL);
-   switch (reactionType)
-   {
-      case NuclearDataReaction::Scatter:
+
+   const NuclearDataReaction::Enum reactionType = device.isotopes[selectedUniqueNumber].reactions[selectedReact+1].type;
+
+   switch(reactionType) {
+     case NuclearDataReaction::Scatter:
+       { 
+         nOut = 1;
+         energyOut[0] = mc_particle.kinetic_energy*(1.0-(rngSample(&mc_particle.random_number_seed)*(1.0/mat_mass)));
+         angleOut[0] = rngSample(&mc_particle.random_number_seed)*2.0-1.0;
          atomicFetchAdd(tallies+Device::SCATTER,1UL);
-         break;
-      case NuclearDataReaction::Absorption:
-         atomicFetchAdd(tallies+Device::ABSORB,1UL);
-         break;
-      case NuclearDataReaction::Fission:
-         atomicFetchAdd(tallies+Device::FISSION,1UL);
-         atomicFetchAdd<unsigned long>(tallies+Device::PRODUCE,nOut);
-         break;
-      case NuclearDataReaction::Undefined:
-         abort();
+       }
+       break;
+     case NuclearDataReaction::Absorption:
+       atomicFetchAdd(tallies+Device::ABSORB,1UL);
+       break;
+     case NuclearDataReaction::Fission:
+       { 
+         nOut = int(device.nuBar+rngSample(&mc_particle.random_number_seed));
+         for (int i = 0; i < nOut; i++) {
+           const double ran = rngSample(&mc_particle.random_number_seed)/2.0+0.5;
+           energyOut[i] = 20.0*ran*ran;
+           angleOut[i] = rngSample(&mc_particle.random_number_seed)*2.0-1.0;
+         }
+       }
+       atomicFetchAdd(tallies+Device::FISSION,1UL);
+       atomicFetchAdd<unsigned long>(tallies+Device::PRODUCE,nOut);
+       break;
+     case NuclearDataReaction::Undefined:
+       abort();
    }
 
    if( nOut == 0 ) return false;

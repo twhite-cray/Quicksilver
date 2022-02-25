@@ -316,7 +316,7 @@ ${Quicksilver_EXE}: git_hash.hh git_vers.hh ${CC_OBJECTS}
 	${CXX} ${CXXFLAGS} ${LDFLAGS} -o ${Quicksilver_EXE} ${CC_OBJECTS}
 
 clean:
-	rm -f *.o git_hash.hh git_vers.hh .depend load.map *.core *.optrpt
+	rm -f *.o git_hash.hh git_vers.hh .depend load.map *.core *.optrpt *.bc *.cui *.s *gfx90?.out* *.hipfb
 
 distclean: clean
 	rm -f ${Quicksilver_EXE}   .depend.bak
