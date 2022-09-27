@@ -1,5 +1,5 @@
 #!/bin/bash
-module load rocm
+module load rocm/5.1.0
 module list
 export LD_LIBRARY_PATH="${CRAY_LD_LIBRARY_PATH}:${LD_LIBRARY_PATH}"
 set -x

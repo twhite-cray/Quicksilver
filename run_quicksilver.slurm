@@ -8,7 +8,7 @@
 #SBATCH --job-name=quicksilver
 #SBATCH -o output/job-%j.out
 
-module load rocm
+module load rocm/5.1.0
 
 set -x
 
