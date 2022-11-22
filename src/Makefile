@@ -94,10 +94,10 @@ SHELL = /bin/bash
 # Set your desired C++ compiler and any necessary flags.
 # The interpretation of each of these four variables is described above.
 # A number of examples for machines we regularly run on are given below.
-CXX = 
-CXXFLAGS =
-CPPFLAGS = 
-LDFLAGS =
+#CXX = 
+#CXXFLAGS =
+#CPPFLAGS = 
+#LDFLAGS =
 
 ###############################################################################
 # Very simple GCC build with OpenMP but without MPI.  

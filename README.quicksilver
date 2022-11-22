@@ -1,0 +1,82 @@
+***** Notice ******
+The main focus of the package is to demonstrate as-is application functionality
+on systems with HPE Cray EX235A “Bard Peak” nodes running the COS operating system.
+
+Quicksilver
+===========
+A. Description
+This is README for building and running the as-is CORAL-2 Quicksilver benchmark.
+
+B. TLDR Instructions
+The following steps will build and run the Quicksilver benchmark on
+HPE BardPeak systems using AMD Rocm and SLURM.
+
+   build_quicksilver.sh
+   sbatch -A <account> -N 1 run_quicksilver.slurm
+   sbatch -A <account> -N 8 run_quicksilver.slurm
+   sbatch -A <account> -N 2250 run_quicksilver.slurm
+   sbatch -A <account> -N 2304 run_quicksilver.slurm
+   sbatch -A <account> -N 2340 run_quicksilver.slurm
+   sbatch -A <account> -N 2352 run_quicksilver.slurm
+
+C. Building
+The Quicksilver source code is provided in the "src/" subdirectory and a
+bash script "build_quicksilver.sh" is provided to build the Quicksilver
+executable. This should be run as
+
+   ./build_quicksilver.sh | tee output/build.log 2>&1
+
+The quicksilver binary will be created in
+
+   src/qs
+
+Reference compilation output from building on ORNL's Crusher system has
+been provided in the reference_output subdirectory.
+
+D. Running
+A single SLURM batch script "run_quicksilver.slurm" is provided for running
+Quicksilver. The script is generic in that it auto-detects the number of
+nodes allocated to the job and scales the workload to run on the allocated
+number of nodes. To run:
+
+   sbatch -A <account> -N <number-of-nodes> run_quicksilver.slurm
+
+Run output will be created in the output subdirectory in a uniquely named
+subdirectory - the subdirectory name follows the requested benchmark
+specifications
+
+   output/job-<N>n-<SLURM_JOBID>
+
+where <N> is the number of nodes.
+
+The standard output from the benchmark run is caputured in the file:
+
+   output/job-<N>n-<SLURM_JOBID>/quicksilver.out
+
+The figure of merit for the benchmark run is reported directly in the
+standard output file and can be extracted using:
+
+    grep "Figure Of Merit" output/*/quicksilver.out
+    
+Reference outputs for runs on up to 2352 nodes for ORNL's Frontier system
+have been provided in the reference_output subdirectory.
+
+E. Verification
+A self-assessment of a valid run is performed during the run and reported
+at the end of the standard output - there should be four lines that start
+with "PASS" indicating that the corresponding verification test has passed.
+To check for verfication, use the following to make sure there are four
+passing tests for each runtime configuration:
+
+   grep PASS output/*/quicksilver.out | cut -f 1 -d ' ' | uniq -c
+
+For example, for "reference_output":
+
+$ grep PASS reference_output/*/quicksilver.out | cut -f 1 -d ' ' | uniq -c
+      4 reference_output/job-1n-389630/quicksilver.out:PASS::
+      4 reference_output/job-2250n-389644/quicksilver.out:PASS::
+      4 reference_output/job-2304n-389643/quicksilver.out:PASS::
+      4 reference_output/job-2340n-389642/quicksilver.out:PASS::
+      4 reference_output/job-2352n-389633/quicksilver.out:PASS::
+      4 reference_output/job-8n-389631/quicksilver.out:PASS::
+
