@@ -62,8 +62,6 @@ void MC_SourceNow(MonteCarlo *monteCarlo)
     // Store the source particle weight for later use.
     monteCarlo->source_particle_weight = source_particle_weight;
 
-    uint64_t particle_count = 0;
-
     // Compute the partial sums on each mpi process.
     // uint64_t local_num_particles = (int)(local_weight_particles / source_particle_weight);
 
@@ -117,8 +115,6 @@ void MC_SourceNow(MonteCarlo *monteCarlo)
                 MC_Base_Particle base_particle( particle );
 
                 monteCarlo->_particleVaultContainer->addProcessingParticle( base_particle );
-
-                particle_count++;
 
                 atomicFetchAdd(&(monteCarlo->_tallies->_balanceTask[0]._source),1ULL);
             }

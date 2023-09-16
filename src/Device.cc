@@ -177,6 +177,7 @@ void Device::cycleInit(MonteCarlo &mc)
   CHECK(hipMemset(tallies,0,TALLIES_SIZE*sizeof(*tallies)));
 
   CHECK(hipMemset(particleSizes,0,PARTICLE_SIZES_SIZE*sizeof(*particleSizes)));
+  CHECK(hipDeviceSynchronize());
   const ParticleVault &vault = *(mc._particleVaultContainer->getTaskProcessingVault());
   particleSizes[PROCESSING] = vault.size();
   assert(vault.size());

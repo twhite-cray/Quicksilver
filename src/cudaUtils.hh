@@ -30,6 +30,7 @@ void hipCalloc(const size_t n, T *__restrict__ &p)
   const size_t bytes = n*sizeof(T);
   CHECK(hipMalloc((void **)&p,bytes));
   CHECK(hipMemset(p,0,bytes));
+  CHECK(hipDeviceSynchronize());
 }
 
 #endif

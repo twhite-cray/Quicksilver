@@ -29,8 +29,9 @@
 #include "git_vers.hh"
 
 static constexpr int NT = 64;
+static constexpr int NTMAX = 1024;
 
-__global__ __launch_bounds__(NT) static void CycleTrackingGuts( const int ipMin, int ipMax, Device device, const int maxCount, int *__restrict__ const sendCounts, MessageParticle *__restrict__ const sendParts)
+__global__ __launch_bounds__(NTMAX) static void CycleTrackingGuts( const int ipMin, int ipMax, Device device, const int maxCount, int *__restrict__ const sendCounts, MessageParticle *__restrict__ const sendParts)
 {
     __shared__ unsigned long tallies[Device::TALLIES_SIZE];
     __shared__ int sip;
